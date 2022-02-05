@@ -3,8 +3,6 @@ hydra:
     dir: ../outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   output_subdir: null
 
-# TODO tutaj zmien
-
 main:
   is_tested: false
 
