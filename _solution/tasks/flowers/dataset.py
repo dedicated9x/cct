@@ -1,13 +1,14 @@
 from pathlib import Path
+import PIL.Image
 import numpy as np
 import pandas as pd
+import scipy.io
 import torch
 import torch.utils.data
-import hydra
-from _solution.common.utils import pprint_sample
-import scipy.io
-import PIL.Image
 import timm.data.transforms_factory
+import hydra
+
+from _solution.common.utils import pprint_sample
 
 
 def get_transform(role):
