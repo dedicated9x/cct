@@ -9,7 +9,7 @@ from _solution.common.get_trainer import get_trainer
 def main(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
-    # TODO delete this
+    # TODO daj w defaulcie na false
     config.trainer.wandb = False
 
     pl.seed_everything(1234)
