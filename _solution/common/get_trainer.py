@@ -1,13 +1,12 @@
+import torch
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.loggers import WandbLogger
-
+import pytorch_lightning.loggers
 
 def get_trainer(config):
     # Checkpoints
     if config.trainer.monitored_metric is not None:
         metric_name = config.trainer.monitored_metric.name
-        callbacks = [ModelCheckpoint(
+        callbacks = [pl.callbacks.ModelCheckpoint(
             monitor=metric_name,
             filename='{epoch}-' + f'{{{metric_name}:.2f}}',
             mode=config.trainer.monitored_metric.mode,
@@ -18,12 +17,18 @@ def get_trainer(config):
 
     # Wandb
     if config.trainer.wandb:
-        logger = WandbLogger(
+        logger = pytorch_lightning.loggers.WandbLogger(
             project=config.main.module_name,
             name=config.main.module_name.lower(),
         )
     else:
         logger = True
+
+    # GPUs
+    if torch.cuda.is_available():
+        gpus = config.trainer.device
+    else:
+        gpus = None
 
     trainer = pl.Trainer(
         gpus=config.trainer.device,
