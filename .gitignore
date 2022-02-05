@@ -129,6 +129,4 @@ dmypy.json
 .pyre/
 
 # Custom
-#data/
-outputs/
 .idea/
