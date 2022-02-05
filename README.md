@@ -19,5 +19,5 @@ data/
 
 Step 3. Training
 ```
-PYTHONPATH=$(pwd) python _solution/run_experiment.py
+PYTHONPATH=$(pwd) python run_experiment.py
 ```
