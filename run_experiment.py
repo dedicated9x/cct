@@ -2,11 +2,11 @@ import hydra
 import omegaconf
 import pytorch_lightning as pl
 
-from _solution.common.dispatch import modulename2cls
-from _solution.common.get_trainer import get_trainer
+from src.common.dispatch import modulename2cls
+from src.common.get_trainer import get_trainer
 
 
-@hydra.main(config_path="_solution/tasks/flowers/conf", config_name="base")
+@hydra.main(config_path="src/tasks/flowers/conf", config_name="base")
 def main(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 

@@ -1,4 +1,4 @@
-from _solution.tasks.flowers.module import FlowersModule
+from src.tasks.flowers.module import FlowersModule
 
 
 def modulename2cls(name):

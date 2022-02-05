@@ -3,9 +3,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from _solution.common.module import BaseModule
-from _solution.tasks.flowers.arch import CctFlower17
-from _solution.tasks.flowers.dataset import FlowersDataset
+from src.common.module import BaseModule
+from src.tasks.flowers.arch import CctFlower17
+from src.tasks.flowers.dataset import FlowersDataset
 
 
 class FlowersModule(BaseModule):

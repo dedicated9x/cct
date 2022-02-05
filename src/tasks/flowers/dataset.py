@@ -7,8 +7,6 @@ import torch
 import torch.utils.data
 import timm.data.transforms_factory
 
-from _solution.common.utils import pprint_sample
-
 
 def get_transform(role):
     """
@@ -83,6 +81,8 @@ class FlowersDataset(torch.utils.data.Dataset):
         }
 
 def main():
+    from src.common.utils import pprint_sample
+
     def _display_sample():
         ds = FlowersDataset(
             role="train",

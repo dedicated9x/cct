@@ -3,8 +3,9 @@ Step 1. Environment installation.
 conda env create -f env.yaml
 ```
 
-Step 2. Dataset downloading.
-It should be done manually. Expected result is as follows 
+Step 2. Dataset downloading. <br>
+It should be done manually. Link: https://www.robots.ox.ac.uk/~vgg/data/flowers/17/index.html <br>
+Expected result is as follows 
 ```
 data/
 |-- datasplits.mat
