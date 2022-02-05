@@ -19,5 +19,5 @@ data/
 
 Step 3. Training
 ```
-PYTHONPATH=$(pwd) python run_experiment.py
+python run_experiment.py
 ```
