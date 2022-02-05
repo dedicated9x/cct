@@ -51,7 +51,9 @@ class FlowersDataset(torch.utils.data.Dataset):
         assert role in ["train", "test", "val"]
 
         # TODO ta sciezka powinna byc inna
-        path_root = Path(r"C:\temp\appsilon")
+        # path_root = Path(r"C:\temp\appsilon")
+        path_root = Path(__file__).parent.parent.parent.parent / "data"
+
         self.path_images = path_root / "17flowers" / "jpg"
         list_filenames = (self.path_images / "files.txt").read_text().split("\n")
         self.df = pd.DataFrame().assign(filename=list_filenames)
