@@ -6,7 +6,6 @@ import scipy.io
 import torch
 import torch.utils.data
 import timm.data.transforms_factory
-import hydra
 
 from _solution.common.utils import pprint_sample
 
@@ -46,20 +45,16 @@ def get_transform(role):
 
 
 class FlowersDataset(torch.utils.data.Dataset):
-    def __init__(self, role):
+    def __init__(self, role, path_data):
         super(FlowersDataset, self).__init__()
         assert role in ["train", "test", "val"]
 
-        # TODO ta sciezka powinna byc inna
-        # path_root = Path(r"C:\temp\appsilon")
-        path_root = Path(__file__).parent.parent.parent.parent / "data"
-
-        self.path_images = path_root / "17flowers" / "jpg"
+        self.path_images = path_data / "17flowers" / "jpg"
         list_filenames = (self.path_images / "files.txt").read_text().split("\n")
         self.df = pd.DataFrame().assign(filename=list_filenames)
         self.df["label"] = self.df["filename"].apply(lambda x: divmod(int(x[6:-4]) - 1, 80)[0])
 
-        mask_idxs = scipy.io.loadmat(path_root / "datasplits.mat")[self.get_mat_key(role)]
+        mask_idxs = scipy.io.loadmat(path_data / "datasplits.mat")[self.get_mat_key(role)]
         mask_idxs = mask_idxs - 1   #Indices in .mat file they start from 1, not from 0.
         mask_dense = np.zeros(self.df.shape[0])
         mask_dense[mask_idxs] = 1
@@ -87,14 +82,17 @@ class FlowersDataset(torch.utils.data.Dataset):
             "y": torch.tensor(row["label"]).to(torch.float32),
         }
 
+def main():
+    def _display_sample():
+        ds = FlowersDataset(
+            role="train",
+            path_data=Path(__file__).parent.parent.parent.parent / "data"
+        )
+        sample = next(iter(ds))
+        pprint_sample(sample)
 
-@hydra.main(config_path="conf", config_name="base")
-def display_sample(config):
-    ds = FlowersDataset(role="train")
-    sample = next(iter(ds))
-    pprint_sample(sample)
+    _display_sample()
 
 if __name__ == '__main__':
-    display_sample()
-
+    main()
 
