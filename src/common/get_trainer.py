@@ -31,7 +31,7 @@ def get_trainer(config):
         gpus = None
 
     trainer = pl.Trainer(
-        gpus=config.trainer.device,
+        gpus=gpus,
         max_epochs=config.trainer.max_epochs,
         callbacks=callbacks,
         logger=logger,
