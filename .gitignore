@@ -131,3 +131,5 @@ dmypy.json
 # Custom
 .idea/
 lightning_logs/
+FlowersModule/
+wandb/

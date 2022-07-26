@@ -10,6 +10,8 @@ from src.common.get_trainer import get_trainer
 def main(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
+    config.trainer.wandb = True
+
     pl.seed_everything(1234)
     module_cls = modulename2cls(name=config.main.module_name)
     model = module_cls(config=config)
@@ -23,3 +25,7 @@ def main(config: omegaconf.DictConfig) -> None:
 
 if __name__ == '__main__':
     main()
+
+# TODO dodaj wandb
+# TODO utwardz to
+# TODO daj mozliwosc na cpu
