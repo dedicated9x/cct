@@ -3,6 +3,7 @@ import PIL.Image
 import numpy as np
 import pandas as pd
 import scipy.io
+import omegaconf
 import torch
 import torch.utils.data
 import timm.data.transforms_factory
@@ -43,21 +44,23 @@ def get_transform(role):
 
 
 class FlowersDataset(torch.utils.data.Dataset):
-    def __init__(self, role, path_data):
+    def __init__(self, config: omegaconf.DictConfig, split: str):
         super(FlowersDataset, self).__init__()
-        assert role in ["train", "test", "val"]
+        assert split in ["train", "test", "val"]
+
+        path_data = Path(config.paths.data)
 
         self.path_images = path_data / "17flowers" / "jpg"
         list_filenames = (self.path_images / "files.txt").read_text().split("\n")
         self.df = pd.DataFrame().assign(filename=list_filenames)
         self.df["label"] = self.df["filename"].apply(lambda x: divmod(int(x[6:-4]) - 1, 80)[0])
 
-        mask_idxs = scipy.io.loadmat(path_data / "datasplits.mat")[self.get_mat_key(role)]
+        mask_idxs = scipy.io.loadmat(path_data / "datasplits.mat")[self.get_mat_key(split)]
         mask_idxs = mask_idxs - 1   #Indices in .mat file they start from 1, not from 0.
         mask_dense = np.zeros(self.df.shape[0])
         mask_dense[mask_idxs] = 1
         self.df = self.df[mask_dense.astype(bool)].reset_index(drop=True)
-        self.transform = get_transform(role)
+        self.transform = get_transform(split)
 
     def get_mat_key(self, role):
         return {
@@ -85,7 +88,7 @@ def main():
 
     def _display_sample():
         ds = FlowersDataset(
-            role="train",
+            split="train",
             path_data=Path(__file__).parent.parent.parent.parent / "data"
         )
         sample = next(iter(ds))

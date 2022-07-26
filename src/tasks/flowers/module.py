@@ -15,10 +15,13 @@ class FlowersModule(BaseModule):
         self.model = CctFlower17()
         self.loss_train = nn.CrossEntropyLoss()
 
-        path_data = self._get_path_data()
-        self.ds_train = FlowersDataset(role="train", path_data=path_data)
-        self.ds_val = FlowersDataset(role="val", path_data=path_data)
-        self.ds_test = FlowersDataset(role="test", path_data=path_data)
+        # TODO tutaj zmien
+        cls_dataset = FlowersDataset
+
+        # TODO reszta z configu normlanie leci
+        self.ds_train = cls_dataset(config, "train")
+        self.ds_val = cls_dataset(config, "val")
+        self.ds_test = cls_dataset(config, "test")
 
         self.save_hyperparameters(config)
 
@@ -41,8 +44,4 @@ class FlowersModule(BaseModule):
         y = torch.cat([batch['y'] for batch in outputs])
         acc = (y_hat.argmax(dim=1) == y).to(torch.float32).mean()
         self.log("Test/Acc1", acc)
-
-    def _get_path_data(self):
-        return Path(__file__).parent.parent.parent.parent / "data"
-
 

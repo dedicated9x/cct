@@ -16,5 +16,8 @@ trainer:
 optimizer:
   use_scheduler: false
 
+paths:
+  root: ${hydra:runtime.cwd}
+  data: ${paths.root}/data
 
 
