@@ -26,6 +26,5 @@ def main(config: omegaconf.DictConfig) -> None:
 if __name__ == '__main__':
     main()
 
-# TODO dodaj wandb
 # TODO utwardz to
 # TODO daj mozliwosc na cpu
