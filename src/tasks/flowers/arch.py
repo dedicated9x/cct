@@ -4,7 +4,7 @@ from torch.hub import load_state_dict_from_url
 
 
 class CctFlower17(nn.Module):
-    def __init__(self):
+    def __init__(self, n_outputs):
         super(CctFlower17, self).__init__()
         cct = cct_14(
             num_classes=1000,
@@ -14,7 +14,7 @@ class CctFlower17(nn.Module):
             kernel_size=7,
         )
         cct = self._load_imagenet_weights(cct)
-        self.cct = self._replace_last_layer(cct)
+        self.cct = self._replace_last_layer(cct, n_outputs)
 
     def forward(self, x):
         x = self.cct(x)
@@ -28,8 +28,8 @@ class CctFlower17(nn.Module):
         cct.load_state_dict(state_dict_image_net)
         return cct
 
-    def _replace_last_layer(self, cct):
-        cct.classifier.fc = nn.Linear(in_features=384, out_features=17, bias=True)
+    def _replace_last_layer(self, cct, n_outputs):
+        cct.classifier.fc = nn.Linear(in_features=384, out_features=n_outputs, bias=True)
         return cct
 
 

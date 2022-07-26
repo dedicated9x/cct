@@ -5,6 +5,12 @@ main:
   module_name: FlowersModule
   is_tested: true
 
+dataset:
+  name: FlowersDataset
+
+model:
+  n_outputs: 17
+
 optimizer:
   lr: 0.00001
 

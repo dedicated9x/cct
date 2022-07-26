@@ -12,11 +12,13 @@ class FlowersModule(BaseModule):
     def __init__(self, config=None):
         super(FlowersModule, self).__init__(config)
 
-        self.model = CctFlower17()
+        self.model = CctFlower17(config.model.n_outputs)
         self.loss_train = nn.CrossEntropyLoss()
 
-        # TODO tutaj zmien
-        cls_dataset = FlowersDataset
+        if config.dataset.name == "FlowersDataset":
+            cls_dataset = FlowersDataset
+        else:
+            raise NotImplementedError
 
         # TODO reszta z configu normlanie leci
         self.ds_train = cls_dataset(config, "train")
