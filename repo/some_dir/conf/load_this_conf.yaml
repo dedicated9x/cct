@@ -1,0 +1,12 @@
+# Load base configuration
+defaults:
+  - /base_conf
+  - _self_
+
+# Override specific values
+database:
+  user: admin
+  password: admin123
+
+server:
+  port: 9090

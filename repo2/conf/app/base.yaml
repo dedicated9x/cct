@@ -1,0 +1,11 @@
+# This will include merging from both base_server.yaml and base_frontend.yaml
+defaults:
+  - /../frontend@frontend: base_frontend
+  - server/base_server
+  - _self_
+
+server:
+  debug: false
+
+frontend:
+  enable_analytics: true

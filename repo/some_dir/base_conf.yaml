@@ -1,0 +1,10 @@
+# Base configuration
+database:
+  driver: mysql
+  host: localhost
+  user: frontend
+  password: frontend
+
+server:
+  host: 0.0.0.0
+  port: 8080

@@ -1,0 +1,10 @@
+defaults:
+  - base
+  - _self_
+
+server:
+  debug: true
+  port: 9090
+
+frontend:
+  theme: 'dark'

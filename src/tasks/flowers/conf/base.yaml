@@ -1,6 +1,7 @@
 defaults:
   - ..\..\..\common\conf\base
 
+#  - # TODO how to load `test` from the parent directory?
 main:
   module_name: FlowersModule
   is_tested: true
