@@ -1,5 +1,6 @@
 defaults:
-  - ..\..\..\common\conf\base
+  - /../../../common/conf/base@
+  - _self_
 
 #  - # TODO how to load `test` from the parent directory?
 main:

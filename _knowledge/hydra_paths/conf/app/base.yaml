@@ -1,6 +1,10 @@
-# Czyli /sciezka/do/FOLDERU!@nazwa_klucza: nazwa_configu
+
 defaults:
+# LESSON 1) Czyli /sciezka/do/FOLDERU!@nazwa_klucza: nazwa_configu
+# LESSON 2) backslashe nie dzialaja
   - /../frontend@frontend: base_frontend
+# LESSON 3) W taki dziwny sposob wczytujemy "jak z worka"
+  - _globals/globals@
   - server/base_server
   - _self_
 
