@@ -1,4 +1,4 @@
-# This will include merging from both base_server.yaml and base_frontend.yaml
+# Czyli /sciezka/do/FOLDERU!@nazwa_klucza: nazwa_configu
 defaults:
   - /../frontend@frontend: base_frontend
   - server/base_server

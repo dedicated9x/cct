@@ -1,8 +1,7 @@
 import hydra
 from omegaconf import DictConfig, OmegaConf
-import os
 
-@hydra.main(version_base="1.2", config_path="some_dir/conf", config_name="load_this_conf")
+@hydra.main(config_path="conf/app", config_name="advanced_1", version_base="1.2")
 def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
 
