@@ -22,7 +22,7 @@ class CctFlower17(nn.Module):
 
     def _load_imagenet_weights(self, cct):
         state_dict_image_net = load_state_dict_from_url(
-            url='http://ix.cs.uoregon.edu/~alih/compact-transformers/checkpoints/finetuned/cct_14_7x2_384_imagenet.pth',
+            url='https://shi-labs.com/projects/cct/checkpoints/finetuned/cct_14_7x2_384_imagenet.pth',
             progress=False
         )
         cct.load_state_dict(state_dict_image_net)
