@@ -83,19 +83,29 @@ class FlowersDataset(torch.utils.data.Dataset):
             "y": torch.tensor(row["label"]).to(torch.float32),
         }
 
-def main():
+"""
+    '/home/admin2/Documents/repos/cct/src/tasks/flowers' \
+    '                                           /src/tasks/flowers/conf'
+    '/home/admin2/Documents/repos/cct/src/tasks
+                                                /src/tasks/flowers/conf'
+"""
+
+if __name__ == '__main__':
+    import hydra
     from src.common.utils import pprint_sample
 
-    def _display_sample():
+    # TODO da sie chyba uproscic `config_path`
+    @hydra.main(version_base="1.2", config_path="../../../src/tasks/flowers/conf", config_name="base")
+    def _display_sample(config: omegaconf.DictConfig) -> None:
+        config.paths.root = str(Path(__file__).parents[3])
         ds = FlowersDataset(
-            split="train",
-            path_data=Path(__file__).parent.parent.parent.parent / "data"
+            config=config,
+            split="train"
         )
         sample = next(iter(ds))
-        pprint_sample(sample)
+        # TODO wyprintuj to jakos
+
 
     _display_sample()
 
-if __name__ == '__main__':
-    main()
-
+# /home/admin2/Documents/repos/cct/data
