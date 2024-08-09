@@ -7,10 +7,10 @@ train:
   re_prob: 0.25
   re_mode: pixel
 
-val:
+val: &val_settings
   interpolation: bicubic
   crop_pct: 0.9
   is_training: false
 
 test:
-  is_training: false
+  <<: *val_settings

@@ -1,6 +1,5 @@
 from pathlib import Path
 import PIL.Image
-import numpy as np
 import pandas as pd
 import scipy.io
 import omegaconf
@@ -9,7 +8,7 @@ import torch.utils.data
 import timm.data.transforms_factory
 
 
-def get_transform(split):
+def get_transform(config: omegaconf.DictConfig, split: str):
     """
     Note that these transforms play 2 roles:
     - preprocessing,
@@ -17,31 +16,17 @@ def get_transform(split):
     """
     assert split in ["train", "val", "test"]
 
-    common_params = dict(
-        input_size=(3, 384, 384),
-        mean=(0.485, 0.456, 0.406),
-        std=(0.229, 0.224, 0.225),
+    pp_params = config.dataset.preprocessing
+    aug_params = config.dataset.augmentations.get(split)
+
+    _dict = lambda x: omegaconf.OmegaConf.to_container(x, resolve=True)
+
+    transform = timm.data.transforms_factory.create_transform(
+        **_dict(pp_params),
+        **_dict(aug_params)
     )
 
-    # TODO rozdziel jedne paramsy od drugich
-    if split == "train":
-        return timm.data.transforms_factory.create_transform(
-            **common_params,
-            is_training=True,
-            scale=[0.08, 1.0],
-            ratio=[0.75, 1.3333333333333333],
-            auto_augment='rand-m9-mstd0.5-inc1',
-            interpolation="random",
-            re_prob=0.25,
-            re_mode="pixel"
-        )
-    else:
-        return timm.data.transforms_factory.create_transform(
-            **common_params,
-            is_training=False,
-            interpolation="bicubic",
-            crop_pct=0.9
-        )
+    return transform
 
 
 class FlowersDataset(torch.utils.data.Dataset):
@@ -61,7 +46,7 @@ class FlowersDataset(torch.utils.data.Dataset):
         mask_dense = np.zeros(self.df.shape[0])
         mask_dense[mask_idxs] = 1
         self.df = self.df[mask_dense.astype(bool)].reset_index(drop=True)
-        self.transform = get_transform(split)
+        self.transform = get_transform(config, split)
 
     def get_mat_key(self, role):
         return {
@@ -123,7 +108,7 @@ if __name__ == '__main__':
         config.paths.root = str(Path(__file__).parents[3])
         ds = FlowersDataset(
             config=config,
-            split="train"
+            split="val"
         )
         sample = next(iter(ds))
         pprint_sample(sample)
