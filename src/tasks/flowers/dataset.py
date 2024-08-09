@@ -83,16 +83,38 @@ class FlowersDataset(torch.utils.data.Dataset):
             "y": torch.tensor(row["label"]).to(torch.float32),
         }
 
-"""
-    '/home/admin2/Documents/repos/cct/src/tasks/flowers' \
-    '                                           /src/tasks/flowers/conf'
-    '/home/admin2/Documents/repos/cct/src/tasks
-                                                /src/tasks/flowers/conf'
-"""
-
 if __name__ == '__main__':
     import hydra
-    from src.common.utils import pprint_sample
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from src.common.utils.printing import pprint_sample
+    from src.common.utils.plotting import plt_show_fixed
+
+    # TODO ustal seeda
+    # TODO dodaj oryginlny obrazek
+    # TODO zrob to w petli.
+
+    def visualize_sample(sample):
+        # Convert the tensor `x` to a numpy array and transpose to (H, W, C) for visualization
+        image_tensor = sample['x']
+        image = image_tensor.permute(1, 2, 0).numpy()
+
+        # Normalize the image back to the original pixel values
+        # TODO znajdz, skad on to zabral `norm_constants`
+        mean = np.array([0.485, 0.456, 0.406])
+        std = np.array([0.229, 0.224, 0.225])
+        image = std * image + mean
+        image = np.clip(image, 0, 1)
+
+        # Convert the label tensor `y` to a scalar
+        label = sample['y'].item()
+
+        # Plot the image and the label
+        plt.imshow(image)
+        plt.title(f"Label: {label}")
+        plt.axis('off')  # Hide axis
+        plt_show_fixed(plt)
+        # plt.show()
 
     # TODO da sie chyba uproscic `config_path`
     @hydra.main(version_base="1.2", config_path="../../../src/tasks/flowers/conf", config_name="base")
@@ -103,9 +125,7 @@ if __name__ == '__main__':
             split="train"
         )
         sample = next(iter(ds))
-        # TODO wyprintuj to jakos
-
+        pprint_sample(sample)
+        visualize_sample(sample)
 
     _display_sample()
-
-# /home/admin2/Documents/repos/cct/data
