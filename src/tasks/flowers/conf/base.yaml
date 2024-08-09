@@ -1,5 +1,7 @@
 defaults:
   - /../../../common/conf/base@
+  - dataset/augmentations/flowers_base
+  - dataset/preprocessing/flowers_base
   - _self_
 
 #  - # TODO how to load `test` from the parent directory?

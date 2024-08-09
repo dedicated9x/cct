@@ -9,13 +9,13 @@ import torch.utils.data
 import timm.data.transforms_factory
 
 
-def get_transform(role):
+def get_transform(split):
     """
     Note that these transforms play 2 roles:
     - preprocessing,
     - augmentation (in the case of training)
     """
-    assert role in ["train", "val", "test"]
+    assert split in ["train", "val", "test"]
 
     common_params = dict(
         input_size=(3, 384, 384),
@@ -23,7 +23,8 @@ def get_transform(role):
         std=(0.229, 0.224, 0.225),
     )
 
-    if role == "train":
+    # TODO rozdziel jedne paramsy od drugich
+    if split == "train":
         return timm.data.transforms_factory.create_transform(
             **common_params,
             is_training=True,

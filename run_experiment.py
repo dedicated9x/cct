@@ -17,6 +17,8 @@ def prepare_wandb_logger():
 def main(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
+    import sys; sys.exit()
+
     prepare_wandb_logger()
     config.trainer.wandb = True
 
