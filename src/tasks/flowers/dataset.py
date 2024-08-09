@@ -1,6 +1,7 @@
 from pathlib import Path
 import PIL.Image
 import pandas as pd
+import numpy as np
 import scipy.io
 import omegaconf
 import torch
@@ -16,13 +17,13 @@ def get_transform(config: omegaconf.DictConfig, split: str):
     """
     assert split in ["train", "val", "test"]
 
-    pp_params = config.dataset.preprocessing
+    preprocessing_params = config.dataset.preprocessing
     aug_params = config.dataset.augmentations.get(split)
 
     _dict = lambda x: omegaconf.OmegaConf.to_container(x, resolve=True)
 
     transform = timm.data.transforms_factory.create_transform(
-        **_dict(pp_params),
+        **_dict(preprocessing_params),
         **_dict(aug_params)
     )
 
@@ -80,15 +81,14 @@ if __name__ == '__main__':
     # TODO dodaj oryginlny obrazek
     # TODO zrob to w petli.
 
-    def visualize_sample(sample):
+    def visualize_sample(sample, normalization_params: tuple):
         # Convert the tensor `x` to a numpy array and transpose to (H, W, C) for visualization
         image_tensor = sample['x']
         image = image_tensor.permute(1, 2, 0).numpy()
 
         # Normalize the image back to the original pixel values
-        # TODO znajdz, skad on to zabral `norm_constants`
-        mean = np.array([0.485, 0.456, 0.406])
-        std = np.array([0.229, 0.224, 0.225])
+        mean = np.array(normalization_params[0])
+        std = np.array(normalization_params[1])
         image = std * image + mean
         image = np.clip(image, 0, 1)
 
@@ -104,14 +104,18 @@ if __name__ == '__main__':
 
     # TODO da sie chyba uproscic `config_path`
     @hydra.main(version_base="1.2", config_path="../../../src/tasks/flowers/conf", config_name="base")
-    def _display_sample(config: omegaconf.DictConfig) -> None:
+    def _display_dataset(config: omegaconf.DictConfig) -> None:
         config.paths.root = str(Path(__file__).parents[3])
         ds = FlowersDataset(
             config=config,
             split="val"
         )
-        sample = next(iter(ds))
-        pprint_sample(sample)
-        visualize_sample(sample)
+        for idx in range(len(ds)):
+            sample = ds[idx]
+            pprint_sample(sample)
+            visualize_sample(
+                sample,
+                normalization_params=(config.dataset.preprocessing.mean, config.dataset.preprocessing.std)
+            )
 
-    _display_sample()
+    _display_dataset()

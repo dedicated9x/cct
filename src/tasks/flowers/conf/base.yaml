@@ -4,11 +4,11 @@ defaults:
   - dataset/preprocessing/flowers_base
   - _self_
 
-#  - # TODO how to load `test` from the parent directory?
 main:
   module_name: FlowersModule
   is_tested: true
 
+# TODO czy po to jest ten dispatch?
 dataset:
   name: FlowersDataset
 
