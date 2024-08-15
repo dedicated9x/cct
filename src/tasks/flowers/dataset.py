@@ -7,6 +7,8 @@ import omegaconf
 import torch
 import torch.utils.data
 import timm.data.transforms_factory
+from torchvision import transforms  # Add this import
+
 
 
 def get_transform(config: omegaconf.DictConfig, split: str):
@@ -62,31 +64,41 @@ class FlowersDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         row = self.df.iloc[idx]
 
-        x = PIL.Image.open(self.path_images / row["filename"])
-        x = self.transform(x)
+        image = PIL.Image.open(self.path_images / row["filename"])
+        x = self.transform(image)
 
-        return {
+        sample = {
             "x": x,
             "y": torch.tensor(row["label"]).to(torch.float32),
         }
+
+        debug = True
+        if debug:
+            x_orig = transforms.ToTensor()(image)
+            sample['x_orig'] = x_orig
+
+        return sample
 
 if __name__ == '__main__':
     import hydra
     import numpy as np
     import matplotlib.pyplot as plt
+    import matplotlib; matplotlib.use('TkAgg')
     from src.common.utils.printing import pprint_sample
-    from src.common.utils.plotting import plt_show_fixed
 
     # TODO ustal seeda
-    # TODO dodaj oryginlny obrazek
     # TODO zrob to w petli.
+    # TODO (wywal augmentacje z kolorami, bo chyba to poprawi)
 
     def visualize_sample(sample, normalization_params: tuple):
-        # Convert the tensor `x` to a numpy array and transpose to (H, W, C) for visualization
+        # Convert the tensors `x` and `x_orig` to numpy arrays and transpose to (H, W, C) for visualization
         image_tensor = sample['x']
-        image = image_tensor.permute(1, 2, 0).numpy()
+        image_orig_tensor = sample['x_orig']
 
-        # Normalize the image back to the original pixel values
+        image = image_tensor.permute(1, 2, 0).numpy()
+        image_orig = image_orig_tensor.permute(1, 2, 0).numpy()
+
+        # Normalize the transformed image `x` back to the original pixel values
         mean = np.array(normalization_params[0])
         std = np.array(normalization_params[1])
         image = std * image + mean
@@ -95,27 +107,34 @@ if __name__ == '__main__':
         # Convert the label tensor `y` to a scalar
         label = sample['y'].item()
 
-        # Plot the image and the label
-        plt.imshow(image)
-        plt.title(f"Label: {label}")
-        plt.axis('off')  # Hide axis
-        plt_show_fixed(plt)
-        # plt.show()
+        # Plot the original image and the transformed image side by side
+        fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 
-    # TODO da sie chyba uproscic `config_path`
-    @hydra.main(version_base="1.2", config_path="../../../src/tasks/flowers/conf", config_name="base")
+        # Plot the transformed image `x`
+        axs[0].imshow(image)
+        axs[0].set_title(f"Transformed Image (Label: {label})")
+        axs[0].axis('off')  # Hide axis
+
+        # Plot the original image `x_orig`
+        axs[1].imshow(image_orig)
+        axs[1].set_title("Original Image")
+        axs[1].axis('off')  # Hide axis
+
+        plt.show()
+
+    @hydra.main(version_base="1.2", config_path="conf", config_name="base")
     def _display_dataset(config: omegaconf.DictConfig) -> None:
         config.paths.root = str(Path(__file__).parents[3])
         ds = FlowersDataset(
             config=config,
             split="train"
         )
-        for idx in range(len(ds)):
-            sample = ds[idx]
-            pprint_sample(sample)
-            visualize_sample(
-                sample,
-                normalization_params=(config.dataset.preprocessing.mean, config.dataset.preprocessing.std)
-            )
+        # for idx in range(len(ds)):
+        sample = ds[0]
+        pprint_sample(sample)
+        visualize_sample(
+            sample,
+            normalization_params=(config.dataset.preprocessing.mean, config.dataset.preprocessing.std)
+        )
 
     _display_dataset()
