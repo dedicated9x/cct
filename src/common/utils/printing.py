@@ -56,7 +56,7 @@ def pprint_sample(_dict):
                 min_val = v.min().item()
                 max_val = v.max().item()
                 mean_val = v.mean().item()
-        except AttributeError:
+        except (AttributeError, RuntimeError):
             pass
 
         data["Key"].append(k)

@@ -35,7 +35,7 @@ class FlowersDataset(torch.utils.data.Dataset):
         super(FlowersDataset, self).__init__()
         assert split in ["train", "test", "val"]
 
-        path_data = Path(config.paths.data)
+        path_data = Path(config.paths.data) / "flowers"
 
         self.path_images = path_data / "17flowers" / "jpg"
         list_filenames = (self.path_images / "files.txt").read_text().split("\n")
@@ -108,7 +108,7 @@ if __name__ == '__main__':
         config.paths.root = str(Path(__file__).parents[3])
         ds = FlowersDataset(
             config=config,
-            split="val"
+            split="train"
         )
         for idx in range(len(ds)):
             sample = ds[idx]

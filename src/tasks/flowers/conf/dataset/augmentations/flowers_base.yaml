@@ -1,5 +1,6 @@
 train:
   is_training: true
+  input_size: [3, 384, 384]
   scale: [0.08, 1.0]
   ratio: [0.75, 1.3333333333333333]
   auto_augment: rand-m9-mstd0.5-inc1
@@ -8,9 +9,10 @@ train:
   re_mode: pixel
 
 val: &val_settings
+  is_training: false
+  input_size: [3, 384, 384]
   interpolation: bicubic
   crop_pct: 0.9
-  is_training: false
 
 test:
   <<: *val_settings
