@@ -5,13 +5,15 @@ import omegaconf
 import torch.utils.data
 from sklearn.model_selection import train_test_split
 from torchvision import transforms
+from torchvision.transforms import functional as F
+
 
 class Augmentation:
     def __init__(self, transform_x, transform_y_scheme):
         self.transform_x = transform_x
         self.transform_y_scheme = transform_y_scheme
 
-    def transform_y(self, y):
+    def _transform_y(self, y):
         base_scheme = ['squares', 'circles', 'up', 'right', 'down', 'left']
 
         new2old = {k: v for k, v in zip(self.transform_y_scheme, base_scheme)}
@@ -22,22 +24,36 @@ class Augmentation:
         y = list(dict_counts.values())
         return y
 
+    def __call__(self, x, y):
+        x = self.transform_x(x)
+        y = self._transform_y(y)
+        return x, y
 
 
 def get_augs(config: omegaconf.DictConfig, split: str):
     assert split in ["train", "val", "test"]
 
-    # rotation_degrees = [90, 180, 270]
-    # rotation_augs = [transforms.RandomRotation(degrees=(d, d)) for d in rotation_degrees]
-    # flip_augs = [transforms.RandomVerticalFlip(p=1.0), transforms.RandomHorizontalFlip(p=1.0)]
-    #
-    # transform = transforms.Compose([
-    #     # transforms.RandomRotation(degrees=(90, 90))
-    #     transforms.RandomHorizontalFlip(p=1.0)
-    # ])
-
     dict_transforms = {
-        "rotation_90": Augmentation(transforms.RandomRotation(degrees=(90, 90)), ['squares', 'circles', 'left', 'up', 'right', 'down'])
+        "rotation_90": Augmentation(
+            transforms.RandomRotation(degrees=(90, 90)),
+            ['squares', 'circles', 'left', 'up', 'right', 'down']
+        ),
+        "rotation_180": Augmentation(
+            transforms.RandomRotation(degrees=(180, 180)),
+            ['squares', 'circles', 'down', 'left', 'up', 'right']
+        ),
+        "rotation_270": Augmentation(
+            transforms.RandomRotation(degrees=(180, 180)),
+            ['squares', 'circles', 'right', 'down', 'left', 'up']
+        ),
+        "hflip": Augmentation(
+            transforms.RandomHorizontalFlip(p=1.0),
+            ['squares', 'circles', 'up', 'left', 'down', 'right']
+        ),
+        "vflip": Augmentation(
+            transforms.RandomVerticalFlip(p=1.0),
+            ['squares', 'circles', 'down', 'right', 'up', 'left']
+        )
     }
     return dict_transforms
 
@@ -85,9 +101,10 @@ class ImagesDataset(torch.utils.data.Dataset):
         x_orig = transforms.ToTensor()(image)
         y_orig = [row[col_name] for col_name in ['squares', 'circles', 'up', 'right', 'down', 'left']]
 
+        # TODO asdsdas
+        aug_name = "rotation_90"
 
-        x = self.dict_transforms["rotation_90"].transform_x(x_orig)
-        y = self.dict_transforms["rotation_90"].transform_y(y_orig)
+        x, y = self.dict_transforms[aug_name](x_orig, y_orig)
 
         sample = {
             "x": x,
@@ -112,7 +129,6 @@ if __name__ == '__main__':
     import torch
 
     # TODO rozwiaz problem 4-ego kanalu na wczesniejszym etapie
-    # TODO 1 add y_orig.  There will be two "axes". x_orig with y_orig and x with y.
     def plot_tensor_as_image(tensor, orig_tensor, labels, orig_labels, filename):
         # Ensure both tensors are on the CPU and convert to numpy
         tensor = tensor.cpu().numpy()
