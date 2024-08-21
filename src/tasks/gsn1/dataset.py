@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     # TODO rozwiaz problem 4-ego kanalu na wczesniejszym etapie
     # TODO 1 add y_orig.  There will be two "axes". x_orig with y_orig and x with y.
-    def plot_tensor_as_image(tensor, orig_tensor, labels, filename):
+    def plot_tensor_as_image(tensor, orig_tensor, labels, orig_labels, filename):
         # Ensure both tensors are on the CPU and convert to numpy
         tensor = tensor.cpu().numpy()
         orig_tensor = orig_tensor.cpu().numpy()
@@ -126,28 +126,35 @@ if __name__ == '__main__':
         rgb_tensor = rgb_tensor.clip(0, 1)
         rgb_orig_tensor = rgb_orig_tensor.clip(0, 1)
 
-        # Create a subplot with 1 row and 2 columns to show both images side by side
-        fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+        # Create a subplot with 2 rows and 2 columns to show both images side by side
+        fig, ax = plt.subplots(2, 2, figsize=(12, 12))
 
-        # Plot the transformed image
-        ax[0].imshow(rgb_tensor)
-        ax[0].axis('off')  # Turn off axis labels
-        ax[0].set_title('Transformed Image', fontsize=12)
+        # Plot the transformed image with its label
+        ax[0, 0].imshow(rgb_tensor)
+        ax[0, 0].axis('off')  # Turn off axis labels
+        ax[0, 0].set_title('Transformed Image', fontsize=12)
 
-        # Plot the original image
-        ax[1].imshow(rgb_orig_tensor)
-        ax[1].axis('off')  # Turn off axis labels
-        ax[1].set_title('Original Image', fontsize=12)
+        # Plot the original image with its label
+        ax[0, 1].imshow(rgb_orig_tensor)
+        ax[0, 1].axis('off')  # Turn off axis labels
+        ax[0, 1].set_title('Original Image', fontsize=12)
 
-        # Set a super title for the figure with filename and labels
-        title = f"Filename: {filename}\nLabels: {labels.tolist()}"
-        fig.suptitle(title, fontsize=14)
+        # Display labels for the transformed and original
+        ax[1, 0].text(0.5, 0.5, f"Transformed Labels: {labels.tolist()}", ha='center', va='center', fontsize=12)
+        ax[1, 0].axis('off')  # Hide axis for labels text
+        ax[1, 1].text(0.5, 0.5, f"Original Labels: {orig_labels.tolist()}", ha='center', va='center', fontsize=12)
+        ax[1, 1].axis('off')  # Hide axis for labels text
+
+        # Set a super title for the figure with filename
+        fig.suptitle(f"Filename: {filename}", fontsize=14)
 
         # Display the plot and wait for a key or mouse button press
         plt.show(block=False)
         plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
         plt.close()  # Close the current figure after keypress/mouse click
 
+
+    # Updated _display_dataset function call to pass both y and y_orig
     @hydra.main(version_base="1.2", config_path="conf", config_name="base")
     def _display_dataset(config: omegaconf.DictConfig) -> None:
         config.paths.root = str(Path(__file__).parents[3])
@@ -158,7 +165,8 @@ if __name__ == '__main__':
         for idx in range(len(ds)):
             sample = ds[idx]
             pprint_sample(sample)
-            plot_tensor_as_image(sample['x'], sample['x_orig'], sample['y'], sample['filename'])
+            plot_tensor_as_image(sample['x'], sample['x_orig'], sample['y'], sample['y_orig'], sample['filename'])
             # break
+
 
     _display_dataset()
