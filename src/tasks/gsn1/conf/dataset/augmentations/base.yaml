@@ -1,2 +1,2 @@
-enable_rotation: true
-enable_mirroring: true
+prob_rotation: 0.5
+prob_mirroring: 1.0
