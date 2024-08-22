@@ -1,0 +1,1 @@
+1. Max pooling, dropout, batch-norm, etc.

@@ -2,10 +2,10 @@ from pathlib import Path
 import PIL.Image
 import pandas as pd
 import omegaconf
+import torch
 import torch.utils.data
 from sklearn.model_selection import train_test_split
 from torchvision import transforms
-from torchvision.transforms import functional as F
 
 
 class Augmentation:
@@ -43,7 +43,7 @@ def get_augs(config: omegaconf.DictConfig, split: str):
             ['squares', 'circles', 'down', 'left', 'up', 'right']
         ),
         "rotation_270": Augmentation(
-            transforms.RandomRotation(degrees=(180, 180)),
+            transforms.RandomRotation(degrees=(270, 270)),
             ['squares', 'circles', 'right', 'down', 'left', 'up']
         ),
         "hflip": Augmentation(
@@ -101,10 +101,19 @@ class ImagesDataset(torch.utils.data.Dataset):
         x_orig = transforms.ToTensor()(image)
         y_orig = [row[col_name] for col_name in ['squares', 'circles', 'up', 'right', 'down', 'left']]
 
-        # TODO asdsdas
-        aug_name = "rotation_90"
+        x, y = x_orig, y_orig
 
-        x, y = self.dict_transforms[aug_name](x_orig, y_orig)
+        if torch.rand(1).item() < self.aug.prob_rotation:
+            aug_name = ["rotation_90", "rotation_180", "rotation_270"][torch.randint(0, 3, (1,)).item()]
+            x, y = self.dict_transforms[aug_name](x, y)
+        else:
+            pass
+
+        if torch.rand(1).item() < self.aug.prob_mirroring:
+            aug_name = ["hflip", "vflip"][torch.randint(0, 2, (1,)).item()]
+            x, y = self.dict_transforms[aug_name](x, y)
+        else:
+            pass
 
         sample = {
             "x": x,

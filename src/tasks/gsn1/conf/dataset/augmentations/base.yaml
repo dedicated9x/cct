@@ -1,2 +1,2 @@
-prob_rotation: 0.5
-prob_mirroring: 0.5
+prob_rotation: 1.0
+prob_mirroring: 1.0

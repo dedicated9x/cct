@@ -1,1 +1,2 @@
 1. Dlaczego normalizujemy imagenetem? Czy naprawde jest improvement?
+
