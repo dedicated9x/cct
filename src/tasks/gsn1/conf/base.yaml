@@ -3,3 +3,24 @@ defaults:
   - dataset/base
   - _self_
 
+main:
+  module_name: Gsn1BaseModule
+  is_tested: true
+
+# TODO czy to tez jest pobierane?
+dataset:
+  name: ImagesDataset
+
+#model:
+#  n_outputs: 17
+
+optimizer:
+  lr: 0.00001
+
+trainer:
+  max_epochs: 20
+  batch_size: 16
+  device: [0]
+#  monitored_metric:
+#    name: "Val/Acc1"
+#    mode: max

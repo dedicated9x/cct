@@ -1,5 +1,5 @@
 from src.tasks.flowers.module import FlowersModule
-
+from src.tasks.gsn1.module import Gsn1BaseModule
 
 def modulename2cls(name):
     dict_globalname2obj = globals().copy()
