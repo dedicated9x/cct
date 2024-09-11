@@ -13,8 +13,8 @@ def prepare_wandb_logger():
     os.makedirs(wandb_logdir, exist_ok=True)
     os.environ['WANDB_DIR'] = wandb_logdir
 
-@hydra.main(version_base="1.2", config_path="src/tasks/flowers/conf", config_name="base")
-# @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="base")
+# @hydra.main(version_base="1.2", config_path="src/tasks/flowers/conf", config_name="base")
+@hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="base")
 def main(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 

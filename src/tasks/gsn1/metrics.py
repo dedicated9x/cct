@@ -40,6 +40,7 @@ for y_hat, y in zip(batch_preds, batch_targets):
         loss_sample += -(y[i] * torch.log(y_hat[i]) + (1-y[i]) * torch.log(1 - y_hat[i]))
     loss_batch += loss_sample
 
+# TODO narazie jszcze nie widzimy, co wlasciwie bedzie wchodzic funkcji
 # sc - single class
 loss_batch_v2 = 0
 for batch_logits_sc, batch_targets_sc in zip(batch_logits.T, batch_targets.T):

@@ -16,17 +16,12 @@ class Gsn1BaseModule(BaseModule):
         self.model = ShapeClassificationNet()
         # TODO zbadaj dalsze losy ten loss_train
         self.loss_train = nn.CrossEntropyLoss()
-        #
-        # if config.dataset.name == "FlowersDataset":
-        #     cls_dataset = FlowersDataset
-        # else:
-        #     raise NotImplementedError
-        #
-        # self.ds_train = cls_dataset(config, "train")
-        # self.ds_val = cls_dataset(config, "val")
-        # self.ds_test = cls_dataset(config, "test")
-        #
-        # self.save_hyperparameters(config)
+
+        self.ds_train = ImagesDataset(config, "train")
+        self.ds_val = ImagesDataset(config, "val")
+        self.ds_test = ImagesDataset(config, "test")
+
+        self.save_hyperparameters(config)
 
     def training_step(self, batch, batch_idx):
         a = 2

@@ -91,6 +91,7 @@ class ImagesDataset(torch.utils.data.Dataset):
                 self.df = df_test
 
         self.dict_transforms = get_augs(config, split)
+        self.visualization_mode = config.dataset.visualization_mode
 
     def __len__(self):
         return self.df.shape[0]
@@ -115,14 +116,17 @@ class ImagesDataset(torch.utils.data.Dataset):
         else:
             pass
 
+        # Channels 0,1,2 are equal, channel 3 has no information.
+        x = x[0].unsqueeze(0)
+        x_orig = x_orig[0].unsqueeze(0)
+
         sample = {
             "x": x,
             "y": torch.tensor(y).to(torch.int32),
             "filename": row['name']
         }
 
-        debug = True
-        if debug:
+        if self.visualization_mode:
             sample["x_orig"] = x_orig
             sample["y_orig"] = torch.tensor(y_orig).to(torch.int32)
 
@@ -137,15 +141,17 @@ if __name__ == '__main__':
     from src.common.utils.printing import pprint_sample
     import torch
 
-    # TODO rozwiaz problem 4-ego kanalu na wczesniejszym etapie
     def plot_tensor_as_image(tensor, orig_tensor, labels, orig_labels, filename):
+        tensor = tensor.repeat(3, 1, 1)
+        orig_tensor = orig_tensor.repeat(3, 1, 1)
+
         # Ensure both tensors are on the CPU and convert to numpy
         tensor = tensor.cpu().numpy()
         orig_tensor = orig_tensor.cpu().numpy()
 
-        # Take the first three channels and stack them along the last axis to form RGB images
-        rgb_tensor = tensor[:3, :, :].transpose(1, 2, 0)
-        rgb_orig_tensor = orig_tensor[:3, :, :].transpose(1, 2, 0)
+        # Take the channels and stack them along the last axis to form RGB images
+        rgb_tensor = tensor.transpose(1, 2, 0)
+        rgb_orig_tensor = orig_tensor.transpose(1, 2, 0)
 
         # Clip the values to be between 0 and 1, if necessary
         rgb_tensor = rgb_tensor.clip(0, 1)
@@ -183,10 +189,14 @@ if __name__ == '__main__':
     @hydra.main(version_base="1.2", config_path="conf", config_name="base")
     def _display_dataset(config: omegaconf.DictConfig) -> None:
         config.paths.root = str(Path(__file__).parents[3])
+        config.dataset.visualization_mode = True
         ds = ImagesDataset(
             config=config,
             split="val"
         )
+
+        assert ds[0]['x'].shape == torch.Size([1, 28, 28])
+
         for idx in range(len(ds)):
             sample = ds[idx]
             pprint_sample(sample)

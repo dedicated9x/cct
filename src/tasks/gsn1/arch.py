@@ -45,7 +45,7 @@ def main():
     model = ShapeClassificationNet()
 
     # Przykładowy losowy batch (batch_size=1, kanał=1, wysokość=28, szerokość=28)
-    random_input = torch.randn(1, 1, 28, 28)  # szum
+    random_input = torch.randn(32, 1, 28, 28)  # szum
     print("Random input shape:", random_input.shape)
 
     # Przepuszczenie batcha przez sieć
@@ -53,7 +53,7 @@ def main():
 
     # Wyświetlenie wyników
     print("Output shape:", output.shape)
-    print("Output:", output)
+    print("Output:", output[13])
 
 
 if __name__ == "__main__":
