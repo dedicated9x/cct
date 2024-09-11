@@ -72,7 +72,8 @@ class FlowersDataset(torch.utils.data.Dataset):
             "y": torch.tensor(row["label"]).to(torch.float32),
         }
 
-        debug = True
+        # TODO zmien lokalnie w configu na False
+        debug = False
         if debug:
             x_orig = transforms.ToTensor()(image)
             sample['x_orig'] = x_orig
