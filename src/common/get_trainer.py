@@ -1,8 +1,17 @@
 import torch
 import pytorch_lightning as pl
 import pytorch_lightning.loggers
+from pathlib import Path
+import os
+
+def get_logging_dir():
+    repo_name = Path(__file__).parents[2].name
+    logdir = f'/tmp/wandb_pl_logs/{repo_name}'
+    os.makedirs(logdir, exist_ok=True)
+    return logdir
 
 def get_trainer(config):
+
     # Checkpoints
     if config.trainer.monitored_metric is not None:
         metric_name = config.trainer.monitored_metric.name
@@ -15,14 +24,17 @@ def get_trainer(config):
     else:
         callbacks = None
 
-    # Wandb
+    # Configure loggers
     if config.trainer.wandb:
         logger = pytorch_lightning.loggers.WandbLogger(
             project=config.main.module_name,
             name=config.main.module_name.lower(),
+            save_dir=get_logging_dir(),
         )
     else:
-        logger = True
+        logger = pytorch_lightning.loggers.TensorBoardLogger(
+            save_dir=get_logging_dir()
+        )
 
     # GPUs
     if torch.cuda.is_available():

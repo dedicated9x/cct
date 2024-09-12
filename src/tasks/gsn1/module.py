@@ -44,12 +44,20 @@ class Gsn1BaseModule(BaseModule):
         print(f"\n Val/Acc1 = {acc:.2f}")
         self.log("Val/Acc1", acc)
 
-    # TODO wsadz checkpointy do jakiegos folderu i
-    # TODO schowaj lighting logs tam, gdzie wandb
+    # TODO sprawdzic, czy self.validation_step() zadziala
+    def test_step(self, batch, batch_idx):
+        x, targets = batch['x'], batch['y_labels']
+        logits = self.model(x)
+        return {"logits": logits, "targets": targets}
+
     def test_epoch_end(self, outputs):
-        raise NotImplementedError
-        # y_hat = torch.cat([batch['y_hat'] for batch in outputs])
-        # y = torch.cat([batch['y'] for batch in outputs])
-        # acc = (y_hat.argmax(dim=1) == y).to(torch.float32).mean()
-        # self.log("Test/Acc1", acc)
+        logits = torch.cat([batch['logits'] for batch in outputs])
+        targets = torch.cat([batch['targets'] for batch in outputs])
+
+        preds = torch.sigmoid(logits)
+        preds_binary = convert_topk_to_binary(preds, 2)
+
+        acc = (preds_binary.int() == targets).all(dim=1).float().mean()
+        print(f"\n Test/Acc1 = {acc:.2f}")
+        self.log("Test/Acc1", acc)
 
