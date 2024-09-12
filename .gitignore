@@ -132,4 +132,5 @@ dmypy.json
 .idea/
 lightning_logs/
 FlowersModule/
+Gsn1BaseModule/
 wandb/

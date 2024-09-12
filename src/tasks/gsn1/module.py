@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from src.common.module import BaseModule
 from src.tasks.gsn1.arch import ShapeClassificationNet
 from src.tasks.gsn1.dataset import ImagesDataset
-
+from src.tasks.gsn1.metrics import bcewithlogits_multilabel, convert_topk_to_binary
 
 class Gsn1BaseModule(BaseModule):
     def __init__(self, config=None):
@@ -14,7 +14,6 @@ class Gsn1BaseModule(BaseModule):
 
         # TODO wrzuc tu config
         self.model = ShapeClassificationNet()
-        # TODO zbadaj dalsze losy ten loss_train
         self.loss_train = nn.CrossEntropyLoss()
 
         self.ds_train = ImagesDataset(config, "train")
@@ -24,25 +23,30 @@ class Gsn1BaseModule(BaseModule):
         self.save_hyperparameters(config)
 
     def training_step(self, batch, batch_idx):
-        a = 2
-        raise NotImplementedError
-        # x, y = batch['x'], batch['y']
-        # y_hat = self(x)
-        # y = F.one_hot(y.to(torch.int64), num_classes=17).to(torch.float32)
-        # loss = self.loss_train(y_hat, y)
-        # return loss
+        x, targets = batch['x'], batch['y_labels']
+        logits = self.model(x)
+        loss = bcewithlogits_multilabel(logits, targets)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, targets = batch['x'], batch['y_labels']
+        logits = self.model(x)
+        return {"logits": logits, "targets": targets}
 
     def validation_epoch_end(self, outputs):
-        a = 2
-        raise NotImplementedError
-        # y_hat = torch.cat([batch['y_hat'] for batch in outputs])
-        # y = torch.cat([batch['y'] for batch in outputs])
-        # acc = (y_hat.argmax(dim=1) == y).to(torch.float32).mean()
-        # print(f"\n Val/Acc1 = {acc:.2f}")
-        # self.log("Val/Acc1", acc)
+        logits = torch.cat([batch['logits'] for batch in outputs])
+        targets = torch.cat([batch['targets'] for batch in outputs])
 
+        preds = torch.sigmoid(logits)
+        preds_binary = convert_topk_to_binary(preds, 2)
+
+        acc = (preds_binary.int() == targets).all(dim=1).float().mean()
+        print(f"\n Val/Acc1 = {acc:.2f}")
+        self.log("Val/Acc1", acc)
+
+    # TODO wsadz checkpointy do jakiegos folderu i
+    # TODO schowaj lighting logs tam, gdzie wandb
     def test_epoch_end(self, outputs):
-        a = 2
         raise NotImplementedError
         # y_hat = torch.cat([batch['y_hat'] for batch in outputs])
         # y = torch.cat([batch['y'] for batch in outputs])

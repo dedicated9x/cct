@@ -16,6 +16,7 @@ class BaseModule(pl.LightningModule):
     def forward(self, x):
         return self.model(x)
 
+    # TODO usun to, bo to w koncu nie takie common, jak by sie moglo wydawac
     def validation_step(self, batch, batch_idx):
         x, y = batch['x'], batch['y']
         y_hat = self(x)

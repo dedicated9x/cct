@@ -104,12 +104,12 @@ class ImagesDataset(torch.utils.data.Dataset):
 
         x, y = x_orig, y_orig
 
+        # Augmentations
         if torch.rand(1).item() < self.aug.prob_rotation:
             aug_name = ["rotation_90", "rotation_180", "rotation_270"][torch.randint(0, 3, (1,)).item()]
             x, y = self.dict_transforms[aug_name](x, y)
         else:
             pass
-
         if torch.rand(1).item() < self.aug.prob_mirroring:
             aug_name = ["hflip", "vflip"][torch.randint(0, 2, (1,)).item()]
             x, y = self.dict_transforms[aug_name](x, y)
@@ -120,15 +120,21 @@ class ImagesDataset(torch.utils.data.Dataset):
         x = x[0].unsqueeze(0)
         x_orig = x_orig[0].unsqueeze(0)
 
+        y = torch.tensor(y).to(torch.int32)
+        y_orig = torch.tensor(y_orig).to(torch.int32)
+
+        y_labels = (y >= 1).int()
+
         sample = {
             "x": x,
-            "y": torch.tensor(y).to(torch.int32),
+            "y": y, # TODO zmien na y_counts
+            "y_labels": y_labels,
             "filename": row['name']
         }
 
         if self.visualization_mode:
             sample["x_orig"] = x_orig
-            sample["y_orig"] = torch.tensor(y_orig).to(torch.int32)
+            sample["y_orig"] = y_orig
 
         return sample
 

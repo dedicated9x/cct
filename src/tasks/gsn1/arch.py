@@ -35,7 +35,11 @@ class ShapeClassificationNet(nn.Module):
         x = x.view(-1, 128 * 3 * 3)  # Flatten
         x = F.relu(self.fc1(x))
         x = self.dropout(x)
-        x = torch.sigmoid(self.fc2(x))  # Sigmoid dla klasyfikacji binarnej każdej klasy
+        x = self.fc2(x)
+
+        # No sigmoid for better stability
+        # x = torch.sigmoid(x)
+
         return x
 
 
