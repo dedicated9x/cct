@@ -12,6 +12,7 @@ def get_logging_dir():
 
 def get_trainer(config):
 
+    # TODO zrob, aby sie zapisywal ckpt z najwyzsza metryka
     # Checkpoints
     if config.trainer.monitored_metric is not None:
         metric_name = config.trainer.monitored_metric.name

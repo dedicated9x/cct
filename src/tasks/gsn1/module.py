@@ -44,11 +44,8 @@ class Gsn1BaseModule(BaseModule):
         print(f"\n Val/Acc1 = {acc:.2f}")
         self.log("Val/Acc1", acc)
 
-    # TODO sprawdzic, czy self.validation_step() zadziala
     def test_step(self, batch, batch_idx):
-        x, targets = batch['x'], batch['y_labels']
-        logits = self.model(x)
-        return {"logits": logits, "targets": targets}
+        return self.validation_step(batch, batch_idx)
 
     def test_epoch_end(self, outputs):
         logits = torch.cat([batch['logits'] for batch in outputs])
