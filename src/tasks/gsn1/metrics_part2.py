@@ -2,6 +2,14 @@ import torch
 
 import torch.nn.functional as F
 
+def chunkwise_softmax_2d_and_reshape(x, chunk_size: int):
+    assert abs(x.shape[1] % chunk_size) < 1e-6
+    assert x.dim() == 2
+    batch_size = x.shape[0]
+    logits = logits_flattened.reshape(batch_size, int(x.shape[1] / chunk_size), chunk_size)
+    preds = F.softmax(logits, dim=2)
+    return preds
+
 def loss_counting_explicit(counts, preds):
     loss_explicit = 0
     for r, y in zip(counts, preds):
@@ -26,12 +34,7 @@ counts = torch.tensor([[0, 0, 0, 0, 4, 6],
 
 logits_flattened = torch.rand(3, 60)
 
-# TODO chunkwise_softmax
-batch_size = logits_flattened.shape[0]
-logits = logits_flattened.reshape(batch_size, 6, 10)
-preds = F.softmax(logits, dim=2)
-
-
+preds = chunkwise_softmax_2d_and_reshape(logits_flattened, chunk_size=10)
 
 loss = loss_counting(counts, preds)
 loss_explicit = loss_counting_explicit(counts, preds)
