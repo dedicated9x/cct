@@ -57,6 +57,19 @@ def get_augs(config: omegaconf.DictConfig, split: str):
     }
     return dict_transforms
 
+def encode_counts(counts):
+    counts = counts.tolist()
+
+    idxs = []
+    for index, value in enumerate(counts):
+        if value != 0:
+            idxs.append(index)
+
+    left_idx, right_idx = idxs
+    left_value = counts[left_idx]
+
+    encoding = 15 * (left_value - 1) + int((left_idx * (11 - left_idx)) / 2 + (right_idx - left_idx))
+    return encoding
 
 class ImagesDataset(torch.utils.data.Dataset):
     def __init__(self, config: omegaconf.DictConfig, split: str):
@@ -100,41 +113,44 @@ class ImagesDataset(torch.utils.data.Dataset):
         row = self.df.iloc[idx]
         image = PIL.Image.open(self.path_images / row["name"])
         x_orig = transforms.ToTensor()(image)
-        y_orig = [row[col_name] for col_name in ['squares', 'circles', 'up', 'right', 'down', 'left']]
+        y_counts_orig = [row[col_name] for col_name in ['squares', 'circles', 'up', 'right', 'down', 'left']]
 
-        x, y = x_orig, y_orig
+        x, y_counts = x_orig, y_counts_orig
 
         # Augmentations
         if torch.rand(1).item() < self.aug.prob_rotation:
             aug_name = ["rotation_90", "rotation_180", "rotation_270"][torch.randint(0, 3, (1,)).item()]
-            x, y = self.dict_transforms[aug_name](x, y)
+            x, y = self.dict_transforms[aug_name](x, y_counts)
         else:
             pass
         if torch.rand(1).item() < self.aug.prob_mirroring:
             aug_name = ["hflip", "vflip"][torch.randint(0, 2, (1,)).item()]
-            x, y = self.dict_transforms[aug_name](x, y)
+            x, y = self.dict_transforms[aug_name](x, y_counts)
         else:
             pass
 
         # Channels 0,1,2 are equal, channel 3 has no information.
         x = x[0].unsqueeze(0)
-        x_orig = x_orig[0].unsqueeze(0)
+        y_counts = torch.tensor(y_counts).to(torch.int32)
 
-        y = torch.tensor(y).to(torch.int32)
-        y_orig = torch.tensor(y_orig).to(torch.int32)
+        y_counts_encoded = encode_counts(y_counts)
 
-        y_labels = (y >= 1).int()
+        y_shapes = (y_counts >= 1).int()
 
         sample = {
             "x": x,
-            "y": y, # TODO zmien na y_counts
-            "y_labels": y_labels,
+            "y_counts": y_counts,
+            "y_shapes": y_shapes,
             "filename": row['name']
         }
 
         if self.visualization_mode:
+            # See
+            x_orig = x_orig[0].unsqueeze(0)
+            y_counts_orig = torch.tensor(y_counts_orig).to(torch.int32)
+
             sample["x_orig"] = x_orig
-            sample["y_orig"] = y_orig
+            sample["y_counts_orig"] = y_counts_orig
 
         return sample
 
@@ -206,7 +222,7 @@ if __name__ == '__main__':
         for idx in range(len(ds)):
             sample = ds[idx]
             pprint_sample(sample)
-            plot_tensor_as_image(sample['x'], sample['x_orig'], sample['y'], sample['y_orig'], sample['filename'])
+            plot_tensor_as_image(sample['x'], sample['x_orig'], sample['y_counts'], sample['y_counts_orig'], sample['filename'])
             # break
 
 

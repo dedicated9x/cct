@@ -28,8 +28,8 @@ def get_trainer(config):
     # Configure loggers
     if config.trainer.wandb:
         logger = pytorch_lightning.loggers.WandbLogger(
-            project=config.main.module_name,
-            name=config.main.module_name.lower(),
+            project=config.module.name,
+            name=config.module.name.lower(),
             save_dir=get_logging_dir(),
         )
     else:

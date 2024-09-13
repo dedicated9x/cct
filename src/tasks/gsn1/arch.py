@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 # Definicja sieci klasyfikującej kształty
 class ShapeClassificationNet(nn.Module):
-    def __init__(self):
+    def __init__(self, out_features: int):
         super(ShapeClassificationNet, self).__init__()
         # Warstwa konwolucyjna 1
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1)
@@ -22,7 +22,8 @@ class ShapeClassificationNet(nn.Module):
 
         # Warstwa w pełni połączona
         self.fc1 = nn.Linear(128 * 3 * 3, 128)
-        self.fc2 = nn.Linear(128, 6)  # 6 klas kształtów
+
+        self.head = nn.Linear(128, out_features)
 
         # Dropout
         self.dropout = nn.Dropout(0.5)
@@ -33,9 +34,10 @@ class ShapeClassificationNet(nn.Module):
         x = self.pool(F.relu(self.bn3(self.conv3(x))))
 
         x = x.view(-1, 128 * 3 * 3)  # Flatten
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.fc2(x)
+
+        x = self.dropout(F.relu(self.fc1(x)))
+
+        x = self.head(x)
 
         # No sigmoid for better stability
         # x = torch.sigmoid(x)
@@ -46,7 +48,7 @@ class ShapeClassificationNet(nn.Module):
 # Funkcja main
 def main():
     # Tworzymy model
-    model = ShapeClassificationNet()
+    model = ShapeClassificationNet(out_features=6)
 
     # Przykładowy losowy batch (batch_size=1, kanał=1, wysokość=28, szerokość=28)
     random_input = torch.randn(32, 1, 28, 28)  # szum

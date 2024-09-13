@@ -8,12 +8,11 @@ from src.tasks.gsn1.arch import ShapeClassificationNet
 from src.tasks.gsn1.dataset import ImagesDataset
 from src.tasks.gsn1.metrics import bcewithlogits_multilabel, convert_topk_to_binary
 
-class Gsn1BaseModule(BaseModule):
+class ShapesModule(BaseModule):
     def __init__(self, config=None):
-        super(Gsn1BaseModule, self).__init__(config)
+        super(ShapesModule, self).__init__(config)
 
-        # TODO wrzuc tu config
-        self.model = ShapeClassificationNet()
+        self.model = ShapeClassificationNet(out_features=6)
         self.loss_train = nn.CrossEntropyLoss()
 
         self.ds_train = ImagesDataset(config, "train")
@@ -23,31 +22,26 @@ class Gsn1BaseModule(BaseModule):
         self.save_hyperparameters(config)
 
     def training_step(self, batch, batch_idx):
-        x, targets = batch['x'], batch['y_labels']
+        x, targets = batch['x'], batch['y_shapes']
         logits = self.model(x)
         loss = bcewithlogits_multilabel(logits, targets)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, targets = batch['x'], batch['y_labels']
+        x, targets = batch['x'], batch['y_shapes']
         logits = self.model(x)
         return {"logits": logits, "targets": targets}
 
     def validation_epoch_end(self, outputs):
-        logits = torch.cat([batch['logits'] for batch in outputs])
-        targets = torch.cat([batch['targets'] for batch in outputs])
-
-        preds = torch.sigmoid(logits)
-        preds_binary = convert_topk_to_binary(preds, 2)
-
-        acc = (preds_binary.int() == targets).all(dim=1).float().mean()
-        print(f"\n Val/Acc1 = {acc:.2f}")
-        self.log("Val/Acc1", acc)
+        self._compute_epoch_end_metrics(outputs, stage='Val')
 
     def test_step(self, batch, batch_idx):
         return self.validation_step(batch, batch_idx)
 
     def test_epoch_end(self, outputs):
+        self._compute_epoch_end_metrics(outputs, stage='Test')
+
+    def _compute_epoch_end_metrics(self, outputs, stage):
         logits = torch.cat([batch['logits'] for batch in outputs])
         targets = torch.cat([batch['targets'] for batch in outputs])
 
@@ -55,6 +49,51 @@ class Gsn1BaseModule(BaseModule):
         preds_binary = convert_topk_to_binary(preds, 2)
 
         acc = (preds_binary.int() == targets).all(dim=1).float().mean()
-        print(f"\n Test/Acc1 = {acc:.2f}")
-        self.log("Test/Acc1", acc)
+        print(f"\n {stage}/Acc1 = {acc:.2f}")
+        self.log(f"{stage}/Acc1", acc)
+
+
+class CountsModule(BaseModule):
+    def __init__(self, config=None):
+        super(CountsModule, self).__init__(config)
+
+        self.model = ShapeClassificationNet(out_features=60)
+        self.loss_train = nn.CrossEntropyLoss()
+
+        self.ds_train = ImagesDataset(config, "train")
+        self.ds_val = ImagesDataset(config, "val")
+        self.ds_test = ImagesDataset(config, "test")
+
+        self.save_hyperparameters(config)
+
+    def training_step(self, batch, batch_idx):
+        x, targets = batch['x'], batch['y_counts']
+        logits = self.model(x)
+        loss = bcewithlogits_multilabel(logits, targets)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, targets = batch['x'], batch['y_shapes']
+        logits = self.model(x)
+        return {"logits": logits, "targets": targets}
+
+    def validation_epoch_end(self, outputs):
+        self._compute_epoch_end_metrics(outputs, stage='Val')
+
+    def test_step(self, batch, batch_idx):
+        return self.validation_step(batch, batch_idx)
+
+    def test_epoch_end(self, outputs):
+        self._compute_epoch_end_metrics(outputs, stage='Test')
+
+    def _compute_epoch_end_metrics(self, outputs, stage):
+        logits = torch.cat([batch['logits'] for batch in outputs])
+        targets = torch.cat([batch['targets'] for batch in outputs])
+
+        preds = torch.sigmoid(logits)
+        preds_binary = convert_topk_to_binary(preds, 2)
+
+        acc = (preds_binary.int() == targets).all(dim=1).float().mean()
+        print(f"\n {stage}/Acc1 = {acc:.2f}")
+        self.log(f"{stage}/Acc1", acc)
 

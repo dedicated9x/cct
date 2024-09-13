@@ -4,15 +4,10 @@ defaults:
   - _self_
 
 main:
-  module_name: Gsn1BaseModule
   is_tested: true
 
-# TODO czy to tez jest pobierane?
-dataset:
-  name: ImagesDataset
-
-#model:
-#  n_outputs: 17
+module:
+  name: ShapesModule
 
 optimizer:
   lr: 0.00001
