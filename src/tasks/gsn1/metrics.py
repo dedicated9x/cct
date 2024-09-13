@@ -1,19 +1,7 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
-
-def bcewithlogits_multilabel_unstable(batch_logits, batch_targets):
-    batch_preds = torch.sigmoid(batch_logits)
-    # print(batch_preds)
-
-    loss_batch = 0
-    for y_hat, y in zip(batch_preds, batch_targets):
-        loss_sample = 0
-        for i in range(6):
-            loss_sample += -(y[i] * torch.log(y_hat[i]) + (1 - y[i]) * torch.log(1 - y_hat[i]))
-        loss_batch += loss_sample
-
-    return loss_batch
 
 def bcewithlogits_multilabel(batch_logits, batch_targets):
     """
@@ -53,32 +41,44 @@ def convert_topk_to_binary(tensor, k):
 
     return binary_tensor
 
+def chunkwise_softmax_2d_and_reshape(x, chunk_size: int):
+    assert abs(x.shape[1] % chunk_size) < 1e-6
+    assert x.dim() == 2
+    batch_size = x.shape[0]
+    logits = logits_flattened.reshape(batch_size, int(x.shape[1] / chunk_size), chunk_size)
+    preds = F.softmax(logits, dim=2)
+    return preds
+
+def loss_counting_explicit(counts, preds):
+    loss_explicit = 0
+    for r, y in zip(counts, preds):
+        loss = 0
+        for i in range(6):
+            for j in range(10):
+                loss += y[i, j] * (j - r[i]) ** 2
+        loss_explicit += loss
+    return loss_explicit
+
+def loss_counting(counts, preds):
+    repeated_counts = counts.unsqueeze(2).repeat(1, 1, 10)
+    j_indices = torch.arange(10).unsqueeze(0).repeat(6, 1)
+    loss = (preds * ((j_indices - repeated_counts) ** 2)).sum()
+    return loss
+
 if __name__ == '__main__':
-    def generate_tensor(height, width, ones_per_row):
-        # Initialize an empty tensor of zeros with the specified dimensions
-        tensor = torch.zeros(height, width, dtype=torch.int32)
-
-        # Loop through each row and randomly assign exactly 'ones_per_row' ones
-        for i in range(height):
-            # Get random indices to place ones in the row
-            ones_indices = torch.randperm(width)[:ones_per_row]
-            # Set the random positions to one
-            tensor[i, ones_indices] = 1
-
-        return tensor
-
     torch.manual_seed(0)
 
-    # batch_size = 3
-    batch_targets = generate_tensor(height=3, width=6, ones_per_row=2)
-    batch_logits = torch.randn(3, 6)
-    print(batch_targets)
+    counts = torch.tensor([[0, 0, 0, 0, 4, 6],
+                           [3, 0, 7, 0, 0, 0],
+                           [0, 0, 8, 0, 2, 0]], dtype=torch.int32)
 
-    loss_batch = bcewithlogits_multilabel_unstable(batch_logits, batch_targets)
-    loss_batch_v2 = bcewithlogits_multilabel(batch_logits, batch_targets)
+    logits_flattened = torch.rand(3, 60)
 
-    print(loss_batch)
-    print(loss_batch_v2)
+    preds = chunkwise_softmax_2d_and_reshape(logits_flattened, chunk_size=10)
+
+    loss = loss_counting(counts, preds)
+    loss_explicit = loss_counting_explicit(counts, preds)
+    a = 2
 
 
 
