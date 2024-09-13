@@ -1,5 +1,6 @@
 import torch
-from src.tasks.gsn1.metrics import bcewithlogits_multilabel
+
+from src.tasks.gsn1.metrics import bcewithlogits_multilabel, chunkwise_softmax_2d_and_reshape, loss_counting
 
 def generate_tensor(height, width, ones_per_row):
     # Initialize an empty tensor of zeros with the specified dimensions
@@ -41,5 +42,31 @@ def test_bcewithlogits_multilabel():
 
     assert abs(loss_batch - loss_batch_unstable) < 1e-6
 
+def loss_counting_explicit(counts, preds):
+    loss_explicit = 0
+    for r, y in zip(counts, preds):
+        loss = 0
+        for i in range(6):
+            for j in range(10):
+                loss += y[i, j] * (j - r[i]) ** 2
+        loss_explicit += loss
+    return loss_explicit
+
+def test_loss_counting():
+    torch.manual_seed(0)
+
+    counts = torch.tensor([[0, 0, 0, 0, 4, 6],
+                           [3, 0, 7, 0, 0, 0],
+                           [0, 0, 8, 0, 2, 0]], dtype=torch.int32)
+
+    logits_flattened = torch.rand(3, 60)
+
+    preds = chunkwise_softmax_2d_and_reshape(x=logits_flattened, chunk_size=10)
+
+    loss = loss_counting(counts, preds)
+    loss_explicit = loss_counting_explicit(counts, preds)
+
+    assert abs(loss - loss_explicit) < 1e-4
+
 if __name__ == "__main__":
-    test_bcewithlogits_multilabel()
+    test_loss_counting()
