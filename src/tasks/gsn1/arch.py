@@ -3,47 +3,47 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# Definicja sieci klasyfikującej kształty
+# Modified ShapeClassificationNet
 class ShapeClassificationNet(nn.Module):
     def __init__(self, out_features: int):
         super(ShapeClassificationNet, self).__init__()
-        # Warstwa konwolucyjna 1
+        # Convolutional Layer 1
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(32)
-        self.pool = nn.MaxPool2d(2, 2)  # warstwa pooling
+        self.pool = nn.MaxPool2d(2, 2)  # Apply pooling only after the first conv layer
 
-        # Warstwa konwolucyjna 2
+        # Convolutional Layer 2
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm2d(64)
 
-        # Warstwa konwolucyjna 3
+        # Convolutional Layer 3
         self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
         self.bn3 = nn.BatchNorm2d(128)
 
-        # Warstwa w pełni połączona
-        self.fc1 = nn.Linear(128 * 3 * 3, 128)
-
+        # Global Average Pooling will replace the fully connected layer
+        # Output Layer
         self.head = nn.Linear(128, out_features)
 
         # Dropout
         self.dropout = nn.Dropout(0.5)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.bn1(self.conv1(x))))
-        x = self.pool(F.relu(self.bn2(self.conv2(x))))
-        x = self.pool(F.relu(self.bn3(self.conv3(x))))
+        # Apply convolutional layers with ReLU activation
+        x = self.pool(F.relu(self.bn1(self.conv1(x))))  # Max pooling after first conv layer
+        x = F.relu(self.bn2(self.conv2(x)))             # No pooling after this layer
+        x = F.relu(self.bn3(self.conv3(x)))             # No pooling after this layer
 
-        x = x.view(-1, 128 * 3 * 3)  # Flatten
+        # Apply Global Average Pooling
+        x = F.adaptive_avg_pool2d(x, (1, 1))  # Reduce spatial dimensions to 1x1
+        x = x.view(x.size(0), -1)             # Flatten to (batch_size, 128)
 
-        x = self.dropout(F.relu(self.fc1(x)))
+        # Apply dropout
+        x = self.dropout(x)
 
+        # Output layer
         x = self.head(x)
 
-        # No sigmoid for better stability
-        # x = torch.sigmoid(x)
-
         return x
-
 
 # Funkcja main
 def main():
@@ -64,5 +64,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# TODO
