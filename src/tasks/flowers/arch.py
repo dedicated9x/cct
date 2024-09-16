@@ -38,7 +38,7 @@ def main():
     import timeit
 
     def _measure_times():
-        model = CctFlower17()
+        model = CctFlower17(n_outputs=17)
         model.to("cuda:0")
         n_repeats = 50
 

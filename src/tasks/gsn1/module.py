@@ -13,6 +13,7 @@ class ShapesModule(BaseModule):
         super(ShapesModule, self).__init__(config)
 
         self.model = ShapeClassificationNet(out_features=6)
+        # TODO to usunac
         self.loss_train = nn.CrossEntropyLoss()
 
         self.ds_train = ImagesDataset(config, "train")
@@ -58,6 +59,7 @@ class CountsModule(BaseModule):
         super(CountsModule, self).__init__(config)
 
         self.model = ShapeClassificationNet(out_features=60)
+        # TODO to usunac
         self.loss_train = nn.CrossEntropyLoss()
 
         self.ds_train = ImagesDataset(config, "train")
@@ -100,3 +102,46 @@ class CountsModule(BaseModule):
         print(f"\n {stage}/Acc1 = {acc:.2f}")
         self.log(f"{stage}/Acc1", acc)
 
+class CountsEncodedModule(BaseModule):
+    def __init__(self, config=None):
+        super(CountsEncodedModule, self).__init__(config)
+
+        self.model = ShapeClassificationNet(out_features=135)
+        self.loss = nn.CrossEntropyLoss()
+
+        self.ds_train = ImagesDataset(config, "train")
+        self.ds_val = ImagesDataset(config, "val")
+        self.ds_test = ImagesDataset(config, "test")
+
+        self.save_hyperparameters(config)
+
+    def training_step(self, batch, batch_idx):
+        x, targets = batch['x'], batch['y_counts_encoded']
+        logits = self.model(x)
+        loss = self.loss(logits, targets)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, targets = batch['x'], batch['y_counts_encoded']
+        logits = self.model(x)
+        return {"logits": logits, "targets": targets}
+
+    def validation_epoch_end(self, outputs):
+        self._compute_epoch_end_metrics(outputs, stage='Val')
+
+    def test_step(self, batch, batch_idx):
+        return self.validation_step(batch, batch_idx)
+
+    def test_epoch_end(self, outputs):
+        self._compute_epoch_end_metrics(outputs, stage='Test')
+
+    def _compute_epoch_end_metrics(self, outputs, stage):
+        logits = torch.cat([batch['logits'] for batch in outputs])
+        targets = torch.cat([batch['targets'] for batch in outputs])
+
+        # preds = chunkwise_softmax_2d_and_reshape(x=logits, chunk_size=10, )
+        # preds_counts = preds.argmax(dim=2)
+        #
+        # acc = (preds_counts.int() == targets).all(dim=1).float().mean()
+        # print(f"\n {stage}/Acc1 = {acc:.2f}")
+        # self.log(f"{stage}/Acc1", acc)

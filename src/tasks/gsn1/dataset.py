@@ -135,12 +135,14 @@ class ImagesDataset(torch.utils.data.Dataset):
 
         y_counts_encoded = encode_counts(y_counts)
 
+        # TODO sprawdzic dtype do tej labelki
         y_shapes = (y_counts >= 1).int()
 
         sample = {
             "x": x,
-            "y_counts": y_counts,
             "y_shapes": y_shapes,
+            "y_counts": y_counts,
+            "y_counts_encoded": torch.tensor(y_counts_encoded),
             "filename": row['name']
         }
 
@@ -208,7 +210,7 @@ if __name__ == '__main__':
 
 
     # Updated _display_dataset function call to pass both y and y_orig
-    @hydra.main(version_base="1.2", config_path="conf", config_name="base")
+    @hydra.main(version_base="1.2", config_path="conf", config_name="00_shapes_base")
     def _display_dataset(config: omegaconf.DictConfig) -> None:
         config.paths.root = str(Path(__file__).parents[3])
         config.dataset.visualization_mode = True

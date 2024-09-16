@@ -1,0 +1,6 @@
+defaults:
+  - 00_shapes_base
+  - _self_
+
+module:
+  name: CountsEncodedModule

@@ -25,14 +25,6 @@ print(f"{targets_sparse=}")
 bce_v1 = nn.BCEWithLogitsLoss(reduction="none")(logits, targets_dense)
 bce_v2 = nn.BCELoss(reduction="none")(torch.sigmoid(logits), targets_dense)
 
-print("\n")
-print(f"{logits=}")
-print(f"{targets_dense=}")
-
 print(f"{bce_v1=}")
 print(f"{bce_v2=}")
-
-# F.binary_cross_entropy()
-a = 2
-# TODO czy softmax dla malych wektorw to sigmoid
 
