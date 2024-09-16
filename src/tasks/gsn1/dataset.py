@@ -120,12 +120,12 @@ class ImagesDataset(torch.utils.data.Dataset):
         # Augmentations
         if torch.rand(1).item() < self.aug.prob_rotation:
             aug_name = ["rotation_90", "rotation_180", "rotation_270"][torch.randint(0, 3, (1,)).item()]
-            x, y = self.dict_transforms[aug_name](x, y_counts)
+            x, y_counts = self.dict_transforms[aug_name](x, y_counts)
         else:
             pass
         if torch.rand(1).item() < self.aug.prob_mirroring:
             aug_name = ["hflip", "vflip"][torch.randint(0, 2, (1,)).item()]
-            x, y = self.dict_transforms[aug_name](x, y_counts)
+            x, y_counts = self.dict_transforms[aug_name](x, y_counts)
         else:
             pass
 

@@ -9,16 +9,13 @@ from src.common.get_trainer import get_trainer
 
 
 # @hydra.main(version_base="1.2", config_path="src/tasks/flowers/conf", config_name="base")
-@hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="00_shapes_base")
+# @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="00_shapes_base")
 # @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="01_counts_base")
-# @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="02_counts_encoded_base")
+@hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="02_counts_encoded_base")
 def main(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
     # config.trainer.wandb = True
-
-    # TODO po drodze zgubilismy accuracy
-    # TODO jednak trzeba zrobic test, sorry
 
     pl.seed_everything(1234)
     # TODO mozna to zrobic jakims hydra.instantiate
