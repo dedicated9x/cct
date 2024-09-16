@@ -30,10 +30,10 @@ class Augmentation:
         return x, y
 
 
-def get_augs(config: omegaconf.DictConfig, split: str):
-    assert split in ["train", "val", "test"]
+def get_aug(name):
+    assert name in ["rotation_90", "rotation_180", "rotation_270", "hflip", "vflip"]
 
-    dict_transforms = {
+    dict_augs = {
         "rotation_90": Augmentation(
             transforms.RandomRotation(degrees=(90, 90)),
             ['squares', 'circles', 'left', 'up', 'right', 'down']
@@ -55,7 +55,7 @@ def get_augs(config: omegaconf.DictConfig, split: str):
             ['squares', 'circles', 'down', 'right', 'up', 'left']
         )
     }
-    return dict_transforms
+    return dict_augs[name]
 
 def encode_counts(counts):
     counts = counts.tolist()
@@ -103,7 +103,6 @@ class ImagesDataset(torch.utils.data.Dataset):
             else:
                 self.df = df_test
 
-        self.dict_transforms = get_augs(config, split)
         self.visualization_mode = config.dataset.visualization_mode
 
     def __len__(self):
@@ -120,12 +119,12 @@ class ImagesDataset(torch.utils.data.Dataset):
         # Augmentations
         if torch.rand(1).item() < self.aug.prob_rotation:
             aug_name = ["rotation_90", "rotation_180", "rotation_270"][torch.randint(0, 3, (1,)).item()]
-            x, y_counts = self.dict_transforms[aug_name](x, y_counts)
+            x, y_counts = get_aug(aug_name)(x, y_counts)
         else:
             pass
         if torch.rand(1).item() < self.aug.prob_mirroring:
             aug_name = ["hflip", "vflip"][torch.randint(0, 2, (1,)).item()]
-            x, y_counts = self.dict_transforms[aug_name](x, y_counts)
+            x, y_counts = get_aug(aug_name)(x, y_counts)
         else:
             pass
 
