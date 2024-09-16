@@ -15,7 +15,7 @@ def main(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
     # config.trainer.wandb = True
-    config.trainer.max_epochs = 3
+    # config.trainer.max_epochs = 3
 
     pl.seed_everything(1234)
     # TODO mozna to zrobic jakims hydra.instantiate
