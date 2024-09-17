@@ -50,8 +50,8 @@ class ShapesModule(BaseModule):
         preds_binary = convert_topk_to_binary(preds, 2)
 
         acc = (preds_binary.int() == targets).all(dim=1).float().mean()
-        print(f"\n {stage}/Acc1 = {acc:.2f}")
-        self.log(f"{stage}/Acc1", acc)
+        print(f"\n {stage}/Acc = {acc:.2f}")
+        self.log(f"{stage}/Acc", acc)
 
 
 class CountsModule(BaseModule):
@@ -99,8 +99,9 @@ class CountsModule(BaseModule):
         preds_counts = preds.argmax(dim=2)
 
         acc = (preds_counts.int() == targets).all(dim=1).float().mean()
-        print(f"\n {stage}/Acc1 = {acc:.2f}")
-        self.log(f"{stage}/Acc1", acc)
+        print(f"\n {stage}/Acc = {acc:.2f}")
+        self.log(f"{stage}/Acc", acc)
+
 
 class CountsEncodedModule(BaseModule):
     def __init__(self, config=None):
@@ -143,5 +144,5 @@ class CountsEncodedModule(BaseModule):
         # preds_counts = preds.argmax(dim=2)
         #
         # acc = (preds_counts.int() == targets).all(dim=1).float().mean()
-        # print(f"\n {stage}/Acc1 = {acc:.2f}")
-        # self.log(f"{stage}/Acc1", acc)
+        # print(f"\n {stage}/Acc = {acc:.2f}")
+        # self.log(f"{stage}/Acc", acc)

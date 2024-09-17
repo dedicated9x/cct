@@ -49,7 +49,7 @@ def get_trainer(config):
         callbacks=callbacks,
         logger=logger,
         num_sanity_val_steps=0,
-        limit_train_batches=config.trainer.limit_train_batches
+        limit_train_batches=config.trainer.limit_train_batches,
     )
 
     return trainer

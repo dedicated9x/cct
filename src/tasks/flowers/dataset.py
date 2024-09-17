@@ -51,6 +51,9 @@ class FlowersDataset(torch.utils.data.Dataset):
         self.df = self.df[mask_dense.astype(bool)].reset_index(drop=True)
         self.transform = get_transform(config, split)
 
+        self.visualization_mode = config.dataset.visualization_mode
+
+
     def get_mat_key(self, role):
         return {
             "train": "trn1",
@@ -72,9 +75,7 @@ class FlowersDataset(torch.utils.data.Dataset):
             "y": torch.tensor(row["label"]).to(torch.float32),
         }
 
-        # TODO zmien lokalnie w configu na False
-        debug = False
-        if debug:
+        if self.visualization_mode:
             x_orig = transforms.ToTensor()(image)
             sample['x_orig'] = x_orig
 
@@ -126,6 +127,7 @@ if __name__ == '__main__':
     @hydra.main(version_base="1.2", config_path="conf", config_name="base")
     def _display_dataset(config: omegaconf.DictConfig) -> None:
         config.paths.root = str(Path(__file__).parents[3])
+        config.dataset.visualization_mode = True
         ds = FlowersDataset(
             config=config,
             split="train"

@@ -5,11 +5,14 @@ defaults:
   - _self_
 
 main:
-  module_name: FlowersModule
   is_tested: true
+
+module:
+  name: FlowersModule
 
 dataset:
   name: FlowersDataset
+  visualization_mode: false
 
 model:
   n_outputs: 17
@@ -24,3 +27,4 @@ trainer:
   monitored_metric:
     name: "Val/Acc1"
     mode: max
+  ckpt_path: null
