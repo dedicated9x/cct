@@ -20,7 +20,7 @@ gsn1/conf/01_counts_base -> 0.26, 0.41, 0.52
 def main(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
-    config.trainer.wandb = True
+    # config.trainer.wandb = True
     config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/lightning_logs/version_2/checkpoints/18-0.90.ckpt"
 
     pl.seed_everything(1234)
