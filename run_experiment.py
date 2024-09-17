@@ -10,6 +10,7 @@ from src.common.get_trainer import get_trainer
 """
 /tmp/wandb_pl_logs/cct/lightning_logs/version_2/checkpoints/18-0.90.ckpt
 flowers/conf/base -> 0.26, 0.50, 0.80
+gsn1/conf/01_counts_base -> 0.26, 0.41, 0.52
 """
 
 # @hydra.main(version_base="1.2", config_path="src/tasks/flowers/conf", config_name="base")
