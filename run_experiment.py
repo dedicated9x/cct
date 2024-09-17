@@ -30,7 +30,7 @@ def main(config: omegaconf.DictConfig) -> None:
     trainer = get_trainer(config=config)
     trainer.fit(
         model=model,
-        # ckpt_path=config.trainer.resume_from_checkpoint
+        ckpt_path=config.trainer.ckpt_path
     )
     if config.main.is_tested:
         trainer.test(
