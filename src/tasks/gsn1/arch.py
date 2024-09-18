@@ -23,6 +23,23 @@ def _create_conv_block_scheme_from_params(
     layers_scheme = list(zip(in_channels, out_channels, add_maxpools))
     return layers_scheme
 
+def _create_fc_block_scheme_from_params(
+    n_fc_layers: int,
+    in_features_first_fc_layer: int,
+    fc_hidden_dim: int,
+    out_features: int
+):
+    in_features = [in_features_first_fc_layer] + [fc_hidden_dim] * (n_fc_layers - 1)
+    out_features = [fc_hidden_dim] * (n_fc_layers - 1) + [out_features]
+    if n_fc_layers > 1:
+        add_dropouts = [False] + [True] * (n_fc_layers - 1)
+    else:
+        add_dropouts = [True]
+    add_relus = [True] * (n_fc_layers - 1) + [False]
+
+    layers_scheme = list(zip(in_features, out_features, add_dropouts, add_relus))
+    return layers_scheme
+
 
 # Modified ShapeClassificationNet
 class ShapeClassificationNet(nn.Module):
@@ -34,7 +51,9 @@ class ShapeClassificationNet(nn.Module):
             n_channels_first_conv_layer: int,
             n_channels_last_conv_layer: int,
             maxpool_placing: str,
-            pooling_method: str
+            pooling_method: str,
+            n_fc_layers: int,
+            fc_hidden_dim: int
     ):
         assert len(input_shape) == 3
         assert n_conv_layers >= 2
@@ -68,7 +87,11 @@ class ShapeClassificationNet(nn.Module):
         else:
             in_features_first_fc_layer = self.conv_block[-1][0].out_channels
 
-        fc_block_scheme = [(128, 6, True, False)]
+        fc_block_scheme = _create_fc_block_scheme_from_params(
+            n_fc_layers, in_features_first_fc_layer,
+            fc_hidden_dim, out_features
+        )
+
         self.fc_block = nn.ModuleList()
         for i, (in_features, out_features, add_dropout, add_relu) in enumerate(fc_block_scheme):
             self.fc_block.append(
@@ -78,7 +101,6 @@ class ShapeClassificationNet(nn.Module):
                     nn.ReLU() if add_relu else nn.Identity(),
                 )
             )
-
 
         # Store params required during `forward` step.
         self.pooling_method = pooling_method
@@ -111,7 +133,9 @@ def main():
         n_channels_first_conv_layer = 32,
         n_channels_last_conv_layer = 128,
         maxpool_placing = "first_conv",
-        pooling_method="adaptive_avg"
+        pooling_method="adaptive_avg",
+        n_fc_layers=1,
+        fc_hidden_dim=None
     )
 
     # Przykładowy losowy batch (batch_size=1, kanał=1, wysokość=28, szerokość=28)

@@ -95,7 +95,9 @@ def test_ShapeClassificationNet():
         n_channels_first_conv_layer = 32,
         n_channels_last_conv_layer = 128,
         maxpool_placing = "first_conv",
-        pooling_method="adaptive_avg"
+        pooling_method="adaptive_avg",
+        n_fc_layers=1,
+        fc_hidden_dim=None
     )
 
 
