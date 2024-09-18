@@ -1,3 +1,5 @@
+from typing import List
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -27,24 +29,26 @@ class ShapeClassificationNet(nn.Module):
     def __init__(
             self,
             out_features: int,
+            input_shape: List[int],
             n_conv_layers: int,
-            n_channels_first_layer: int,
-            n_channels_last_layer: int,
+            n_channels_first_conv_layer: int,
+            n_channels_last_conv_layer: int,
             maxpool_placing: str,
+            pooling_method: str
     ):
+        assert len(input_shape) == 3
         assert n_conv_layers >= 2
         assert maxpool_placing in ["first_conv", "all_conv", None]
+        assert pooling_method in ["adaptive_avg", "fc"]
 
         super(ShapeClassificationNet, self).__init__()
 
+        # Create conv block
         layers_scheme = _create_scheme_from_params(
-            n_conv_layers, n_channels_first_layer,
-            n_channels_last_layer, maxpool_placing
+            n_conv_layers, n_channels_first_conv_layer,
+            n_channels_last_conv_layer, maxpool_placing
         )
-
-
         self.conv_block = nn.ModuleList()
-
         for i, (in_channels, out_channels, add_maxpool) in enumerate(layers_scheme):
             self.conv_block.append(
                 nn.Sequential(
@@ -55,11 +59,14 @@ class ShapeClassificationNet(nn.Module):
                 )
             )
 
-        # Global Average Pooling will replace the fully connected layer
-        # Output Layer
-        self.head = nn.Linear(128, out_features)
+        # Create "pooling" fc layer (neck).
+        if pooling_method == "fc":
+            _x = torch.randn([1] + input_shape)
+            for conv_layer in self.conv_block:
+                _x = conv_layer(_x)
+            conv_block_output_shape = _x.shape[1:]
 
-        # Dropout
+        self.fc1 = nn.Linear(128, out_features)
         self.dropout = nn.Dropout(0.5)
 
     def forward(self, x):
@@ -67,15 +74,13 @@ class ShapeClassificationNet(nn.Module):
         for conv_layer in self.conv_block:
             x = conv_layer(x)
 
-        # Apply Global Average Pooling
-        x = F.adaptive_avg_pool2d(x, (1, 1))  # Reduce spatial dimensions to 1x1
-        x = x.view(x.size(0), -1)             # Flatten to (batch_size, 128)
+        # Apply Global Average Pooling or first fully connected layer
+        x = F.adaptive_avg_pool2d(x, (1, 1))
+        x = x.view(x.size(0), -1)
 
-        # Apply dropout
+        # Apply fully connected layers
         x = self.dropout(x)
-
-        # Output layer
-        x = self.head(x)
+        x = self.fc1(x)
 
         return x
 
@@ -84,10 +89,12 @@ def main():
     # Tworzymy model
     model = ShapeClassificationNet(
         out_features=6,
+        input_shape=[1, 28, 28],
         n_conv_layers=3,
-        n_channels_first_layer = 32,
-        n_channels_last_layer = 128,
-        maxpool_placing = "first_conv"
+        n_channels_first_conv_layer = 32,
+        n_channels_last_conv_layer = 128,
+        maxpool_placing = "first_conv",
+        pooling_method="adaptive_avg"
     )
 
     # Przykładowy losowy batch (batch_size=1, kanał=1, wysokość=28, szerokość=28)
