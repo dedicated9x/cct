@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def _create_scheme_from_params(
+def _create_conv_block_scheme_from_params(
         n_conv_layers: int,
         n_channels_first_layer: int,
         n_channels_last_layer: int,
@@ -44,12 +44,12 @@ class ShapeClassificationNet(nn.Module):
         super(ShapeClassificationNet, self).__init__()
 
         # Create conv block
-        layers_scheme = _create_scheme_from_params(
+        conv_block_scheme = _create_conv_block_scheme_from_params(
             n_conv_layers, n_channels_first_conv_layer,
             n_channels_last_conv_layer, maxpool_placing
         )
         self.conv_block = nn.ModuleList()
-        for i, (in_channels, out_channels, add_maxpool) in enumerate(layers_scheme):
+        for i, (in_channels, out_channels, add_maxpool) in enumerate(conv_block_scheme):
             self.conv_block.append(
                 nn.Sequential(
                     nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, padding=1),
@@ -64,13 +64,23 @@ class ShapeClassificationNet(nn.Module):
             _x = torch.randn([1] + input_shape)
             for conv_layer in self.conv_block:
                 _x = conv_layer(_x)
-            n_channels_first_fc_layer = _x.shape[1:]
+            in_features_first_fc_layer = _x.shape[1:]
         else:
-            n_channels_first_fc_layer = self.conv_block[-1][0].out_channels
+            in_features_first_fc_layer = self.conv_block[-1][0].out_channels
 
-        self.dropout1 = nn.Dropout(0.5)
-        self.fc1 = nn.Linear(128, out_features)
+        fc_block_scheme = [(128, 6, True, False)]
+        self.fc_block = nn.ModuleList()
+        for i, (in_features, out_features, add_dropout, add_relu) in enumerate(fc_block_scheme):
+            self.fc_block.append(
+                nn.Sequential(
+                    nn.Dropout(0.5) if add_dropout else nn.Identity(),
+                    nn.Linear(in_features, out_features),
+                    nn.ReLU() if add_relu else nn.Identity(),
+                )
+            )
 
+
+        # Store params required during `forward` step.
         self.pooling_method = pooling_method
 
     def forward(self, x):
@@ -86,8 +96,8 @@ class ShapeClassificationNet(nn.Module):
             raise NotImplementedError
 
         # Apply fully connected layers
-        x = self.dropout1(x)
-        x = self.fc1(x)
+        for fc_layer in self.fc_block:
+            x = fc_layer(x)
 
         return x
 
