@@ -64,10 +64,14 @@ class ShapeClassificationNet(nn.Module):
             _x = torch.randn([1] + input_shape)
             for conv_layer in self.conv_block:
                 _x = conv_layer(_x)
-            conv_block_output_shape = _x.shape[1:]
+            n_channels_first_fc_layer = _x.shape[1:]
+        else:
+            n_channels_first_fc_layer = self.conv_block[-1][0].out_channels
 
+        self.dropout1 = nn.Dropout(0.5)
         self.fc1 = nn.Linear(128, out_features)
-        self.dropout = nn.Dropout(0.5)
+
+        self.pooling_method = pooling_method
 
     def forward(self, x):
         # Apply convolutional layers
@@ -75,11 +79,14 @@ class ShapeClassificationNet(nn.Module):
             x = conv_layer(x)
 
         # Apply Global Average Pooling or first fully connected layer
-        x = F.adaptive_avg_pool2d(x, (1, 1))
-        x = x.view(x.size(0), -1)
+        if self.pooling_method == "adaptive_avg":
+            x = F.adaptive_avg_pool2d(x, (1, 1))
+            x = x.view(x.size(0), -1)
+        else:
+            raise NotImplementedError
 
         # Apply fully connected layers
-        x = self.dropout(x)
+        x = self.dropout1(x)
         x = self.fc1(x)
 
         return x
