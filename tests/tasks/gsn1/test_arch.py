@@ -90,8 +90,10 @@ def test_ShapeClassificationNet():
     model_original = ShapeClassificationNetOriginal(out_features=6)
     model_refactored = ShapeClassificationNet(
         out_features=6,
-        maxpool_placing="first_conv",
-        n_conv_layers=3
+        n_conv_layers=3,
+        n_channels_first_layer = 32,
+        n_channels_last_layer = 128,
+        maxpool_placing = "first_conv"
     )
 
 
