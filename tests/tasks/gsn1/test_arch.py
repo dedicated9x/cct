@@ -41,10 +41,14 @@ class ShapeClassificationNetOriginal(nn.Module):
         # Convolutional Layer 2
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm2d(64)
+        self.relu2 = nn.ReLU()
+
 
         # Convolutional Layer 3
         self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
         self.bn3 = nn.BatchNorm2d(128)
+        self.relu3 = nn.ReLU()
+
 
         # Global Average Pooling will replace the fully connected layer
         # Output Layer
@@ -56,8 +60,8 @@ class ShapeClassificationNetOriginal(nn.Module):
     def forward(self, x):
         # Apply convolutional layers with ReLU activation
         x = self.pool(self.relu1(self.bn1(self.conv1(x))))  # Max pooling after first conv layer
-        x = F.relu(self.bn2(self.conv2(x)))             # No pooling after this layer
-        x = F.relu(self.bn3(self.conv3(x)))             # No pooling after this layer
+        x = self.relu2(self.bn2(self.conv2(x)))             # No pooling after this layer
+        x = self.relu3(self.bn3(self.conv3(x)))             # No pooling after this layer
 
         # Apply Global Average Pooling
         x = F.adaptive_avg_pool2d(x, (1, 1))  # Reduce spatial dimensions to 1x1

@@ -22,28 +22,26 @@ class ShapeClassificationNet(nn.Module):
         # for i, n_channels in zip(range(n_conv_layers), [32, 64, 128]):
 
 
-        # Convolutional Layer 1
         self.fc1 = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2) if maxpool_placing in ["first_conv", "all_conv"] else nn.Identity(),
+            nn.MaxPool2d(2, 2) if maxpool_placing in ["first_conv", "all_conv"] else nn.Identity()
         )
 
-        # self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1)
-        # self.bn1 = nn.BatchNorm2d(32)
-        # self.pool1 = nn.MaxPool2d(2, 2) if maxpool_placing in ["first_conv", "all_conv"] else nn.Identity()
+        self.fc2 = nn.Sequential(
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2) if maxpool_placing == "all_conv" else nn.Identity()
+        )
 
-        # Convolutional Layer 2
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.bn2 = nn.BatchNorm2d(64)
-        self.pool2 = nn.MaxPool2d(2, 2) if maxpool_placing == "all_conv" else nn.Identity()
-
-
-        # Convolutional Layer 3
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.bn3 = nn.BatchNorm2d(128)
-        self.pool3 = nn.MaxPool2d(2, 2) if maxpool_placing == "all_conv" else nn.Identity()
+        self.fc3 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2) if maxpool_placing == "all_conv" else nn.Identity()
+        )
 
         # Global Average Pooling will replace the fully connected layer
         # Output Layer
@@ -54,10 +52,9 @@ class ShapeClassificationNet(nn.Module):
 
     def forward(self, x):
         # Apply convolutional layers with ReLU activation
-        # x = self.pool1(F.relu(self.bn1(self.conv1(x))))
         x = self.fc1(x)
-        x = self.pool2(F.relu(self.bn2(self.conv2(x))))
-        x = self.pool3(F.relu(self.bn3(self.conv3(x))))
+        x = self.fc2(x)
+        x = self.fc3(x)
 
         # Apply Global Average Pooling
         x = F.adaptive_avg_pool2d(x, (1, 1))  # Reduce spatial dimensions to 1x1
