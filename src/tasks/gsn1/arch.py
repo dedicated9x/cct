@@ -13,8 +13,8 @@ def _create_conv_block_scheme_from_params(
 ):
     out_channels = [min(n_channels_first_layer * 2 ** i, n_channels_last_layer) for i in range(n_conv_layers)]
     in_channels = [1] + out_channels[:-1]
-    if maxpool_placing == "all_conv":
-        add_maxpools = [True] * n_conv_layers
+    if maxpool_placing == "even_convs":
+        add_maxpools = [bool(i % 2) for i in range(n_conv_layers)]
     elif maxpool_placing == "first_conv":
         add_maxpools = [True] + [False] * (n_conv_layers-1)
     else:
@@ -57,7 +57,7 @@ class ShapeClassificationNet(nn.Module):
     ):
         assert len(input_shape) == 3
         assert n_conv_layers >= 2
-        assert maxpool_placing in ["first_conv", "all_conv", None]
+        assert maxpool_placing in ["first_conv", "even_convs", None]
         assert pooling_method in ["adaptive_avg", "fc"]
 
         super(ShapeClassificationNet, self).__init__()
