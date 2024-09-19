@@ -51,11 +51,11 @@ class ShapeClassificationNetOriginal(nn.Module):
 
 
         # Global Average Pooling will replace the fully connected layer
-        # Output Layer
-        self.head = nn.Linear(128, out_features)
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((1, 1))
 
-        # Dropout
+        # Output Layer
         self.dropout = nn.Dropout(0.5)
+        self.head = nn.Linear(128, out_features)
 
     def forward(self, x):
         # Apply convolutional layers with ReLU activation
@@ -64,7 +64,8 @@ class ShapeClassificationNetOriginal(nn.Module):
         x = self.relu3(self.bn3(self.conv3(x)))             # No pooling after this layer
 
         # Apply Global Average Pooling
-        x = F.adaptive_avg_pool2d(x, (1, 1))  # Reduce spatial dimensions to 1x1
+        x = self.adaptive_pool(x)
+
         x = x.view(x.size(0), -1)             # Flatten to (batch_size, 128)
 
         # Apply dropout

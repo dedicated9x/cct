@@ -86,6 +86,7 @@ class ShapeClassificationNet(nn.Module):
             in_features_first_fc_layer = _x.shape[1:]
         else:
             in_features_first_fc_layer = self.conv_block[-1][0].out_channels
+            self.adaptive_pool = nn.AdaptiveAvgPool2d((1, 1))
 
         fc_block_scheme = _create_fc_block_scheme_from_params(
             n_fc_layers, in_features_first_fc_layer,
@@ -112,7 +113,7 @@ class ShapeClassificationNet(nn.Module):
 
         # Apply Global Average Pooling or first fully connected layer
         if self.pooling_method == "adaptive_avg":
-            x = F.adaptive_avg_pool2d(x, (1, 1))
+            x = self.adaptive_pool(x)
             x = x.view(x.size(0), -1)
         else:
             raise NotImplementedError
