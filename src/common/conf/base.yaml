@@ -20,4 +20,4 @@ paths:
   root: ${hydra:runtime.cwd}
   data: ${paths.root}/data
 
-
+# TODO rozpraw sie z tymi sceizkami

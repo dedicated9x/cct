@@ -20,13 +20,7 @@ class ShapesModule(BaseModule):
         self.model = ShapeClassificationNet(
             out_features=6,
             input_shape=[1, 28, 28],
-            n_conv_layers=3,
-            n_channels_first_conv_layer=32,
-            n_channels_last_conv_layer=128,
-            maxpool_placing="first_conv",
-            pooling_method="adaptive_avg",
-            n_fc_layers=1,
-            fc_hidden_dim=None
+            **config.model
         )
         # TODO to usunac
         self.loss_train = nn.CrossEntropyLoss()

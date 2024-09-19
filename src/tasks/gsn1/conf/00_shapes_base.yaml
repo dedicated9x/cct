@@ -1,6 +1,7 @@
 defaults:
   - /../../../common/conf/base@
   - dataset/base
+  - model/base
   - _self_
 
 main:
