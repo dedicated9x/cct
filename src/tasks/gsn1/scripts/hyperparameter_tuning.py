@@ -19,7 +19,7 @@ def _sample_params_variation():
         "n_channels_first_conv_layer": [16, 32, 64],
         "n_channels_last_conv_layer": [64, 128, 256, 512],
         "maxpool_placing": {
-            None: 0.2,
+            "none": 0.2,
             "first_conv": 0.4,
             "even_convs": 0.4
         },
@@ -58,21 +58,22 @@ def sample_params_variation():
         is_valid = _is_valid_variation(variation)
     return variation
 
-for i in range(1000):
-    variation = sample_params_variation()
-    print(i)
+if __name__ == '__main__':
+    for i in range(1000):
+        variation = sample_params_variation()
+        print(i)
 
-    model = ShapeClassificationNet(
-        **variation,
-        out_features=6,
-        input_shape=[1, 28, 28],
-        )
+        model = ShapeClassificationNet(
+            **variation,
+            out_features=6,
+            input_shape=[1, 28, 28],
+            )
 
-    input_size = (32, 1, 28, 28)
-    input_tensor = torch.randn(input_size)
+        input_size = (32, 1, 28, 28)
+        input_tensor = torch.randn(input_size)
 
-    # Forward pass through the model
-    output = model(input_tensor)
+        # Forward pass through the model
+        output = model(input_tensor)
 
-    # Assert the output shape is as expected
-    assert output.shape == torch.Size([32, 6]), f"Unexpected output shape: {output.shape}"
+        # Assert the output shape is as expected
+        assert output.shape == torch.Size([32, 6]), f"Unexpected output shape: {output.shape}"

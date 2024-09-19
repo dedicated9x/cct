@@ -57,7 +57,7 @@ class ShapeClassificationNet(nn.Module):
     ):
         assert len(input_shape) == 3
         assert n_conv_layers >= 2
-        assert maxpool_placing in ["first_conv", "even_convs", None]
+        assert maxpool_placing in ["first_conv", "even_convs", "none"]
         assert pooling_method in ["adaptive_avg", "fc"]
 
         super(ShapeClassificationNet, self).__init__()
