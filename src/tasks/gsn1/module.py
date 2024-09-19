@@ -17,7 +17,17 @@ class ShapesModule(BaseModule):
     def __init__(self, config=None):
         super(ShapesModule, self).__init__(config)
 
-        self.model = ShapeClassificationNet(out_features=6)
+        self.model = ShapeClassificationNet(
+            out_features=6,
+            input_shape=[1, 28, 28],
+            n_conv_layers=3,
+            n_channels_first_conv_layer=32,
+            n_channels_last_conv_layer=128,
+            maxpool_placing="first_conv",
+            pooling_method="adaptive_avg",
+            n_fc_layers=1,
+            fc_hidden_dim=None
+        )
         # TODO to usunac
         self.loss_train = nn.CrossEntropyLoss()
 
@@ -62,6 +72,8 @@ class ShapesModule(BaseModule):
         acc = (preds_binary.int() == targets).all(dim=1).float().mean()
         print(f"\n Test/Acc = {acc:.2f}")
         self.log(f"Test/Acc", acc)
+
+        # TODO to do jakiegos predict powinno pojsc
         self._plot_confusion_matrix(preds_binary, targets)
 
     def _plot_confusion_matrix(self, preds, targets):
