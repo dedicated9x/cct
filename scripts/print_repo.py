@@ -1,7 +1,7 @@
 import os
+import sys
+from pathlib import Path
 
-# List of directories to be excluded
-excluded_dirs = ['.EXCLUDED', '_knowledge']
 
 def print_tree(startpath, indent=0, excluded_dirs=[]):
     """
@@ -49,31 +49,59 @@ def print_tree(startpath, indent=0, excluded_dirs=[]):
                 printed_files[file_ext] += 1
 
 
-def print_file_contents(startpath, excluded_dirs=[]):
-    """
-    Recursively prints the contents of all .py and .yaml files starting from startpath.
-    """
-    for root, dirs, files in os.walk(startpath):
-        # Skip hidden directories and excluded directories
-        dirs[:] = [d for d in dirs if not d.startswith('.') and d not in excluded_dirs]
 
-        for file in files:
-            if file.endswith(".py") or file.endswith(".yaml"):
-                file_path = os.path.join(root, file)
-                try:
-                    with open(file_path, 'r') as f:
-                        print(f"\n{'=' * 40}\n{file_path}\n{'=' * 40}")
-                        print(f.read())
-                except Exception as e:
-                    print(f"Error reading file {file_path}: {e}")
+def print_filtered_files(root_dir, excluded_words):
+    """
+    Searches for .py and .yaml files within root_dir and its subdirectories,
+    excluding any paths that contain any of the excluded_words.
+    For each qualifying file, prints the file path enclosed within separator lines
+    followed by the file's content.
 
+    Args:
+        root_dir (str or Path): The root directory to search.
+        excluded_words (list of str): List of substrings to exclude in file paths.
+    """
+    root_path = Path(root_dir)
+    if not root_path.exists():
+        print(f"Error: The root directory '{root_dir}' does not exist.")
+        sys.exit(1)
+    if not root_path.is_dir():
+        print(f"Error: The path '{root_dir}' is not a directory.")
+        sys.exit(1)
+
+    # Define the file patterns to search for
+    patterns = ('*.py', '*.yaml')
+
+    # Iterate over each pattern
+    for pattern in patterns:
+        # Use rglob to recursively search for files matching the pattern
+        for filepath in root_path.rglob(pattern):
+            filepath_str = str(filepath)
+
+            # Check if any of the excluded words are in the file path
+            if any(excluded_word in filepath_str for excluded_word in excluded_words):
+                continue  # Skip this file
+
+            # Print the separator and file path
+            separator = "=" * 40
+            print(separator)
+            print(filepath_str)
+            print(separator)
+
+            try:
+                # Read and print the file content
+                with filepath.open('r', encoding='utf-8') as file:
+                    content = file.read()
+                    print(content)
+            except Exception as e:
+                print(f"Error reading file '{filepath_str}': {e}")
+            print()  # Add an empty line for better readability
 
 if __name__ == "__main__":
-    # Specify the directory you want to print the tree for
     root_dir = "/home/admin2/Documents/repos/cct"
+    excluded_dirs = ['.EXCLUDED', '_knowledge']
+    excluded_words = ['_knowledge', '.EXCLUDED', 'flowers', 'tests', 'print_repo']
+
     print_tree(root_dir, excluded_dirs=excluded_dirs)
-    print_file_contents(root_dir, excluded_dirs=excluded_dirs)
-    """
-    FlowersDataset
-    test_ShapeClassificationNet
-    """
+    print_filtered_files(root_dir, excluded_words)
+
