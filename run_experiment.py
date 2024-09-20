@@ -26,6 +26,7 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
     # config.trainer.wandb = True
     # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/lightning_logs/version_2/checkpoints/18-0.90.ckpt"
 
+
     pl.seed_everything(1234)
     # TODO mozna to zrobic jakims hydra.instantiate
     module_cls = modulename2cls(name=config.module.name)

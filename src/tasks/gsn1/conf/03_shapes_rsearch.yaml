@@ -1,35 +1,36 @@
-defaults:
-  - 00_shapes_base
-  - _self_
+# TODO to chyba ni musi po niczym dziedziczyc tak naprawde
+#defaults:
+#  - 00_shapes_base
+#  - _self_
 
 random_search:
   distributions:
-    n_conv_layers:
+    model.n_conv_layers:
       - 3
       - 5
       - 7
       - 9
-    n_channels_first_conv_layer:
+    model.n_channels_first_conv_layer:
       - 16
       - 32
       - 64
-    n_channels_last_conv_layer:
+    model.n_channels_last_conv_layer:
       - 64
       - 128
       - 256
       - 512
-    maxpool_placing:
+    model.maxpool_placing:
       none: 0.2
       first_conv: 0.4
       even_convs: 0.4
-    pooling_method:
+    model.pooling_method:
       adaptive_avg: 0.66
       fc: 0.34
-    n_fc_layers:
+    model.n_fc_layers:
       - 1
       - 2
       - 3
-    fc_hidden_dim:
+    model.fc_hidden_dim:
       - 128
       - 512
   n_iters: 100
