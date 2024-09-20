@@ -13,7 +13,43 @@ def _sample_from_distribution(distribution):
     # Return the corresponding element
     return elements[sampled_idx]
 
-def _sample_params_variation():
+def _sample_params_variation(distributions):
+    list_to_uniform = lambda x: {elem: 1 / len(x) for elem in x}
+
+    # Convert all values to distribution format
+    distributions = {
+        k: v if isinstance(v, dict) else list_to_uniform(v)
+        for k, v in distributions.items()
+    }
+
+    variation = {
+        k: _sample_from_distribution(v)
+        for k, v in distributions.items()
+    }
+
+    return variation
+
+"""
+func_module = "src.tasks.gsn1.scripts.hyperparameter_tuning"
+module = importlib.import_module(func_module)
+func = getattr(module, cfg.func_name)
+result = func(variation)
+"""
+def _is_valid_variation(variation):
+    _v = variation
+    if _v["n_conv_layers"] >= 9 and _v['maxpool_placing'] == 'even_convs':
+        return False
+    else:
+        return True
+
+def sample_params_variation(distributions):
+    is_valid = False
+    while not is_valid:
+        variation = _sample_params_variation(distributions)
+        is_valid = _is_valid_variation(variation)
+    return variation
+
+if __name__ == '__main__':
     distributions = {
         "n_conv_layers": [3, 5, 7, 9],
         "n_channels_first_conv_layer": [16, 32, 64],
@@ -30,37 +66,9 @@ def _sample_params_variation():
         "n_fc_layers": [1, 2, 3],
         "fc_hidden_dim": [128, 512]
     }
-    list_to_uniform = lambda x: {elem: 1 / len(x) for elem in x}
 
-    # convert all values to distribution format
-    distributions = {
-        k: v if isinstance(v, dict) else list_to_uniform(v)
-        for k, v in distributions.items()
-    }
-    variation = {
-        k: _sample_from_distribution(v)
-        for k, v in distributions.items()
-    }
-
-    return variation
-
-def _is_valid_variation(variation):
-    _v = variation
-    if _v["n_conv_layers"] >= 9 and _v['maxpool_placing'] == 'even_convs':
-        return False
-    else:
-        return True
-
-def sample_params_variation():
-    is_valid = False
-    while not is_valid:
-        variation = _sample_params_variation()
-        is_valid = _is_valid_variation(variation)
-    return variation
-
-if __name__ == '__main__':
     for i in range(1000):
-        variation = sample_params_variation()
+        variation = sample_params_variation(distributions)
         print(i)
 
         model = ShapeClassificationNet(
