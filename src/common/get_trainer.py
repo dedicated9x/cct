@@ -32,6 +32,9 @@ def get_trainer(config):
             name=config.module.name.lower(),
             save_dir=get_logging_dir(),
         )
+
+        if config.trainer.tag is not None:
+            logger.experiment.tags = logger.experiment.tags + (config.trainer.tag,)
     else:
         logger = pytorch_lightning.loggers.TensorBoardLogger(
             save_dir=get_logging_dir()

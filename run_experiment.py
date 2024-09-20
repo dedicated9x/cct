@@ -23,8 +23,9 @@ def main(config: omegaconf.DictConfig) -> None:
 def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
-    # config.trainer.wandb = True
+    config.trainer.wandb = True
     # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/lightning_logs/version_2/checkpoints/18-0.90.ckpt"
+    # config.trainer.max_epochs = 5
 
 
     pl.seed_everything(1234)

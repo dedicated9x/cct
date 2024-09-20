@@ -21,4 +21,5 @@ trainer:
     name: "Val/Acc"
     mode: max
   ckpt_path: null
+  tag: null
 

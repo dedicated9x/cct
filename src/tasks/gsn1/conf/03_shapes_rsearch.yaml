@@ -42,6 +42,8 @@ random_search:
       - 0.000003
       - 0.00001
       - 0.00003
+    trainer.tag:
+      - rsearch_no_1
   n_iters: 100
   filter:
     _target_: src.tasks.gsn1.utils.rsearch_filter.GSN1RandomSearchFilter
