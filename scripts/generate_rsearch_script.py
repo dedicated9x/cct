@@ -3,10 +3,8 @@ from typing import Callable
 import torch
 import hydra
 import omegaconf
-import importlib
 from pathlib import Path
-
-from src.tasks.gsn1.scripts.hyperparameter_tuning import random_search_filter as gsn1_rsearch_filter
+from  hydra.utils import instantiate
 
 
 def _sample_from_distribution(distribution):
@@ -36,16 +34,16 @@ def _sample_params_variation(distributions):
 
     return variation
 
-def sample_params_variation(distributions):
+def sample_params_variation(distributions, filter_):
     # TODO ten filtr musi leciec z zewnatrz
     is_valid = False
     while not is_valid:
         variation = _sample_params_variation(distributions)
-        is_valid = gsn1_rsearch_filter(variation)
+        is_valid = filter_(variation)
     return variation
 
-def sample_script_line(distributions):
-    dict_variation = sample_params_variation(distributions)
+def sample_script_line(distributions, filter_):
+    dict_variation = sample_params_variation(distributions, filter_)
     str_variation = " ".join([f"{k}={v}" for k, v in dict_variation.items()])
     script_line = f"python run_experiment.py {str_variation}"
     return script_line
@@ -58,7 +56,10 @@ def generate_random_search_script(config: omegaconf.DictConfig) -> None:
 
     list_script_lines = []
     for i in range(config.random_search.n_iters):
-        script_line = sample_script_line(distributions)
+        script_line = sample_script_line(
+            distributions,
+            filter_=instantiate(config.random_search.filter)
+        )
         list_script_lines.append(script_line)
     script_text = " || \n".join(list_script_lines)
     script_text = f"#!/bin/bash\n\n{script_text}"

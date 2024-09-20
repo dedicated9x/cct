@@ -34,3 +34,5 @@ random_search:
       - 128
       - 512
   n_iters: 100
+  filter:
+    _target_: src.tasks.gsn1.utils.rsearch_filter.GSN1RandomSearchFilter
