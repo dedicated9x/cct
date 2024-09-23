@@ -61,7 +61,7 @@ def generate_random_search_script(config: omegaconf.DictConfig) -> None:
             filter_=instantiate(config.random_search.filter)
         )
         list_script_lines.append(script_line)
-    script_text = " || \n".join(list_script_lines)
+    script_text = ";\n".join(list_script_lines)
     script_text = f"#!/bin/bash\n\n{script_text}"
     with open(str(Path(__file__).parent / "run_rsearch.sh"), "w") as outfile:
         outfile.write(script_text)

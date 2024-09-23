@@ -68,7 +68,7 @@ class ShapesModule(BaseModule):
         self.log(f"Test/Acc", acc)
 
         # TODO to do jakiegos predict powinno pojsc
-        self._plot_confusion_matrix(preds_binary, targets)
+        # self._plot_confusion_matrix(preds_binary, targets)
 
     def _plot_confusion_matrix(self, preds, targets):
         # Ensure preds and targets are NumPy arrays
@@ -171,7 +171,11 @@ class CountsEncodedModule(BaseModule):
     def __init__(self, config=None):
         super(CountsEncodedModule, self).__init__(config)
 
-        self.model = ShapeClassificationNet(out_features=135)
+        self.model = ShapeClassificationNet(
+            out_features=135,
+            input_shape=[1, 28, 28],
+            **config.model
+        )
         self.loss = nn.CrossEntropyLoss()
 
         self.ds_train = ImagesDataset(config, "train")
@@ -204,9 +208,6 @@ class CountsEncodedModule(BaseModule):
         logits = torch.cat([batch['logits'] for batch in outputs])
         targets = torch.cat([batch['targets'] for batch in outputs])
 
-        # preds = chunkwise_softmax_2d_and_reshape(x=logits, chunk_size=10, )
-        # preds_counts = preds.argmax(dim=2)
-        #
-        # acc = (preds_counts.int() == targets).all(dim=1).float().mean()
-        # print(f"\n {stage}/Acc = {acc:.2f}")
-        # self.log(f"{stage}/Acc", acc)
+        acc = (logits.argmax(dim=1) == targets).float().mean()
+        print(f"\n {stage}/Acc = {acc:.2f}")
+        self.log(f"{stage}/Acc", acc)

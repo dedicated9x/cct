@@ -49,6 +49,7 @@ def chunkwise_softmax_2d_and_reshape(x, chunk_size: int):
     preds = F.softmax(logits, dim=2)
     return preds
 
+# TODO zapytac preview skad pomysl na taki glupi loss
 def loss_counting(counts, preds, device: str = "cpu"):
     repeated_counts = counts.unsqueeze(2).repeat(1, 1, 10)
     j_indices = torch.arange(10).unsqueeze(0).repeat(6, 1).to(device)
