@@ -6,9 +6,27 @@ import scipy.io
 import omegaconf
 import torch
 import torch.utils.data
+from timm.data import RandAugment
 import timm.data.transforms_factory
 from torchvision import transforms
 
+def _remove_unnecessary_ops(transform):
+    # Access the RandAugment component within the transform pipeline
+    rand_augment = None
+
+    # Find the RandAugment component within the transform pipeline
+    for t in transform.transforms:
+        if isinstance(t, RandAugment):
+            rand_augment = t
+            break
+
+    # Check if RandAugment was found, then modify the ops list
+    if rand_augment is not None:
+        # Filter out 'Invert' and 'Solarize' operations from the ops list
+        rand_augment.ops = [op for op in rand_augment.ops if op.name not in ['Invert', 'SolarizeIncreasing']]
+
+    # Now the transform object no longer contains the 'Invert' and 'SolarizeIncreasing' augmentations
+    return transform
 
 
 def get_transform(config: omegaconf.DictConfig, split: str):
@@ -28,6 +46,8 @@ def get_transform(config: omegaconf.DictConfig, split: str):
         **_dict(preprocessing_params),
         **_dict(aug_params)
     )
+
+    # transform = _remove_unnecessary_ops(transform)
 
     return transform
 
@@ -89,8 +109,6 @@ if __name__ == '__main__':
     from src.common.utils.printing import pprint_sample
 
     # TODO ustal seeda
-    # TODO zrob to w petli.
-    # TODO (wywal augmentacje z kolorami, bo chyba to poprawi)
 
     def visualize_sample(sample, normalization_params: tuple):
         # Convert the tensors `x` and `x_orig` to numpy arrays and transpose to (H, W, C) for visualization
@@ -122,7 +140,10 @@ if __name__ == '__main__':
         axs[1].set_title("Original Image")
         axs[1].axis('off')  # Hide axis
 
-        plt.show()
+        # Display the plot and wait for a key or mouse button press
+        plt.show(block=False)
+        plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
+        plt.close()  # Close the current figure after keypress/mouse click
 
     @hydra.main(version_base="1.2", config_path="conf", config_name="base")
     def _display_dataset(config: omegaconf.DictConfig) -> None:
@@ -132,12 +153,12 @@ if __name__ == '__main__':
             config=config,
             split="train"
         )
-        # for idx in range(len(ds)):
-        sample = ds[0]
-        pprint_sample(sample)
-        visualize_sample(
-            sample,
-            normalization_params=(config.dataset.preprocessing.mean, config.dataset.preprocessing.std)
-        )
+        for idx in range(len(ds)):
+            sample = ds[idx]
+            pprint_sample(sample)
+            visualize_sample(
+                sample,
+                normalization_params=(config.dataset.preprocessing.mean, config.dataset.preprocessing.std)
+            )
 
     _display_dataset()

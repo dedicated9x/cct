@@ -13,8 +13,8 @@ flowers/conf/base -> 0.26, 0.50, 0.80
 gsn1/conf/01_counts_base -> 0.26, 0.41, 0.52
 """
 
-# @hydra.main(version_base="1.2", config_path="src/tasks/flowers/conf", config_name="base")
-@hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="00_shapes_base")
+@hydra.main(version_base="1.2", config_path="src/tasks/flowers/conf", config_name="base")
+# @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="00_shapes_base")
 # @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="01_counts_base")
 # @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="02_counts_encoded_base")
 def main(config: omegaconf.DictConfig) -> None:

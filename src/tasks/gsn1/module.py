@@ -65,8 +65,6 @@ class ShapesModule(BaseModule):
         acc = (preds_binary.int() == targets).all(dim=1).float().mean()
         print(f"\n Test/Acc = {acc:.2f}")
         self.log(f"Test/Acc", acc)
-
-        # TODO to powinno logowac do wandb, a nie na ekran
         self._plot_confusion_matrix(preds_binary, targets)
 
     def _plot_confusion_matrix(self, preds, targets):
