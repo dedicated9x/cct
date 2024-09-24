@@ -16,17 +16,6 @@ class BaseModule(pl.LightningModule):
     def forward(self, x):
         return self.model(x)
 
-    # TODO usun to, bo to w koncu nie takie common, jak by sie moglo wydawac
-    def validation_step(self, batch, batch_idx):
-        x, y = batch['x'], batch['y']
-        y_hat = self(x)
-        return {"y_hat": y_hat, "y": y}
-
-    def test_step(self, batch, batch_idx):
-        x, y = batch['x'], batch['y']
-        y_hat = self(x)
-        return {"y_hat": y_hat, "y": y}
-
     def train_dataloader(self):
         return torch.utils.data.DataLoader(
             self.ds_train,

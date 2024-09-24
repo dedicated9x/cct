@@ -15,15 +15,9 @@ class FlowersModule(BaseModule):
         self.model = CctFlower17(config.model.n_outputs)
         self.loss_train = nn.CrossEntropyLoss()
 
-        if config.dataset.name == "FlowersDataset":
-            cls_dataset = FlowersDataset
-        else:
-            raise NotImplementedError
-
-        # TODO reszta z configu normlanie leci
-        self.ds_train = cls_dataset(config, "train")
-        self.ds_val = cls_dataset(config, "val")
-        self.ds_test = cls_dataset(config, "test")
+        self.ds_train = FlowersDataset(config, "train")
+        self.ds_val = FlowersDataset(config, "val")
+        self.ds_test = FlowersDataset(config, "test")
 
         self.save_hyperparameters(config)
 
@@ -34,12 +28,22 @@ class FlowersModule(BaseModule):
         loss = self.loss_train(y_hat, y)
         return loss
 
+    def validation_step(self, batch, batch_idx):
+        x, y = batch['x'], batch['y']
+        y_hat = self(x)
+        return {"y_hat": y_hat, "y": y}
+
     def validation_epoch_end(self, outputs):
         y_hat = torch.cat([batch['y_hat'] for batch in outputs])
         y = torch.cat([batch['y'] for batch in outputs])
         acc = (y_hat.argmax(dim=1) == y).to(torch.float32).mean()
         print(f"\n Val/Acc1 = {acc:.2f}")
         self.log("Val/Acc1", acc)
+
+    def test_step(self, batch, batch_idx):
+        x, y = batch['x'], batch['y']
+        y_hat = self(x)
+        return {"y_hat": y_hat, "y": y}
 
     def test_epoch_end(self, outputs):
         y_hat = torch.cat([batch['y_hat'] for batch in outputs])

@@ -1,8 +1,4 @@
-# TODO to chyba ni musi po niczym dziedziczyc tak naprawde
-#defaults:
-#  - 00_shapes_base
-#  - _self_
-
+# TODO zrob osobonego configa do logowania outputow
 random_search:
   distributions:
     model.n_conv_layers:

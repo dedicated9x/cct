@@ -22,8 +22,6 @@ class ShapesModule(BaseModule):
             input_shape=[1, 28, 28],
             **config.model
         )
-        # TODO to usunac
-        self.loss_train = nn.CrossEntropyLoss()
 
         self.ds_train = ImagesDataset(config, "train")
         self.ds_val = ImagesDataset(config, "val")
@@ -67,7 +65,7 @@ class ShapesModule(BaseModule):
         print(f"\n Test/Acc = {acc:.2f}")
         self.log(f"Test/Acc", acc)
 
-        # TODO to do jakiegos predict powinno pojsc
+        # TODO to powinno logowac do wandb, a nie na ekran
         # self._plot_confusion_matrix(preds_binary, targets)
 
     def _plot_confusion_matrix(self, preds, targets):
@@ -122,9 +120,11 @@ class CountsModule(BaseModule):
     def __init__(self, config=None):
         super(CountsModule, self).__init__(config)
 
-        self.model = ShapeClassificationNet(out_features=60)
-        # TODO to usunac
-        self.loss_train = nn.CrossEntropyLoss()
+        self.model = ShapeClassificationNet(
+            out_features=60,
+            input_shape=[1, 28, 28],
+            **config.model
+        )
 
         self.ds_train = ImagesDataset(config, "train")
         self.ds_val = ImagesDataset(config, "val")

@@ -134,7 +134,6 @@ class ImagesDataset(torch.utils.data.Dataset):
 
         y_counts_encoded = encode_counts(y_counts)
 
-        # TODO sprawdzic dtype do tej labelki
         y_shapes = (y_counts >= 1).int()
 
         sample = {

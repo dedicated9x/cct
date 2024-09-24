@@ -35,7 +35,6 @@ def _sample_params_variation(distributions):
     return variation
 
 def sample_params_variation(distributions, filter_):
-    # TODO ten filtr musi leciec z zewnatrz
     is_valid = False
     while not is_valid:
         variation = _sample_params_variation(distributions)
