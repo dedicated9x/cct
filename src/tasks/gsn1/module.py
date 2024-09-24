@@ -115,7 +115,6 @@ class ShapesModule(BaseModule):
         plt.show()
 
 
-
 class CountsModule(BaseModule):
     def __init__(self, config=None):
         super(CountsModule, self).__init__(config)

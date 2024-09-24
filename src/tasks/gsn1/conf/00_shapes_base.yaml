@@ -8,7 +8,7 @@ main:
   is_tested: true
 
 module:
-  name: ShapesModule
+  _target_: src.tasks.gsn1.module.ShapesModule
 
 optimizer:
   lr: 0.00001

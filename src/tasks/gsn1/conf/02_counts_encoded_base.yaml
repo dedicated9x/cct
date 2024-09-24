@@ -3,4 +3,4 @@ defaults:
   - _self_
 
 module:
-  name: CountsEncodedModule
+  _target_: src.tasks.gsn1.module.CountsEncodedModule

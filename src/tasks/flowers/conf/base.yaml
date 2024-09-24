@@ -8,7 +8,7 @@ main:
   is_tested: true
 
 module:
-  name: FlowersModule
+  _target_: src.tasks.flowers.module.FlowersModule
 
 dataset:
   name: FlowersDataset
@@ -28,3 +28,4 @@ trainer:
     name: "Val/Acc1"
     mode: max
   ckpt_path: null
+  tag: null

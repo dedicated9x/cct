@@ -26,9 +26,10 @@ def get_trainer(config):
 
     # Configure loggers
     if config.trainer.wandb:
+        module_name = config.module._target_.split(".")[-1]
         logger = pytorch_lightning.loggers.WandbLogger(
-            project=config.module.name,
-            name=config.module.name.lower(),
+            project=module_name,
+            name=module_name.lower(),
             save_dir=get_logging_dir(),
         )
 
