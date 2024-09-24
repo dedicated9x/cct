@@ -5,7 +5,6 @@ import omegaconf
 import pytorch_lightning as pl
 from pathlib import Path
 
-from src.common.dispatch import modulename2cls
 from src.common.get_trainer import get_trainer
 
 """
@@ -25,17 +24,13 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
     config.trainer.wandb = True
-    # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/lightning_logs/version_2/checkpoints/18-0.90.ckpt"
-    # config.trainer.max_epochs = 5
+    # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/ShapesModule/jc5nq9sr/checkpoints/1-0.41.ckpt"
+    # config.trainer.max_epochs = 1
 
 
     pl.seed_everything(1234)
-    # TODO mozna to zrobic jakims hydra.instantiate
-    # module_cls = modulename2cls(name=config.module.name)
-    # module = module_cls(config=config)
 
     module = instantiate(config.module, config)
-
     trainer = get_trainer(config=config)
     trainer.fit(
         model=module,

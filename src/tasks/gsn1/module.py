@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+import wandb
 import matplotlib.pyplot as plt
 from itertools import combinations
 from sklearn.metrics import confusion_matrix
@@ -66,7 +67,7 @@ class ShapesModule(BaseModule):
         self.log(f"Test/Acc", acc)
 
         # TODO to powinno logowac do wandb, a nie na ekran
-        # self._plot_confusion_matrix(preds_binary, targets)
+        self._plot_confusion_matrix(preds_binary, targets)
 
     def _plot_confusion_matrix(self, preds, targets):
         # Ensure preds and targets are NumPy arrays
@@ -83,7 +84,7 @@ class ShapesModule(BaseModule):
         label_to_pair = {idx: pair for idx, pair in enumerate(index_pairs)}
 
         # Symbolic representation of each class
-        symbols = ['⬛', '●', '▲', '▶', '▼', '◀']
+        symbols = ['□', '●', '▲', '▶', '▼', '◀']
         # Create label names using the symbolic representations
         label_names = []
         for pair in index_pairs:
@@ -112,7 +113,13 @@ class ShapesModule(BaseModule):
         plt.xticks(rotation=45, ha='right')
         plt.yticks(rotation=0)
         plt.tight_layout()
-        plt.show()
+
+        # Instead of displaying, log the confusion matrix plot to WandB
+        # Log the figure to WandB as an image
+        wandb.log({"Confusion Matrix": wandb.Image(plt)})
+
+        # Optionally, close the figure to free memory
+        plt.close()
 
 
 class CountsModule(BaseModule):
