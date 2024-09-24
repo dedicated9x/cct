@@ -49,7 +49,8 @@ def sample_script_line(distributions, filter_):
     return script_line
 
 
-@hydra.main(version_base="1.2", config_path="../src/tasks/gsn1/conf", config_name="03_shapes_rsearch")
+# @hydra.main(version_base="1.2", config_path="../src/tasks/gsn1/conf", config_name="03_shapes_rsearch")
+@hydra.main(version_base="1.2", config_path="../src/tasks/gsn1/conf", config_name="04_counts_encoded_rsearch")
 def generate_random_search_script(config: omegaconf.DictConfig) -> None:
     distributions = config.random_search.distributions
     distributions = omegaconf.OmegaConf.to_container(distributions, resolve=True)

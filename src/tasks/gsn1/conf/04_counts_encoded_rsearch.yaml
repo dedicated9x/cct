@@ -1,0 +1,43 @@
+random_search:
+  distributions:
+    model.n_conv_layers:
+      - 5
+      - 7
+      - 9
+    model.n_channels_first_conv_layer:
+      - 16
+      - 32
+      - 64
+    model.n_channels_last_conv_layer:
+      - 64
+      - 128
+      - 256
+      - 512
+    model.maxpool_placing:
+      none: 0.2
+      first_conv: 0.4
+      even_convs: 0.4
+    model.pooling_method:
+      adaptive_avg: 0.66
+      fc: 0.34
+    model.n_fc_layers:
+      - 1
+      - 2
+      - 3
+    model.fc_hidden_dim:
+      - 128
+      - 512
+    trainer.batch_size:
+      - 8
+      - 16
+      - 64
+      - 128
+    optimizer.lr:
+      - 0.000003
+      - 0.00001
+      - 0.00003
+    trainer.tag:
+      - rsearch_no_3
+  n_iters: 75
+  filter:
+    _target_: src.tasks.gsn1.utils.rsearch_filter.GSN1RandomSearchFilter
