@@ -30,7 +30,6 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
 
     pl.seed_everything(1234)
 
-    # TODO jest jakis problem z hydra na nowych envach. Ehh...
     module = instantiate(config.module, config)
     trainer = get_trainer(config=config)
     trainer.fit(
