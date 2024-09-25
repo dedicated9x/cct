@@ -6,6 +6,7 @@ hydra:
 main:
   is_tested: false
 
+# TODO mogloby tu nie byc trainera i optimizera
 trainer:
   device: [0]
   max_epochs: null

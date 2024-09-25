@@ -206,6 +206,7 @@ if __name__ == '__main__':
         plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
         plt.close()  # Close the current figure after keypress/mouse click
 
+        # TODO uprosc to do dwoch axow
 
     # Updated _display_dataset function call to pass both y and y_orig
     @hydra.main(version_base="1.2", config_path="conf", config_name="00_shapes_base")
