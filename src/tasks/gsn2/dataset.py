@@ -12,6 +12,7 @@ import numpy as np
 import torch
 import pickle
 import torch.utils.data
+from pathlib import Path
 
 # DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -149,8 +150,15 @@ class MnistCanvas:
             box.plot_on_ax(ax)
         plt.show()
 
+    def plot_on_ax(self, ax, boxes: Optional[List[MnistBox]] = None):
+        ax.imshow(self.image)
+        boxes = boxes or self.boxes
+        for box in boxes:
+            box.plot_on_ax(ax)
+        # plt.show()
+
 def get_mnist_data():
-    with open('../../../data/gsn2/mnist_data.pkl', 'rb') as f:
+    with open(Path(__file__).parents[3] / "data/gsn2/mnist_data.pkl", 'rb') as f:
         mnist_data = pickle.load(f)
         return mnist_data
 
@@ -191,8 +199,8 @@ class ImagesDataset(torch.utils.data.Dataset):
     def __init__(self, split: str):
         super(ImagesDataset, self).__init__()
         (mnist_x_train, mnist_y_train), (mnist_x_test, mnist_y_test) = get_mnist_data()
-        for x in mnist_x_train, mnist_y_train, mnist_x_test, mnist_y_test:
-            print(type(x), x.shape)
+        # for x in mnist_x_train, mnist_y_train, mnist_x_test, mnist_y_test:
+        #     print(type(x), x.shape)
 
         self.TRAIN_DIGITS = [
             crop_insignificant_values(digit) / 255.0
@@ -218,7 +226,34 @@ class ImagesDataset(torch.utils.data.Dataset):
             raise NotImplementedError
         return mnist_canvas
 
+def get_anchor_grids():
+    a = 2
+
+    return {
+        2: (np.random.rand(6, 2) * 128).astype(int),
+        3: (np.random.rand(6, 2) * 128).astype(int),
+        4: (np.random.rand(6, 2) * 128).astype(int)
+    }
+
 if __name__ == '__main__':
     ds = ImagesDataset(split="train")
-    mnist_canvas = ds[0]
-    mnist_canvas.plot()
+    great_number = 100
+    for i in range(great_number):
+        mnist_canvas = ds[i]
+
+        fig, ax = plt.subplots()
+        mnist_canvas.plot_on_ax(ax)
+
+        anchor_grids = get_anchor_grids()
+        for anchor_grid, color in zip(
+            anchor_grids.values(),
+            ["yellow", "orange", "red"]
+        ):
+            ax.scatter(anchor_grid[:, 0], anchor_grid[:, 1], color=color)
+
+        plt.show()
+
+        # TODO wyciagnij axa z tad
+
+        plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
+        plt.close()  # Close the current figure after keypress/mouse click
