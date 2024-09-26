@@ -1,23 +1,36 @@
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
-from src.tasks.gsn2.dataset import ImagesDataset, get_mnist_data, crop_insignificant_values
-
+import pandas as pd
 import numpy as np
+from src.tasks.gsn2.dataset import ImagesDataset
 
-ds = ImagesDataset(split="train")
-xs = [ds.TRAIN_DIGITS[i].shape[0] for i in range(10000)]
-ys = [ds.TRAIN_DIGITS[i].shape[1] for i in range(10000)]
-show_limit = 5000
 
-fig, ax = plt.subplots(1, 1)
+def plot_sizes_with_counts():
+    # Assuming xs and ys are already defined
+    ds = ImagesDataset(split="train")
+    xs = [ds.TRAIN_DIGITS[i].shape[0] for i in range(10000)]
+    ys = [ds.TRAIN_DIGITS[i].shape[1] for i in range(10000)]
 
-# Create scatter plot
-ax.scatter(xs[:show_limit], ys[:show_limit])
-# ax.scatter(ys[:show_limit], xs[:show_limit])
+    # Prepare the result as a series of tuples
+    result = np.column_stack((xs, ys))
+    series_of_tuples = pd.Series([tuple(row) for row in result])
 
-# Add titles and labels
-ax.set_xlabel('x')
-ax.set_ylabel('y')
+    # Get value counts of each tuple
+    value_counts = series_of_tuples.value_counts()
 
-# Show the plot
-plt.show()
+    fig, ax = plt.subplots()
+
+    # Plot each unique (x, y) pair and annotate with its count
+    for (x, y), count in value_counts.items():
+        ax.scatter(x, y)
+        ax.annotate(str(count), (x, y), textcoords="offset points", xytext=(0, 5), ha='center')
+
+    # Add titles and labels
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+
+    # Show the plot
+    plt.show()
+
+
+plot_sizes_with_counts()

@@ -227,13 +227,27 @@ class ImagesDataset(torch.utils.data.Dataset):
         return mnist_canvas
 
 def get_anchor_grids():
-    a = 2
+    k_range = [2, 3, 4]
+    anchor_grids = {k: [] for k in k_range}
 
-    return {
-        2: (np.random.rand(6, 2) * 128).astype(int),
-        3: (np.random.rand(6, 2) * 128).astype(int),
-        4: (np.random.rand(6, 2) * 128).astype(int)
-    }
+    for k in k_range:
+        m_max = int(128 / 2 ** k) - 1
+        n_max = m_max
+        for m in range(m_max + 1):
+            for n in range(n_max + 1):
+                new_x = m * 2 ** k + 2 ** (k-1)
+                new_y = n * 2 ** k + 2 ** (k-1)
+                anchor_grids[k].append((new_x, new_y))
+
+    anchor_grids = {k: np.array(v) for k, v in anchor_grids.items()}
+    return anchor_grids
+
+    #
+    # return {
+    #     2: (np.random.rand(6, 2) * 128).astype(int),
+    #     3: (np.random.rand(6, 2) * 128).astype(int),
+    #     4: (np.random.rand(6, 2) * 128).astype(int)
+    # }
 
 if __name__ == '__main__':
     ds = ImagesDataset(split="train")
@@ -249,7 +263,7 @@ if __name__ == '__main__':
             anchor_grids.values(),
             ["yellow", "orange", "red"]
         ):
-            ax.scatter(anchor_grid[:, 0], anchor_grid[:, 1], color=color)
+            ax.scatter(anchor_grid[:, 0], anchor_grid[:, 1], color=color, s=3)
 
         plt.show()
 
