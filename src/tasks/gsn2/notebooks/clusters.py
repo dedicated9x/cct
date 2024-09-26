@@ -75,7 +75,7 @@ def kmeans(boxes, k, dist=np.median, max_iter=300):
 
 
 # Ustawienie k, liczby klastrów
-k = 4  # Możesz dostosować tę wartość
+k = 5  # Możesz dostosować tę wartość
 
 # Wykonanie klasteryzacji k-średnich
 clusters, nearest_clusters = kmeans(boxes, k)
