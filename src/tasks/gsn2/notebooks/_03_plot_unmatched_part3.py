@@ -45,7 +45,10 @@ class RandomMnistBoxSet:
             if not is_above_threshold
         ]
 
+        self.anchor_set = anchor_set
         self.list_nonmatched = list_nonmatched
+
+
 
     def analyse_unmatched(self):
         # Define a function to calculate the anchor size as a tuple
@@ -54,16 +57,29 @@ class RandomMnistBoxSet:
 
         df = pd.DataFrame({'MnistBox': self.list_nonmatched})
         df['Size'] = df['MnistBox'].apply(_calculate_size)
+        df = df[df['Size'].apply(lambda x: x[0] == 19)]
+        df['Center'] = df['MnistBox'].apply(lambda x: x.center)
+
+        xs = df['Center'].apply(lambda x: x[0]).tolist()
+        ys = df['Center'].apply(lambda x: x[1]).tolist()
 
         fig, ax = plt.subplots(1, 1)
         ax.imshow(np.zeros((128, 128)))
+        ax.scatter(ys, xs, s=3)
+
+        self.anchor_set.grid.plot_on_ax(ax, color='red')
+        # for box in self.list_nonmatched:
+        #     box.plot_on_ax(ax)
+
+        plt.show()
+
+
+
+    def plot_next_unmatched(self, anchor_set: AnchorSet):
         for box in self.list_nonmatched:
-            box.plot_on_ax(ax)
-
-
-    def plot_next_unmatched(self):
-        # TODO trzeba to zrobic, aby miec pewnosc, ze nie dzieje sie tu jakichs totalny syf
-        raise NotImplementedError
+            if box.size != (19, 19):
+                continue
+            anchor_set.display_all_anchors_in_loop(divisor=3, aux_box=box)
 
 
 if __name__ == '__main__':
@@ -77,4 +93,6 @@ if __name__ == '__main__':
     box_set = RandomMnistBoxSet(1000)
     anchor_set = AnchorSet(anchor_sizes, k_grid=3)
     box_set.match_with_anchorset(anchor_set, iou_threshold=0.5)
+
     box_set.analyse_unmatched()
+    # box_set.plot_next_unmatched(anchor_set)

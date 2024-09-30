@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
@@ -41,13 +41,15 @@ class AnchorSet:
             list_mnistboxes.append(mnistbox)
 
         self.anchor_sizes = anchor_sizes
+        self.grid = grid
         self.list_mnistboxes = list_mnistboxes
 
-    def present_anchors(
+    def plot_anchor_subset(
             self,
             anchor_size: Tuple[int, int],
             divisor: int,
-            remainder: int
+            remainder: int,
+            aux_box: Optional[MnistBox] = None
     ) -> None:
         assert remainder < divisor
 
@@ -73,7 +75,21 @@ class AnchorSet:
         ax.imshow(bg)
         for box in list_mnistboxes:
             box.plot_on_ax(ax, plot_text=False)
+        if aux_box is not None:
+            aux_box.plot_on_ax(ax, color="yellow")
         ax.set_xlabel(f"{anchor_size}, R={remainder} (D={divisor})")
+
+    def display_all_anchors_in_loop(
+            self,
+            divisor: int,
+            aux_box: Optional[MnistBox] = None
+    ):
+        for anchor_size in self.anchor_sizes:
+            for remainder in range(divisor):
+                self.plot_anchor_subset(anchor_size, divisor, remainder, aux_box)
+
+                plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
+                plt.close()  #
 
 
 if __name__ == '__main__':
@@ -85,9 +101,5 @@ if __name__ == '__main__':
         (19, 5),
     ]
     anchor_set = AnchorSet(anchor_sizes, k_grid=3)
-    for anchor_size in anchor_sizes:
-        for remainder in [0, 1, 2]:
-            anchor_set.present_anchors(anchor_size, divisor=3, remainder=remainder)
-
-            plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
-            plt.close()  # Close the current figure after keypress/mouse click
+    box = MnistBox(5, 51, 24, 62, 3)
+    anchor_set.display_all_anchors_in_loop(divisor=3, aux_box=box)

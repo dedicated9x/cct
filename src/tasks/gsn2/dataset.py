@@ -45,6 +45,17 @@ class MnistBox:
     def y_diff(self):
         return self.y_max - self.y_min
 
+    @property
+    def size(self):
+        return (self.x_diff, self.y_diff)
+
+    @property
+    def center(self):
+        return (
+            self.x_min + 0.5 * self.x_diff,
+            self.y_min + 0.5 * self.y_diff,
+        )
+
     def __repr__(self):
         return f'Mnist Box: x_min = {self.x_min},' + \
             f' x_max = {self.x_max}, y_min = {self.y_min},' + \
