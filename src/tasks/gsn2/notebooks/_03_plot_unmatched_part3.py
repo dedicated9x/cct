@@ -48,6 +48,8 @@ class RandomMnistBoxSet:
         self.anchor_set = anchor_set
         self.list_nonmatched = list_nonmatched
 
+        return list_nonmatched
+
 
 
     def analyse_unmatched(self):
@@ -73,8 +75,6 @@ class RandomMnistBoxSet:
 
         plt.show()
 
-
-
     def plot_next_unmatched(self, anchor_set: AnchorSet):
         for box in self.list_nonmatched:
             if box.size != (19, 19):
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         (19, 5),
     ]
     box_set = RandomMnistBoxSet(1000)
-    anchor_set = AnchorSet(anchor_sizes, k_grid=3)
+    anchor_set = AnchorSet(anchor_sizes, k_grid=2)
     box_set.match_with_anchorset(anchor_set, iou_threshold=0.5)
 
     box_set.analyse_unmatched()

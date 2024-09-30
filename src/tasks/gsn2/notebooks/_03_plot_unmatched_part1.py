@@ -41,13 +41,14 @@ class Grid:
 if __name__ == '__main__':
     bg = np.zeros((128, 128))
 
-    fig, ax = plt.subplots()
-    ax.imshow(bg)
+    fig, axes = plt.subplots(1, 3)
 
-    for k, color in zip(
+    for k, color, ax in zip(
         [2, 3, 4],
-        ["yellow", "orange", "red"]
-
+        ["yellow", "orange", "red"],
+        axes
     ):
         grid = Grid(k)
+        ax.imshow(bg)
         grid.plot_on_ax(ax, color=color)
+        ax.set_xlabel(f"k={k}")

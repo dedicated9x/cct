@@ -1,3 +1,5 @@
+# TODO napisz to samemu
+
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
 from src.tasks.gsn2.dataset import ImagesDataset, get_mnist_data, crop_insignificant_values
@@ -6,23 +8,6 @@ import numpy as np
 import numpy as np
 import matplotlib.pyplot as plt
 
-ds = ImagesDataset(split="train")
-xs = [ds.TRAIN_DIGITS[i].shape[0] for i in range(10000)]
-ys = [ds.TRAIN_DIGITS[i].shape[1] for i in range(10000)]
-
-
-
-# Zakładamy, że xs i ys są już zdefiniowane
-# Przykładowo:
-# xs = [19, 19, 19, 19, 19, 17, 19, 19, 19, 19, 19, 13, 19, 19, 19]
-# ys = [19, 16, 19, 13, 14, 19, 7, 17, 4, 17, 13, 19, 19, 15, 4]
-
-# Konwersja xs i ys do tablic numpy
-xs = np.array(xs)
-ys = np.array(ys)
-
-# Łączenie xs i ys w jedną tablicę o kształcie (n_samples, 2)
-boxes = np.stack((xs, ys), axis=1)
 
 
 def iou(box, clusters):
@@ -73,28 +58,39 @@ def kmeans(boxes, k, dist=np.median, max_iter=300):
         last_clusters = nearest_clusters
     return clusters, nearest_clusters
 
+if __name__ == '__main__':
+    ds = ImagesDataset(split="train")
+    xs = [ds.TRAIN_DIGITS[i].shape[0] for i in range(10000)]
+    ys = [ds.TRAIN_DIGITS[i].shape[1] for i in range(10000)]
 
-# Ustawienie k, liczby klastrów
-k = 5  # Możesz dostosować tę wartość
+    # Konwersja xs i ys do tablic numpy
+    xs = np.array(xs)
+    ys = np.array(ys)
 
-# Wykonanie klasteryzacji k-średnich
-clusters, nearest_clusters = kmeans(boxes, k)
+    # Łączenie xs i ys w jedną tablicę o kształcie (n_samples, 2)
+    boxes = np.stack((xs, ys), axis=1)
 
-# Wykres punktowy klastrów
-plt.figure(figsize=(10, 6))
-colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k', 'orange', 'purple', 'brown']  # Dodaj więcej kolorów, jeśli k > 10
-for i in range(k):
-    cluster_boxes = boxes[nearest_clusters == i]
-    plt.scatter(cluster_boxes[:, 0], cluster_boxes[:, 1], c=colors[i % len(colors)], label=f'Klaster {i}')
-    plt.scatter(clusters[i][0], clusters[i][1], c='black', marker='x')
-    plt.annotate(f'[{clusters[i][0]:.1f}, {clusters[i][1]:.1f}]',
-                 (clusters[i][0], clusters[i][1]),
-                 textcoords="offset points", xytext=(0, 10), ha='center', color='black')
-plt.xlabel('Szerokość')
-plt.ylabel('Wysokość')
-plt.title('Klasteryzacja Anchor Boxes')
-plt.legend()
-plt.grid(True)
-plt.show()
+    # Ustawienie k, liczby klastrów
+    k = 5  # Możesz dostosować tę wartość
+
+    # Wykonanie klasteryzacji k-średnich
+    clusters, nearest_clusters = kmeans(boxes, k)
+
+    # Wykres punktowy klastrów
+    plt.figure(figsize=(10, 6))
+    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k', 'orange', 'purple', 'brown']  # Dodaj więcej kolorów, jeśli k > 10
+    for i in range(k):
+        cluster_boxes = boxes[nearest_clusters == i]
+        plt.scatter(cluster_boxes[:, 0], cluster_boxes[:, 1], c=colors[i % len(colors)], label=f'Klaster {i}')
+        plt.scatter(clusters[i][0], clusters[i][1], c='black', marker='x')
+        plt.annotate(f'[{clusters[i][0]:.1f}, {clusters[i][1]:.1f}]',
+                     (clusters[i][0], clusters[i][1]),
+                     textcoords="offset points", xytext=(0, 10), ha='center', color='black')
+    plt.xlabel('Szerokość')
+    plt.ylabel('Wysokość')
+    plt.title('Klasteryzacja Anchor Boxes')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 

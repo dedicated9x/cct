@@ -12,7 +12,7 @@ import pandas as pd
 
 class AnchorSet:
     def __init__(self, anchor_sizes: List[Tuple], k_grid: int):
-        grid = Grid(k=3)
+        grid = Grid(k=k_grid)
 
         n_grid_centers = grid.grid_flattened.shape[0]
         n_anchor_sizes = len(anchor_sizes)
