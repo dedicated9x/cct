@@ -9,7 +9,9 @@ import torch
 import pandas as pd
 
 class AnchorSet:
-    def __init__(self, anchor_sizes: List[Tuple], grid: Grid):
+    def __init__(self, anchor_sizes: List[Tuple], k_grid: int):
+        grid = Grid(k=3)
+
         n_grid_centers = grid.grid_flattened.shape[0]
         n_anchor_sizes = len(anchor_sizes)
 
@@ -57,7 +59,10 @@ class AnchorSet:
             bg = np.zeros((128, 128))
             ax.imshow(bg)
             for box in list_mnistboxes:
-                box.plot_on_ax(ax, plot_text=False)
+                box.plot_on_ax(
+                    ax,
+                    plot_text=False
+                )
             ax.set_xlabel(str(anchor_size))
 
 
@@ -69,5 +74,5 @@ if __name__ == '__main__':
         (19, 11),
         (19, 5),
     ]
-    anchor_grid = AnchorSet(anchor_sizes, grid=Grid(k=3))
-    anchor_grid.present_anchors()
+    anchor_set = AnchorSet(anchor_sizes, k_grid=3)
+    anchor_set.present_anchors()
