@@ -21,7 +21,7 @@ class Grid:
         assert not np.any(grid_as_tensor == None)
         grid_as_tensor = torch.Tensor(np.array(grid_as_tensor, dtype=int))
 
-        # Flattening in safety way.
+        # 1st flattening here.
         grid_flattened = grid_as_tensor.flatten(start_dim=0, end_dim=1)
 
         self.size = size

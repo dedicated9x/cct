@@ -16,6 +16,12 @@ from pathlib import Path
 
 # DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+def _divide_number(n):
+    if n % 2 == 0:
+        return n // 2, n // 2
+    else:
+        return n // 2 + 1, n // 2
+
 class MnistBox:
     def __init__(
             self,
@@ -44,7 +50,12 @@ class MnistBox:
             f' x_max = {self.x_max}, y_min = {self.y_min},' + \
             f' y_max = {self.y_max}. Class = {self.class_nb}'
 
-    def plot_on_ax(self, ax, color: Optional[str] = 'r'):
+    def plot_on_ax(
+            self,
+            ax,
+            color: Optional[str] = 'r',
+            plot_text: Optional[bool] = True
+    ):
         ax.add_patch(
             patches.Rectangle(
                 (self.y_min, self.x_min),
@@ -55,14 +66,18 @@ class MnistBox:
                 facecolor='none',
             )
         )
-        ax.text(
-            self.y_min,
-            self.x_min,
-            str(self.class_nb),
-            bbox={"facecolor": color, "alpha": 0.4},
-            clip_box=ax.clipbox,
-            clip_on=True,
-        )
+        if plot_text:
+            ax.text(
+                self.y_min,
+                self.x_min,
+                str(self.class_nb),
+                bbox={"facecolor": color, "alpha": 0.4},
+                clip_box=ax.clipbox,
+                clip_on=True,
+            )
+        else:
+            pass
+
 
     @property
     def area(self):
@@ -76,6 +91,29 @@ class MnistBox:
             y_max=min(self.y_max, other_box.y_max),
         )
         return aux_box.area / (self.area + other_box.area - aux_box.area)
+
+
+
+    @classmethod
+    def from_size_and_center(
+            cls,
+            center_x: int,
+            center_y: int,
+            size_x: int,
+            size_y: int,
+            class_nb: Optional[int] = None,
+    ):
+        # TODO tutaj moze byc problem z ujemnymi, ale trzeba to handlowac jakos inaczej
+        size_x_left, size_x_right = _divide_number(size_x)
+        size_y_left, size_y_right = _divide_number(size_y)
+
+        return cls(
+            x_min=center_x - size_x_left,
+            y_min=center_y - size_y_left,
+            x_max=center_x + size_x_right,
+            y_max=center_y + size_y_right,
+        )
+
 
 class MnistCanvas:
     def __init__(
@@ -141,14 +179,6 @@ class MnistCanvas:
             image=np.zeros(size),
             boxes=[],
         )
-
-    def plot(self, boxes: Optional[List[MnistBox]] = None):
-        fig, ax = plt.subplots()
-        ax.imshow(self.image)
-        boxes = boxes or self.boxes
-        for box in boxes:
-            box.plot_on_ax(ax)
-        plt.show()
 
     def plot_on_ax(self, ax, boxes: Optional[List[MnistBox]] = None):
         ax.imshow(self.image)
