@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
 
@@ -41,7 +43,14 @@ class AnchorSet:
         self.anchor_sizes = anchor_sizes
         self.list_mnistboxes = list_mnistboxes
 
-    def present_anchors(self) -> None:
+    def present_anchors(
+            self,
+            anchor_size: Tuple[int, int],
+            divisor: int,
+            remainder: int
+    ) -> None:
+        assert remainder < divisor
+
         # Define a function to calculate the anchor size as a tuple
         def _calculate_anchor_size(item):
             return (item.x_max - item.x_min, item.y_max - item.y_min)
@@ -50,20 +59,21 @@ class AnchorSet:
         df['Anchor Size'] = df['MnistBox'].apply(_calculate_anchor_size)
         grouped_dict = df.groupby('Anchor Size')['MnistBox'].apply(list).to_dict()
 
-        fig, axes = plt.subplots(2, (len(self.anchor_sizes) + 1) // 2, figsize=(10, 5))
-        for anchor_size, ax in zip(
-            grouped_dict.keys(),
-            axes.flatten()[:len(grouped_dict)]
-        ):
-            list_mnistboxes = grouped_dict[anchor_size]
-            bg = np.zeros((128, 128))
-            ax.imshow(bg)
-            for box in list_mnistboxes:
-                box.plot_on_ax(
-                    ax,
-                    plot_text=False
-                )
-            ax.set_xlabel(str(anchor_size))
+        fig, ax = plt.subplots(1, 1)
+
+        # Filtering step 1: by anchor size
+        list_mnistboxes = grouped_dict[anchor_size]
+        # Filtering step 2: by remainder
+        list_mnistboxes = [
+            elem for idx, elem in enumerate(list_mnistboxes)
+            if idx % divisor == remainder
+        ]
+
+        bg = np.zeros((128, 128))
+        ax.imshow(bg)
+        for box in list_mnistboxes:
+            box.plot_on_ax(ax, plot_text=False)
+        ax.set_xlabel(f"{anchor_size}, R={remainder} (D={divisor})")
 
 
 if __name__ == '__main__':
@@ -75,4 +85,9 @@ if __name__ == '__main__':
         (19, 5),
     ]
     anchor_set = AnchorSet(anchor_sizes, k_grid=3)
-    anchor_set.present_anchors()
+    for anchor_size in anchor_sizes:
+        for remainder in [0, 1, 2]:
+            anchor_set.present_anchors(anchor_size, divisor=3, remainder=remainder)
+
+            plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
+            plt.close()  # Close the current figure after keypress/mouse click
