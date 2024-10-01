@@ -177,7 +177,7 @@ class MnistCanvas:
         )
         return True
 
-    def get_torch_tensor(self, device) -> torch.Tensor:
+    def get_torch_tensor(self, device: Optional[str] = "cpu") -> torch.Tensor:
         np_image = self.image.astype('float32')
         np_image = np_image.reshape(
             (1, 1, self.image.shape[0], self.image.shape[1])
