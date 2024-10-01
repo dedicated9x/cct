@@ -4,8 +4,21 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+from  pathlib import Path
 from torchvision.models.resnet import ResNet, BasicBlock, load_state_dict_from_url
-from src.tasks.gsn2.dataset import ImagesDataset
+from src.tasks.gsn2.dataset import ImagesDataset, MnistBox
+
+class DigitDetectionModelOutput:
+
+    def __init__(
+        self,
+        anchors: List[MnistBox],
+        classification_output: torch.Tensor,
+        box_regression_output: torch.Tensor,
+    ):
+        self.anchors = anchors
+        self.classification_output = classification_output
+        self.box_regression_output = box_regression_output
 
 # Modified ShapeClassificationNet
 class Head(nn.Module):
@@ -147,8 +160,12 @@ if __name__ == '__main__':
         )
         model.eval()
         output1 = model(_x)
-        print(output1["classification_output"].shape)
-        print(output1["box_regression_output"].shape)
+
+        # Check if same as before
+        path_file = Path(__file__).parents[3] / ".EXCLUDED/outputs/tensor.pt"
+        # torch.save(output1["classification_output"], path_file)
+        assert (torch.load(path_file) == output1["classification_output"]).all().item()
+
 
 # TODO test na backbone (ponizej)
 

@@ -8,17 +8,7 @@ from src.tasks.gsn2.dataset import MnistBox, MnistCanvas, ImagesDataset
 from src.tasks.gsn2.anchor_set import AnchorSet
 
 
-class DigitDetectionModelOutput:
 
-    def __init__(
-        self,
-        anchors: List[MnistBox],
-        classification_output: torch.Tensor,
-        box_regression_output: torch.Tensor,
-    ):
-        self.anchors = anchors
-        self.classification_output = classification_output
-        self.box_regression_output = box_regression_output
 
 
 class DigitDetectionModelTarget:
