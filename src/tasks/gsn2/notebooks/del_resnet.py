@@ -21,10 +21,14 @@ class MyNet32(ResNet):
         self.scale_factor = 2 ** (n_layers - 1)
         # TODO opcja z mode='nearest'
         self.scale_mode = "bilinear"
+        self.n_filters = 64 * self.scale_factor
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x.repeat(1, 3, 1, 1)
-        x = F.interpolate(x, scale_factor=self.scale_factor, mode=self.scale_mode, align_corners=False)
+        if self.scale_factor > 1:
+            x = F.interpolate(x, scale_factor=self.scale_factor, mode=self.scale_mode, align_corners=False)
+        else:
+            pass
 
         x = self.conv1(x)
         x = self.bn1(x)
@@ -32,44 +36,26 @@ class MyNet32(ResNet):
         x = self.maxpool(x)
 
         x = self.layer1(x) # 1
-        # x = self.layer2(x) # 2
-        # x = self.layer3(x) # 4
-        # x = self.layer4(x) # 8
+        if self.n_layers >= 2:
+            x = self.layer2(x) # 2
+        if self.n_layers >= 3:
+            x = self.layer3(x) # 2
+        if self.n_layers >= 4:
+            x = self.layer4(x) # 2
         return x
 
-torch.manual_seed(42)
-np.random.seed(42)
 
-ds = ImagesDataset(split="train")
-x = ds[0].get_torch_tensor()
+if __name__ == '__main__':
+    torch.manual_seed(42)
+    np.random.seed(42)
 
-model = MyNet32(n_layers=1)
-model.eval()
+    ds = ImagesDataset(split="train")
+    _x = ds[0].get_torch_tensor()
 
-
-
-output1 = model(x)
-print(output1.shape)
-print(output1.mean())
-"""
-torch.Size([1, 64, 32, 32])
-tensor(0.4466, grad_fn=<MeanBackward0>)
-"""
-
-
-# fig, axes = plt.subplots(2, 2)
-#
-# for x, ax, label in zip(
-#     [x, x1, x2, x3],
-#     axes.flatten(),
-#     ["orig", "bilinear", "nearest", "bicubic"]
-# ):
-#     x = x.squeeze(0)
-#     x = x.permute(1, 2, 0).numpy()
-#     ax.imshow(x)
-#     ax.set_xlabel(label)
-#
-# # axes[0, 0].imshow(x_np)
-# # axes[1].imshow(x_np2)
-# plt.show()
+    for n_layers in [1, 2, 3, 4]:
+        model = MyNet32(n_layers=n_layers)
+        model.eval()
+        output1 = model(_x)
+        print(output1.shape, model.n_filters)
+        # print(output1.mean())
 
