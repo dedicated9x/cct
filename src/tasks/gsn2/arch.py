@@ -7,6 +7,7 @@ import numpy as np
 from  pathlib import Path
 from torchvision.models.resnet import ResNet, BasicBlock, load_state_dict_from_url
 from src.tasks.gsn2.dataset import ImagesDataset, MnistBox
+from src.tasks.gsn2.anchor_set import AnchorSet
 
 class DigitDetectionModelOutput:
 
@@ -116,7 +117,8 @@ class MyNet32(nn.Module):
             n_layers_backbone: int,
             n_layers_clf_head: int,
             n_layers_reg_head: int,
-            anchor_sizes: List[Tuple[int, int]]
+            anchor_sizes: List[Tuple[int, int]],
+            anchors: List[MnistBox]
     ):
         super(MyNet32, self).__init__()
 
@@ -139,15 +141,20 @@ class MyNet32(nn.Module):
             n_anchor_sizes=n_anchor_sizes
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        self.anchors = anchors
+
+    def forward(self, x: torch.Tensor) -> DigitDetectionModelOutput:
         x = self.backbone(x)
         classification_output = self.classification_head(x)
         box_regression_output = self.box_regression_head(x)
-        return {
-            "classification_output": classification_output,
-            "box_regression_output": box_regression_output
-        }
 
+        output = DigitDetectionModelOutput(
+            anchors=self.anchors,
+            classification_output=classification_output,
+            box_regression_output=box_regression_output
+        )
+
+        return output
 
 if __name__ == '__main__':
     torch.manual_seed(42)
@@ -162,6 +169,8 @@ if __name__ == '__main__':
     ]
 
     ds = ImagesDataset(split="train")
+    anchor_set = AnchorSet(anchor_sizes, k_grid=2)
+
     _x = ds[0].get_torch_tensor()
 
     for n_layers_ in [2]:
@@ -169,7 +178,8 @@ if __name__ == '__main__':
             n_layers_backbone=n_layers_,
             n_layers_clf_head=2,
             n_layers_reg_head=2,
-            anchor_sizes=anchor_sizes
+            anchor_sizes=anchor_sizes,
+            anchors=anchor_set.list_mnistboxes
         )
         model.eval()
         output1 = model(_x)
@@ -177,15 +187,5 @@ if __name__ == '__main__':
         # Check if same as before
         path_file = Path(__file__).parents[3] / ".EXCLUDED/outputs/tensor.pt"
         # torch.save(output1["classification_output"], path_file)
-        assert (torch.load(path_file) == output1["classification_output"]).all().item()
+        assert (torch.load(path_file) == output1.classification_output).all().item()
 
-
-# TODO napisac test dla backbone
-# TODO zrobic output, jaki zalecaja
-
-"""
-1 torch.Size([1, 64, 32, 32]) 64
-2 torch.Size([1, 128, 32, 32]) 128
-3 torch.Size([1, 256, 32, 32]) 256
-4 torch.Size([1, 512, 32, 32]) 512
-"""
