@@ -1,10 +1,10 @@
-from typing import Tuple, Optional
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
 
 from typing import List, Tuple
-from src.tasks.gsn2.notebooks._03_plot_unmatched_part1 import Grid
+from src.tasks.gsn2.grid import Grid
 from src.tasks.gsn2.dataset import MnistBox
 import numpy as np
 import torch

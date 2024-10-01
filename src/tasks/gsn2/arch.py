@@ -4,8 +4,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib; matplotlib.use('TkAgg')
 from torchvision.models.resnet import ResNet, BasicBlock, load_state_dict_from_url
 from src.tasks.gsn2.dataset import ImagesDataset
 

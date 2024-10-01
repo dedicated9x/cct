@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
-from src.tasks.gsn2.dataset import ImagesDataset, get_mnist_data, crop_insignificant_values
+from src.tasks.gsn2.dataset import get_mnist_data, crop_insignificant_values
 
 # ds = ImagesDataset(split="train")
 (mnist_x_train, mnist_y_train), (mnist_x_test, mnist_y_test) = get_mnist_data()

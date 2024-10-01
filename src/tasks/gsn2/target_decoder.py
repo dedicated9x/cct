@@ -2,7 +2,7 @@ from typing import List
 import torch
 
 from src.tasks.gsn2.dataset import MnistBox, MnistCanvas, ImagesDataset
-from src.tasks.gsn2.notebooks._03_plot_unmatched_part2 import AnchorSet
+from src.tasks.gsn2.anchor_set import AnchorSet
 
 class DigitDetectionModelOutput:
 

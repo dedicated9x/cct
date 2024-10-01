@@ -1,15 +1,13 @@
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
 
-from typing import List, Tuple
-from src.tasks.gsn2.notebooks._03_plot_unmatched_part2 import AnchorSet
-from src.tasks.gsn2.dataset import MnistBox
+from src.tasks.gsn2.anchor_set import AnchorSet
 import numpy as np
-import torch
 import pandas as pd
 
 from src.tasks.gsn2.dataset import ImagesDataset
 
+# TODO random będzie subklasą
 class RandomMnistBoxSet:
     def __init__(self, n_boxes:int):
         ds = ImagesDataset(split="train")
@@ -52,6 +50,7 @@ class RandomMnistBoxSet:
 
 
 
+    # TODO to zostaje w notebooku
     def analyse_unmatched(self):
         # Define a function to calculate the anchor size as a tuple
         def _calculate_size(item):
@@ -75,6 +74,7 @@ class RandomMnistBoxSet:
 
         plt.show()
 
+    # TODO stad tylko wez wspolrzedne
     def plot_next_unmatched(self, anchor_set: AnchorSet):
         for box in self.list_nonmatched:
             if box.size != (19, 19):
