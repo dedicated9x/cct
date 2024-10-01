@@ -34,48 +34,6 @@ class DigitDetectionModelTarget:
         self.matched_anchors = matched_anchors
 
 
-# TODO leciec z tym z powrotem. Może rozbij na dwa.
-class RandomMnistBoxSet:
-    def __init__(self, n_boxes:int):
-        ds = ImagesDataset(split="train")
-
-        list_boxes = []
-        i = 0
-        while len(list_boxes) < n_boxes:
-            mnist_canvas = ds[i]
-            list_boxes += mnist_canvas.boxes
-            i += 1
-        list_boxes = list_boxes[:n_boxes]
-
-        self.list_boxes = list_boxes
-
-    def match_with_anchorset(self, anchor_set: AnchorSet, iou_threshold: float):
-        n_boxes = len(self.list_boxes)
-        n_anchors = len(anchor_set.list_mnistboxes)
-
-        grid_ious = np.full((n_boxes, n_anchors), None)
-        for box_idx in range(n_boxes):
-            for anchor_idx in range(n_anchors):
-                box = self.list_boxes[box_idx]
-                anchor = anchor_set.list_mnistboxes[anchor_idx]
-                iou = box.iou_with(anchor)
-                grid_ious[box_idx, anchor_idx] = iou
-
-        assert not np.any(grid_ious == None)
-
-        filter_is_above_threshold = (grid_ious.max(axis=1) > iou_threshold).tolist()
-
-        list_nonmatched = [
-            box for box, is_above_threshold in zip(self.list_boxes, filter_is_above_threshold)
-            if not is_above_threshold
-        ]
-
-        self.anchor_set = anchor_set
-        self.list_nonmatched = list_nonmatched
-
-        return list_nonmatched
-
-
 class TargetDecoder:
 
     def get_targets(
