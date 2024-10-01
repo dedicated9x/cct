@@ -1,5 +1,5 @@
 from src.tasks.gsn2.anchor_set import AnchorSet
-from src.tasks.gsn2.notebooks._03_plot_unmatched import RandomMnistBoxSet
+from src.tasks.gsn2.target_decoder import RandomMnistBoxSet
 
 ANCHOR_SIZES_GRIDS = {
     "all": [
