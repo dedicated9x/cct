@@ -68,17 +68,13 @@ class Head(nn.Module):
         return x
 
 
-
-class MyNet32(ResNet):
+class Backbone(ResNet):
     def __init__(
             self,
-            n_layers_backbone: int,
-            n_layers_clf_head: int,
-            n_layers_reg_head: int,
-            anchor_sizes: List[Tuple[int, int]]
+            n_layers: int,
     ):
-        super(MyNet32, self).__init__(block=BasicBlock, layers=[2, 2, 2, 2])
-        assert n_layers_backbone in [1, 2, 3, 4]
+        super(Backbone, self).__init__(block=BasicBlock, layers=[2, 2, 2, 2])
+        assert n_layers in [1, 2, 3, 4]
 
         state_dict = load_state_dict_from_url(
             'https://download.pytorch.org/models/resnet18-f37072fd.pth',
@@ -86,26 +82,11 @@ class MyNet32(ResNet):
         )
         self.load_state_dict(state_dict)
 
-        self.n_layers = n_layers_backbone
-        self.scale_factor = 2 ** (n_layers_backbone - 1)
+        self.n_layers = n_layers
+        self.scale_factor = 2 ** (n_layers - 1)
         # TODO opcja z mode='nearest'
         self.scale_mode = "bilinear"
-        self.filters = 64 * self.scale_factor
 
-        n_anchor_sizes = len(anchor_sizes)
-        n_classes = 10
-        self.classification_head = Head(
-            n_layers=n_layers_clf_head,
-            filters=self.filters,
-            out_channels=n_anchor_sizes * n_classes,
-            n_anchor_sizes=n_anchor_sizes
-        )
-        self.box_regression_head = Head(
-            n_layers=n_layers_reg_head,
-            filters=self.filters,
-            out_channels=n_anchor_sizes * 4,
-            n_anchor_sizes=n_anchor_sizes
-        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x.repeat(1, 3, 1, 1)
@@ -126,7 +107,40 @@ class MyNet32(ResNet):
             x = self.layer3(x) # 2
         if self.n_layers >= 4:
             x = self.layer4(x) # 2
+        return x
 
+
+class MyNet32(nn.Module):
+    def __init__(
+            self,
+            n_layers_backbone: int,
+            n_layers_clf_head: int,
+            n_layers_reg_head: int,
+            anchor_sizes: List[Tuple[int, int]]
+    ):
+        super(MyNet32, self).__init__()
+
+        self.backbone = Backbone(n_layers_backbone)
+
+        filters = 64 * self.backbone.scale_factor
+
+        n_anchor_sizes = len(anchor_sizes)
+        n_classes = 10
+        self.classification_head = Head(
+            n_layers=n_layers_clf_head,
+            filters=filters,
+            out_channels=n_anchor_sizes * n_classes,
+            n_anchor_sizes=n_anchor_sizes
+        )
+        self.box_regression_head = Head(
+            n_layers=n_layers_reg_head,
+            filters=filters,
+            out_channels=n_anchor_sizes * 4,
+            n_anchor_sizes=n_anchor_sizes
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.backbone(x)
         classification_output = self.classification_head(x)
         box_regression_output = self.box_regression_head(x)
         return {
@@ -150,7 +164,6 @@ if __name__ == '__main__':
     ds = ImagesDataset(split="train")
     _x = ds[0].get_torch_tensor()
 
-    # for n_layers in [1, 2, 3, 4]:
     for n_layers_ in [2]:
         model = MyNet32(
             n_layers_backbone=n_layers_,
@@ -167,7 +180,8 @@ if __name__ == '__main__':
         assert (torch.load(path_file) == output1["classification_output"]).all().item()
 
 
-# TODO test na backbone (ponizej)
+# TODO napisac test dla backbone
+# TODO zrobic output, jaki zalecaja
 
 """
 1 torch.Size([1, 64, 32, 32]) 64
