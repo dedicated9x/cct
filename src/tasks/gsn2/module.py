@@ -1,3 +1,6 @@
+import torch
+import torch.nn.functional as F
+import torchvision
 
 from src.common.module import BaseModule
 from src.tasks.gsn2.anchor_set import AnchorSet
@@ -35,21 +38,49 @@ class ObjectDetectionModule(BaseModule):
 
         self.save_hyperparameters(config)
 
+        # TODO remove
+        self.counter = 0
+
     def training_step(self, batch, batch_idx):
-        raise NotImplementedError
-        # x, targets = batch['x'], batch['y_shapes']
-        # logits = self.model(x)
-        # loss = bcewithlogits_multilabel(logits, targets)
-        # return loss
+        output = self.model(batch['canvas'])
+
+        loss_batch = 0
+        n_anchors_batch = 0
+        batch_size = output.classification_output.shape[0]
+        for idx_sample in range(batch_size):
+            matched_anchors = batch['matched_anchors'][idx_sample].tolist()
+            # Trim -1's
+            matched_anchors = [e for e in matched_anchors if e != -1]
+
+            clf_target = batch['classification_target'][idx_sample][matched_anchors]
+            clf_output = output.classification_output[idx_sample][matched_anchors]
+
+            focal_loss= torchvision.ops.sigmoid_focal_loss(clf_output, clf_target, reduction="sum")
+
+            boxreg_target = batch['box_regression_target'][idx_sample][matched_anchors]
+            boxreg_output = output.box_regression_output[idx_sample][matched_anchors]
+
+            smooth_l1_loss = F.smooth_l1_loss(boxreg_output, boxreg_target, reduction="sum")
+
+            total_loss = focal_loss + smooth_l1_loss
+
+            loss_batch += total_loss
+            n_anchors_batch += len(matched_anchors)
+
+        # Average loss over number of anchors
+        loss_batch = loss_batch / n_anchors_batch
+
+        return loss_batch
 
     def validation_step(self, batch, batch_idx):
-        raise NotImplementedError
+        return batch_idx
         # x, targets = batch['x'], batch['y_shapes']
         # logits = self.model(x)
         # return {"logits": logits, "targets": targets}
 
     def validation_epoch_end(self, outputs):
-        raise NotImplementedError
+        self.counter += 1
+        self.log(f"Val/Acc", self.counter / 100)
         # logits = torch.cat([batch['logits'] for batch in outputs])
         # targets = torch.cat([batch['targets'] for batch in outputs])
         #
