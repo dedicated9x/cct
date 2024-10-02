@@ -1,0 +1,31 @@
+defaults:
+  - /../../../common/conf/base@
+  - model/base
+  - dataset/base
+  - _self_
+
+main:
+  is_tested: false
+
+module:
+  _target_: src.tasks.gsn2.module.ObjectDetectionModule
+
+optimizer:
+  lr: 0.00001
+
+trainer:
+  max_epochs: 20
+  batch_size: 16
+  device: [0]
+  monitored_metric:
+    name: "Val/Acc"
+    mode: max
+  ckpt_path: null
+  tag: null
+
+#anchor_sizes:
+#  - [19, 19]
+#  - [19, 15]
+#  - [19, 13]
+#  - [19, 11]
+#  - [19, 5]

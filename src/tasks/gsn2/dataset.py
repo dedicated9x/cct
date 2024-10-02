@@ -237,11 +237,12 @@ def get_random_canvas(
     return new_canvas
 
 class ImagesDataset(torch.utils.data.Dataset):
-    def __init__(self, split: str):
+    def __init__(self, split: str, size: Optional[int] = None):
         super(ImagesDataset, self).__init__()
+        assert split in ["train", "val"]
+        assert (split == "val") or (split == "train" and size is not None)
+
         (mnist_x_train, mnist_y_train), (mnist_x_test, mnist_y_test) = get_mnist_data()
-        # for x in mnist_x_train, mnist_y_train, mnist_x_test, mnist_y_test:
-        #     print(type(x), x.shape)
 
         self.TRAIN_DIGITS = [
             crop_insignificant_values(digit) / 255.0
@@ -255,22 +256,38 @@ class ImagesDataset(torch.utils.data.Dataset):
         ]
         self.TEST_CLASSES = mnist_y_test[:1000]
 
+        if split == "val":
+            np.random.seed(42)
+            self.list_samples = [
+                get_random_canvas(
+                    digits=self.TEST_DIGITS,
+                    classes=self.TEST_CLASSES,
+                )
+                for _ in range(256)
+            ]
+        else: #  split == "train"
+            self.size = size
+
         self.split = split
 
     def __len__(self):
-        raise NotImplementedError
+        if self.split == "val":
+            size = len(self.list_samples)
+        else:  # self.split == "train"
+            size = self.size
+        return size
 
     def __getitem__(self, idx):
-        if self.split == "train":
+        if self.split == "val":
+            mnist_canvas = self.list_samples[idx]
+        else:   # self.split == "train"
             mnist_canvas = get_random_canvas(self.TRAIN_DIGITS,  self.TRAIN_CLASSES)
-        else:
-            raise NotImplementedError
         return mnist_canvas
 
 if __name__ == '__main__':
-    ds = ImagesDataset(split="train")
-    great_number = 100
-    for i in range(great_number):
+    # ds = ImagesDataset(split="train", size=100)
+    ds = ImagesDataset(split="val", size=100)
+    for i in range(len(ds)):
         mnist_canvas = ds[i]
 
         fig, ax = plt.subplots()

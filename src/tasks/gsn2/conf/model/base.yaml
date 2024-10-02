@@ -1,0 +1,12 @@
+anchor_set:
+  k_grid: 2
+  anchor_sizes:
+    - [19, 19]
+    - [19, 15]
+    - [19, 13]
+    - [19, 11]
+    - [19, 5]
+
+n_layers_backbone: 2
+n_layers_clf_head: 2
+n_layers_reg_head: 2

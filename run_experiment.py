@@ -14,16 +14,17 @@ gsn1/conf/01_counts_base -> 0.26, 0.41, 0.52
 """
 
 # @hydra.main(version_base="1.2", config_path="src/tasks/flowers/conf", config_name="base")
-@hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="00_shapes_base")
+# @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="00_shapes_base")
 # @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="01_counts_base")
 # @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="02_counts_encoded_base")
+@hydra.main(version_base="1.2", config_path="src/tasks/gsn2/conf", config_name="00_base")
 def main(config: omegaconf.DictConfig) -> None:
     run_experiment(config)
 
 def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
-    config.trainer.wandb = True
+    # config.trainer.wandb = True
     # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/ShapesModule/jc5nq9sr/checkpoints/1-0.41.ckpt"
     # config.trainer.max_epochs = 1
 
