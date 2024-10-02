@@ -2,9 +2,15 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import torch
+import torch.nn.functional as F
 import numpy as np
 
 from src.tasks.gsn2.structures import MnistBox, MnistCanvas
+
+# def _pad_list_with_const(_list, const, lenght):
+#     padding =  [const] * (lenght - len(_list))
+#     padded_list = _list + padding
+#     return padded_list
 
 class DigitDetectionModelTarget:
 
@@ -18,6 +24,19 @@ class DigitDetectionModelTarget:
         self.box_regression_target = box_regression_target
         self.matched_anchors = matched_anchors
 
+    def as_dict_of_tensors(self):
+        matched_anchors = torch.tensor(self.matched_anchors)
+
+        matched_anchors_padded = torch.nn.functional.pad(
+            matched_anchors,
+            pad= (0, len(self.classification_target) - matched_anchors.shape[0]),
+            value=-1
+        )
+        return {
+            "classification_target": self.classification_target,
+            "box_regression_target": self.box_regression_target,
+            "matched_anchors": matched_anchors_padded
+        }
 
 class TargetDecoder:
 
@@ -80,7 +99,7 @@ if __name__ == '__main__':
     decoder = TargetDecoder()
 
     for i in range(100):
-        canvas = ds[i]
+        canvas = ds.get_canvas(i)
         target = decoder.get_targets(canvas, anchor_set.list_mnistboxes)
 
         matched_anchors = [

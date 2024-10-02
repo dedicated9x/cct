@@ -23,9 +23,6 @@ trainer:
   ckpt_path: null
   tag: null
 
-#anchor_sizes:
-#  - [19, 19]
-#  - [19, 15]
-#  - [19, 13]
-#  - [19, 11]
-#  - [19, 5]
+# TODO czy na pewno shared
+shared:
+  iou_threshold: 0.5

@@ -16,7 +16,7 @@ def get_random_mnistboxes(n_boxes:int):
     list_boxes = []
     i = 0
     while len(list_boxes) < n_boxes:
-        mnist_canvas = ds[i]
+        mnist_canvas = ds.get_canvas(i)
         list_boxes += mnist_canvas.boxes
         i += 1
     list_boxes = list_boxes[:n_boxes]

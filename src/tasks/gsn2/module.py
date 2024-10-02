@@ -20,8 +20,18 @@ class ObjectDetectionModule(BaseModule):
             anchors=anchor_set.list_mnistboxes
         )
 
-        self.ds_train = ImagesDataset("train", config.dataset.train.size)
-        self.ds_val = ImagesDataset("val")
+        self.ds_train = ImagesDataset(
+            "train",
+            config.dataset.train.size,
+            config.shared.iou_threshold,
+            anchors=anchor_set.list_mnistboxes
+        )
+        self.ds_val = ImagesDataset(
+            "val",
+            None,
+            config.shared.iou_threshold,
+            anchors=anchor_set.list_mnistboxes
+        )
 
         self.save_hyperparameters(config)
 

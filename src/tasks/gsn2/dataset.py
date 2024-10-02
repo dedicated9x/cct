@@ -1,14 +1,23 @@
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
 import torch.utils.data
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
 
+from src.tasks.gsn2.structures import MnistBox
+from src.tasks.gsn2.anchor_set import AnchorSet
 from src.tasks.gsn2.structures import crop_insignificant_values, get_random_canvas, get_mnist_data
+from src.tasks.gsn2.target_decoder import TargetDecoder
 
 class ImagesDataset(torch.utils.data.Dataset):
-    def __init__(self, split: str, size: Optional[int] = None):
+    def __init__(
+            self,
+            split: str,
+            size: Optional[int] = None,
+            iou_threshold: float = 0.5,
+            anchors: List[MnistBox] = None
+    ):
         super(ImagesDataset, self).__init__()
         assert split in ["train", "val"]
         assert (split == "val") or (split == "train" and size is not None)
@@ -39,7 +48,11 @@ class ImagesDataset(torch.utils.data.Dataset):
         else: #  split == "train"
             self.size = size
 
+        self.decoder = TargetDecoder()
+
         self.split = split
+        self.iou_threshold = iou_threshold
+        self.anchors = anchors
 
     def __len__(self):
         if self.split == "val":
@@ -48,18 +61,27 @@ class ImagesDataset(torch.utils.data.Dataset):
             size = self.size
         return size
 
-    def __getitem__(self, idx):
+    def get_canvas(self, idx):
         if self.split == "val":
             mnist_canvas = self.list_samples[idx]
         else:   # self.split == "train"
             mnist_canvas = get_random_canvas(self.TRAIN_DIGITS,  self.TRAIN_CLASSES)
         return mnist_canvas
 
+    def __getitem__(self, idx):
+        canvas = self.get_canvas(idx)
+        target = self.decoder.get_targets(canvas, self.anchors, self.iou_threshold)
+
+        sample = target.as_dict_of_tensors()
+
+        sample['canvas'] = canvas.get_torch_tensor().squeeze(0)
+        return sample
+
 if __name__ == '__main__':
     # ds = ImagesDataset(split="train", size=100)
     ds = ImagesDataset(split="val", size=100)
     for i in range(len(ds)):
-        mnist_canvas = ds[i]
+        mnist_canvas = ds.get_canvas(i)
 
         fig, ax = plt.subplots()
         mnist_canvas.plot_on_ax(ax)
