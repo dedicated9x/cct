@@ -65,7 +65,7 @@ class TargetDecoder:
 
     def get_predictions(
             self,
-            model_output: DigitDetectionModelOutput,
+            model_output,
     ) -> List[MnistBox]:
         raise
 
