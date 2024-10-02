@@ -4,12 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 import numpy as np
 
-from src.tasks.gsn2.dataset import MnistBox, MnistCanvas, ImagesDataset
-from src.tasks.gsn2.anchor_set import AnchorSet
-
-
-
-
+from src.tasks.gsn2.structures import MnistBox, MnistCanvas
 
 class DigitDetectionModelTarget:
 
@@ -70,6 +65,9 @@ class TargetDecoder:
         raise
 
 if __name__ == '__main__':
+    from src.tasks.gsn2.dataset import ImagesDataset
+    from src.tasks.gsn2.anchor_set import AnchorSet
+
     anchor_sizes = [
         (19, 19),
         (19, 15),
@@ -77,7 +75,7 @@ if __name__ == '__main__':
         (19, 11),
         (19, 5),
     ]
-    ds = ImagesDataset(split="train")
+    ds = ImagesDataset(split="train", size=1024)
     anchor_set = AnchorSet(anchor_sizes, k_grid=2)
     decoder = TargetDecoder()
 
@@ -97,5 +95,4 @@ if __name__ == '__main__':
 
         plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
         plt.close()  # Close the current figure after keypress/mouse click
-
 

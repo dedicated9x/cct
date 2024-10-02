@@ -7,10 +7,11 @@ import matplotlib; matplotlib.use('TkAgg')
 
 from src.tasks.gsn2.grid import Grid
 from src.tasks.gsn2.anchor_set import AnchorSet
-from src.tasks.gsn2.dataset import ImagesDataset, MnistBox
+from src.tasks.gsn2.dataset import ImagesDataset
+from src.tasks.gsn2.structures import MnistBox
 
 def get_random_mnistboxes(n_boxes:int):
-    ds = ImagesDataset(split="train")
+    ds = ImagesDataset(split="train", size=10000)
 
     list_boxes = []
     i = 0

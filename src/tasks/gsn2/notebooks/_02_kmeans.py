@@ -1,13 +1,8 @@
 # TODO napisz to samemu
-
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
 from src.tasks.gsn2.dataset import ImagesDataset, get_mnist_data, crop_insignificant_values
-
-import numpy as np
-import numpy as np
-import matplotlib.pyplot as plt
-
 
 
 def iou(box, clusters):
@@ -59,7 +54,7 @@ def kmeans(boxes, k, dist=np.median, max_iter=300):
     return clusters, nearest_clusters
 
 if __name__ == '__main__':
-    ds = ImagesDataset(split="train")
+    ds = ImagesDataset(split="train", size=10000)
     xs = [ds.TRAIN_DIGITS[i].shape[0] for i in range(10000)]
     ys = [ds.TRAIN_DIGITS[i].shape[1] for i in range(10000)]
 

@@ -7,7 +7,7 @@ from src.tasks.gsn2.dataset import ImagesDataset
 
 def plot_sizes_with_counts():
     # Assuming xs and ys are already defined
-    ds = ImagesDataset(split="train")
+    ds = ImagesDataset(split="train", size=10000)
     xs = [ds.TRAIN_DIGITS[i].shape[0] for i in range(10000)]
     ys = [ds.TRAIN_DIGITS[i].shape[1] for i in range(10000)]
 

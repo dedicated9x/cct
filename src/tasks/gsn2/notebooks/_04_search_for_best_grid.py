@@ -1,5 +1,5 @@
 from src.tasks.gsn2.anchor_set import AnchorSet
-from src.tasks.gsn2.target_decoder import RandomMnistBoxSet
+from src.tasks.gsn2.notebooks._03_plot_unmatched_on_grid import match_with_anchorset, get_random_mnistboxes
 
 ANCHOR_SIZES_GRIDS = {
     "all": [
@@ -47,7 +47,7 @@ ANCHOR_SIZES_GRIDS = {
 if __name__ == '__main__':
     n_samples = 1000
 
-    box_set = RandomMnistBoxSet(n_samples)
+    list_boxes = get_random_mnistboxes(n_boxes=1000)
 
     for anchor_sizes_grid in ["kmeans", "all"]:
         for k in [2, 3, 4]:
@@ -57,7 +57,7 @@ if __name__ == '__main__':
             anchor_sizes = ANCHOR_SIZES_GRIDS[anchor_sizes_grid]
             anchor_set = AnchorSet(anchor_sizes, k_grid=k)
 
-            list_nonmatched = box_set.match_with_anchorset(anchor_set, iou_threshold=0.5)
+            list_nonmatched = match_with_anchorset(list_boxes, anchor_set.list_mnistboxes, iou_threshold=0.5)
 
             cover_ratio = 1 - len(list_nonmatched) / n_samples
             print(anchor_sizes_grid, k, cover_ratio)

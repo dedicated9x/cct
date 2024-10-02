@@ -1,14 +1,13 @@
-from typing import Optional
-
-import matplotlib.pyplot as plt
-import matplotlib; matplotlib.use('TkAgg')
-
-from typing import List, Tuple
-from src.tasks.gsn2.grid import Grid
-from src.tasks.gsn2.dataset import MnistBox
+from typing import Optional, List, Tuple
 import numpy as np
 import torch
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib; matplotlib.use('TkAgg')
+
+from src.tasks.gsn2.grid import Grid
+from src.tasks.gsn2.structures import MnistBox
+
 
 class AnchorSet:
     def __init__(self, anchor_sizes: List[Tuple], k_grid: int):

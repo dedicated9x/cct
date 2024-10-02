@@ -6,7 +6,8 @@ import torch.nn.functional as F
 import numpy as np
 from  pathlib import Path
 from torchvision.models.resnet import ResNet, BasicBlock, load_state_dict_from_url
-from src.tasks.gsn2.dataset import ImagesDataset, MnistBox
+from src.tasks.gsn2.dataset import ImagesDataset
+from src.tasks.gsn2.structures import MnistBox
 from src.tasks.gsn2.anchor_set import AnchorSet
 
 class DigitDetectionModelOutput:
@@ -168,7 +169,7 @@ if __name__ == '__main__':
         (19, 5),
     ]
 
-    ds = ImagesDataset(split="train")
+    ds = ImagesDataset(split="train", size=1000)
     anchor_set = AnchorSet(anchor_sizes, k_grid=2)
 
     _x = ds[0].get_torch_tensor()
