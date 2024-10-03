@@ -69,7 +69,7 @@ def get_predictions(
         model_output: DigitDetectionModelOutput,
         iou_threshold: float,
         confidence_threshold: float
-):
+) -> List[MnistBox]:
     nms_filter = get_nms_filter(model_output, iou_threshold)
     confidence_filter = get_confidence_filter(model_output, confidence_threshold)
     idxs_predictions_ = logical_and_filter(nms_filter, confidence_filter)

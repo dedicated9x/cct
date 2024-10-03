@@ -154,20 +154,25 @@ class ObjectDetectionModule(BaseModule):
         x = np.linspace(0, 2 * np.pi, 100)  # 100 points between 0 and 2π
         y = np.sin(x)
 
-        # Create the plot
-        plt.figure(figsize=(8, 6))
-        plt.plot(x, y, label='sin(x)')
+        # Create the plot with subplots
+        fig, ax = plt.subplots(figsize=(8, 6))
+
+        # Plot the data
+        ax.plot(x, y, label='sin(x)')
 
         # Add labels and title
-        plt.xlabel('x')
-        plt.ylabel('sin(x)')
-        plt.title('Plot of sin(x)')
+        ax.set_xlabel('x')
+        ax.set_ylabel('sin(x)')
+        ax.set_title('Plot of sin(x)')
 
         # Add grid and legend
-        plt.grid(True)
-        plt.legend()
+        ax.grid(True)
+        ax.legend()
 
-        wandb.log({"Confusion Matrix": wandb.Image(plt)})
-        plt.close()
+        # Log the plot to wandb
+        wandb.log({"Confusion Matrix": wandb.Image(fig)})
+
+        # Close the plot to avoid memory issues
+        plt.close(fig)
 
 

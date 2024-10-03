@@ -53,8 +53,8 @@ def get_trainer(config):
         logger=logger,
         num_sanity_val_steps=0,
         limit_train_batches=config.trainer.limit_train_batches,
-        # TODO remove line below
-        limit_test_batches=2
+        limit_val_batches=config.trainer.limit_val_batches,
+        limit_test_batches=config.trainer.limit_test_batches,
     )
 
     return trainer

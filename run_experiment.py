@@ -29,6 +29,7 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
     config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/lightning_logs/version_30/checkpoints/39-0.20.ckpt"
     # config.trainer.max_epochs = 2
     # config.trainer.batch_size = 3
+    # config.trainer.limit_test_batches = 2
     config.main.is_tested = True
 
 
