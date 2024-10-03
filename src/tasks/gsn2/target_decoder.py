@@ -76,7 +76,7 @@ class TargetDecoder:
             self,
             model_output,
     ) -> List[MnistBox]:
-        raise
+        pass
 
 if __name__ == '__main__':
     from src.tasks.gsn2.dataset import ImagesDataset

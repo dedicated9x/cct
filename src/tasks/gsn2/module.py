@@ -1,6 +1,10 @@
 import torch
 import torch.nn.functional as F
 import torchvision
+import matplotlib.pyplot as plt
+import matplotlib;matplotlib.use('TkAgg')
+import numpy as np
+import wandb
 
 from src.common.module import BaseModule
 from src.tasks.gsn2.anchor_set import AnchorSet
@@ -143,13 +147,27 @@ class ObjectDetectionModule(BaseModule):
 
                 predictions = TargetDecoder().get_predictions(model_output)
 
-                # torch.save(outputs[idx_batch]['classification_output'][idx_sample].cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/clf_output.pt")
-                # torch.save(outputs[idx_batch]['box_regression_output'][idx_sample].cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/boxreg_output.pt")
+        self.plot_predictions()
 
+    def plot_predictions(self):
+        # Generate data points
+        x = np.linspace(0, 2 * np.pi, 100)  # 100 points between 0 and 2π
+        y = np.sin(x)
 
+        # Create the plot
+        plt.figure(figsize=(8, 6))
+        plt.plot(x, y, label='sin(x)')
 
+        # Add labels and title
+        plt.xlabel('x')
+        plt.ylabel('sin(x)')
+        plt.title('Plot of sin(x)')
 
-        raise NotImplementedError
+        # Add grid and legend
+        plt.grid(True)
+        plt.legend()
 
+        wandb.log({"Confusion Matrix": wandb.Image(plt)})
+        plt.close()
 
 
