@@ -7,11 +7,6 @@ import numpy as np
 
 from src.tasks.gsn2.structures import MnistBox, MnistCanvas
 
-# def _pad_list_with_const(_list, const, lenght):
-#     padding =  [const] * (lenght - len(_list))
-#     padded_list = _list + padding
-#     return padded_list
-
 class DigitDetectionModelTarget:
 
     def __init__(

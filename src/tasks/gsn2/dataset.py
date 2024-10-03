@@ -75,6 +75,7 @@ class ImagesDataset(torch.utils.data.Dataset):
         sample = target.as_dict_of_tensors()
 
         sample['canvas'] = canvas.get_torch_tensor().squeeze(0)
+        sample['boxes'] = canvas.boxes
         return sample
 
 if __name__ == '__main__':

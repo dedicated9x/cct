@@ -25,8 +25,11 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
     # config.trainer.wandb = True
-    # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/ShapesModule/jc5nq9sr/checkpoints/1-0.41.ckpt"
-    # config.trainer.max_epochs = 1
+
+    # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/lightning_logs/version_30/checkpoints/39-0.20.ckpt"
+    # config.trainer.max_epochs = 2
+    # config.trainer.batch_size = 3
+    # config.main.is_tested = True
 
 
     pl.seed_everything(1234)
@@ -40,9 +43,14 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
     if config.main.is_tested:
         trainer.test(
             model=module,
-            ckpt_path="best"
+            # ckpt_path="best"
+            ckpt_path=config.trainer.ckpt_path
         )
 
 if __name__ == '__main__':
     main()
+
+"""
+    # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/lightning_logs/version_5/checkpoints/19-0.20.ckpt"
+"""
 

@@ -12,6 +12,7 @@ class BaseModule(pl.LightningModule):
     def __init__(self, config=None):
         super(BaseModule, self).__init__()
         self.config = config
+        self.collate_fn = None
 
     def forward(self, x):
         return self.model(x)
@@ -21,14 +22,16 @@ class BaseModule(pl.LightningModule):
             self.ds_train,
             batch_size=self.config.trainer.batch_size,
             shuffle=True,
-            num_workers=4
+            num_workers=4,
+            collate_fn=self.collate_fn
         )
 
     def val_dataloader(self):
         return torch.utils.data.DataLoader(
             self.ds_val,
             batch_size=self.config.trainer.batch_size,
-            num_workers=4
+            num_workers=4,
+            collate_fn=self.collate_fn
         )
 
     def test_dataloader(self):
@@ -36,7 +39,8 @@ class BaseModule(pl.LightningModule):
             return torch.utils.data.DataLoader(
                 self.ds_test,
                 batch_size=self.config.trainer.batch_size,
-                num_workers=4
+                num_workers=4,
+                collate_fn=self.collate_fn
             )
 
     def configure_optimizers(self):

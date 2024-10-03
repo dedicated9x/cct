@@ -4,8 +4,34 @@ import torchvision
 
 from src.common.module import BaseModule
 from src.tasks.gsn2.anchor_set import AnchorSet
-from src.tasks.gsn2.arch import MyNet32
+from src.tasks.gsn2.arch import MyNet32, DigitDetectionModelOutput
 from src.tasks.gsn2.dataset import ImagesDataset
+from src.tasks.gsn2.target_decoder import TargetDecoder
+
+
+
+def custom_collate_fn(batch):
+    items_stackable = [
+        "classification_target", "box_regression_target",
+        "matched_anchors", "canvas"
+    ]
+    items_nonstackable = [
+        "boxes"
+    ]
+    items_all = items_stackable + items_nonstackable
+
+    output_batch = {}
+    batch_size = len(batch)
+    for item_name in items_all:
+        batch_item = [batch[idx][item_name] for idx in range(batch_size)]
+        if item_name in items_stackable:
+            batch_item = torch.stack(batch_item)
+        else:
+            pass
+        output_batch[item_name] = batch_item
+
+
+    return output_batch
 
 
 class ObjectDetectionModule(BaseModule):
@@ -35,6 +61,11 @@ class ObjectDetectionModule(BaseModule):
             config.shared.iou_threshold,
             anchors=anchor_set.list_mnistboxes
         )
+        # TODO remove this line
+        self.ds_test = self.ds_val
+
+        self.anchors = anchor_set.list_mnistboxes
+        self.collate_fn = custom_collate_fn
 
         self.save_hyperparameters(config)
 
@@ -90,4 +121,35 @@ class ObjectDetectionModule(BaseModule):
         # acc = (preds_binary.int() == targets).all(dim=1).float().mean()
         # print(f"\n Val/Acc = {acc:.2f}")
         # self.log(f"Val/Acc", acc)
+
+    def test_step(self, batch, batch_idx):
+        outputs = self.model(batch['canvas'])
+        batch['classification_output'] = outputs.classification_output
+        batch['box_regression_output'] = outputs.box_regression_output
+        return batch
+
+    def test_epoch_end(self, outputs):
+        n_batches = len(outputs)
+        batch_size = outputs[0]['classification_target'].shape[0]
+        for idx_batch in range(n_batches):
+            for idx_sample in range(batch_size):
+                model_output = DigitDetectionModelOutput(
+                    self.anchors,
+                    outputs[idx_batch]['classification_output'][idx_sample],
+                    outputs[idx_batch]['box_regression_output'][idx_sample],
+                )
+                canvas = outputs[idx_batch]['canvas'][idx_sample]
+                boxes = outputs[idx_batch]['boxes'][idx_sample]
+
+                predictions = TargetDecoder().get_predictions(model_output)
+
+                # torch.save(outputs[idx_batch]['classification_output'][idx_sample].cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/clf_output.pt")
+                # torch.save(outputs[idx_batch]['box_regression_output'][idx_sample].cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/boxreg_output.pt")
+
+
+
+
+        raise NotImplementedError
+
+
 

@@ -1,6 +1,10 @@
-więcej kontekstów:
+Plusy pytorch lightning
+- więcej kontekstów:
     te same rzeczy nazwa inaczej w zaleznosci od konteksu
     mniejsza szansa na konflikt oznaczen z czyms duzo wczesniejszym
+
+Plusy hydra:
+- wygodne robienie random searcha (wszystko jest w jednym miejscu)
 
 
 Mocne strony:
