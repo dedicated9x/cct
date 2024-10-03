@@ -5,9 +5,7 @@ import torch.utils.data
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
 
-from src.tasks.gsn2.structures import MnistBox
-from src.tasks.gsn2.anchor_set import AnchorSet
-from src.tasks.gsn2.structures import crop_insignificant_values, get_random_canvas, get_mnist_data
+from src.tasks.gsn2.structures import MnistBox, crop_insignificant_values, get_random_canvas, get_mnist_data
 from src.tasks.gsn2.target_decoder import TargetDecoder
 
 class ImagesDataset(torch.utils.data.Dataset):

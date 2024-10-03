@@ -6,21 +6,10 @@ import torch.nn.functional as F
 import numpy as np
 from  pathlib import Path
 from torchvision.models.resnet import ResNet, BasicBlock, load_state_dict_from_url
-from src.tasks.gsn2.dataset import ImagesDataset
-from src.tasks.gsn2.structures import MnistBox
+from src.tasks.gsn2.structures import MnistBox, DigitDetectionModelOutput
 from src.tasks.gsn2.anchor_set import AnchorSet
+from src.tasks.gsn2.dataset import ImagesDataset
 
-class DigitDetectionModelOutput:
-
-    def __init__(
-        self,
-        anchors: List[MnistBox],
-        classification_output: torch.Tensor,
-        box_regression_output: torch.Tensor,
-    ):
-        self.anchors = anchors
-        self.classification_output = classification_output
-        self.box_regression_output = box_regression_output
 
 # Modified ShapeClassificationNet
 class Head(nn.Module):
@@ -172,7 +161,7 @@ if __name__ == '__main__':
     ds = ImagesDataset(split="train", size=1000)
     anchor_set = AnchorSet(anchor_sizes, k_grid=2)
 
-    _x = ds[0].get_torch_tensor()
+    _x = ds.get_canvas(0).get_torch_tensor()
 
     for n_layers_ in [2]:
         model = MyNet32(

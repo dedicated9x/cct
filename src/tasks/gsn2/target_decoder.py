@@ -1,11 +1,13 @@
 from typing import List
 
-import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as F
+import torchvision
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib; matplotlib.use('TkAgg')
 
-from src.tasks.gsn2.structures import MnistBox, MnistCanvas
+from src.tasks.gsn2.structures import MnistBox, MnistCanvas, DigitDetectionModelOutput
 
 class DigitDetectionModelTarget:
 
@@ -32,6 +34,58 @@ class DigitDetectionModelTarget:
             "box_regression_target": self.box_regression_target,
             "matched_anchors": matched_anchors_padded
         }
+
+def get_nms_filter(model_output: DigitDetectionModelOutput, iou_threshold):
+    xs_min = torch.Tensor([e.x_min for e in model_output.anchors]) + model_output.box_regression_output[:, 0]
+    ys_min = torch.Tensor([e.y_min for e in model_output.anchors]) + model_output.box_regression_output[:, 2]
+    xs_max = torch.Tensor([e.x_max for e in model_output.anchors]) + model_output.box_regression_output[:, 1]
+    ys_max = torch.Tensor([e.y_max for e in model_output.anchors]) + model_output.box_regression_output[:, 3]
+
+    boxes = torch.stack([xs_min, ys_min, xs_max, ys_max])
+    boxes = boxes.transpose(0, 1)
+
+    scores = torch.sigmoid(model_output.classification_output).max(dim=1).values
+    nms_filter = torchvision.ops.nms(boxes, scores, iou_threshold)
+    return nms_filter
+
+def get_confidence_filter(model_output: DigitDetectionModelOutput, confidence_threshold):
+    confidence_filter = torch.sigmoid(model_output.classification_output).max(dim=1).values > confidence_threshold
+
+    # Convert from boolean mask to tensor of indices
+    confidence_filter = torch.nonzero(confidence_filter, as_tuple=False).squeeze()
+    return confidence_filter
+
+def logical_and_filter(filter1, filter2):
+    # TODO one niemusza byc tensorami
+    # Convert tensors to sets and find intersection
+    filter1_set = set(filter1.tolist())
+    filter2_set = set(filter2.tolist())
+
+    # Find the intersection
+    intersection = filter1_set & filter2_set
+
+    # Convert the result back to a tensor
+    return torch.tensor(list(intersection))
+
+def _get_predictions(
+        model_output: DigitDetectionModelOutput,
+        idxs_predictions: List[int],
+        anchors: List[MnistBox]
+) -> List[MnistBox]:
+
+    list_predictions = []
+    for idx in idxs_predictions:
+        class_nb = model_output.classification_output[idx].argmax().item()
+
+        x_min = int(anchors[idx].x_min + model_output.box_regression_output[idx][0])
+        x_max = int(anchors[idx].x_max + model_output.box_regression_output[idx][1])
+        y_min = int(anchors[idx].y_min + model_output.box_regression_output[idx][2])
+        y_max = int(anchors[idx].y_max + model_output.box_regression_output[idx][3])
+
+        prediction = MnistBox(x_min, y_min, x_max, y_max, class_nb)
+        list_predictions.append(prediction)
+
+    return list_predictions
 
 class TargetDecoder:
 
@@ -74,9 +128,15 @@ class TargetDecoder:
 
     def get_predictions(
             self,
-            model_output,
+            model_output: DigitDetectionModelOutput,
+            iou_threshold: float,
+            confidence_threshold: float
     ) -> List[MnistBox]:
-        pass
+        nms_filter = get_nms_filter(model_output, iou_threshold)
+        confidence_filter = get_confidence_filter(model_output, confidence_threshold)
+        idxs_predictions_ = logical_and_filter(nms_filter, confidence_filter)
+        predictions = _get_predictions(model_output, idxs_predictions_.tolist(), model_output.anchors)
+        return predictions
 
 if __name__ == '__main__':
     from src.tasks.gsn2.dataset import ImagesDataset

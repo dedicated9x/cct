@@ -16,7 +16,7 @@ def test_backbone(n_layers, expected_shape):
     np.random.seed(42)
 
     ds = ImagesDataset(split="train", size=1000)
-    _x = ds[0].get_torch_tensor()
+    _x = ds.get_canvas(0).get_torch_tensor()
 
     model = Backbone(n_layers=n_layers)
     model.eval()

@@ -226,3 +226,15 @@ def get_random_canvas(
         ):
             attempts_done += 1
     return new_canvas
+
+class DigitDetectionModelOutput:
+
+    def __init__(
+        self,
+        anchors: List[MnistBox],
+        classification_output: torch.Tensor,
+        box_regression_output: torch.Tensor,
+    ):
+        self.anchors = anchors
+        self.classification_output = classification_output
+        self.box_regression_output = box_regression_output
