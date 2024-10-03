@@ -1,6 +1,7 @@
 from typing import List
 
 import torch
+import numpy as np
 import torchvision
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
@@ -12,7 +13,7 @@ from src.tasks.gsn2.structures import MnistBox
 
 from src.tasks.gsn2.dataset import ImagesDataset
 
-def get_nms_filter(model_output: DigitDetectionModelOutput):
+def get_nms_filter(model_output: DigitDetectionModelOutput, iou_threshold):
     xs_min = torch.Tensor([e.x_min for e in model_output.anchors]) + model_output.box_regression_output[:, 0]
     ys_min = torch.Tensor([e.y_min for e in model_output.anchors]) + model_output.box_regression_output[:, 2]
     xs_max = torch.Tensor([e.x_max for e in model_output.anchors]) + model_output.box_regression_output[:, 1]
@@ -22,7 +23,7 @@ def get_nms_filter(model_output: DigitDetectionModelOutput):
     boxes = boxes.transpose(0, 1)
 
     scores = torch.sigmoid(model_output.classification_output).max(dim=1).values
-    nms_filter = torchvision.ops.nms(boxes, scores, iou_threshold=0.5)
+    nms_filter = torchvision.ops.nms(boxes, scores, iou_threshold)
     return nms_filter
 
 def get_confidence_filter(model_output: DigitDetectionModelOutput, confidence_threshold):
@@ -44,7 +45,7 @@ def logical_and_filter(filter1, filter2):
     # Convert the result back to a tensor
     return torch.tensor(list(intersection))
 
-def get_predictions(
+def _get_predictions(
         model_output: DigitDetectionModelOutput,
         idxs_predictions: List[int],
         anchors: List[MnistBox]
@@ -64,7 +65,16 @@ def get_predictions(
 
     return list_predictions
 
-
+def get_predictions(
+        model_output: DigitDetectionModelOutput,
+        iou_threshold: float,
+        confidence_threshold: float
+):
+    nms_filter = get_nms_filter(model_output, iou_threshold)
+    confidence_filter = get_confidence_filter(model_output, confidence_threshold)
+    idxs_predictions_ = logical_and_filter(nms_filter, confidence_filter)
+    predictions = _get_predictions(model_output, idxs_predictions_.tolist(), anchor_set.list_mnistboxes)
+    return predictions
 
 if __name__ == '__main__':
     anchor_sizes = [
@@ -80,10 +90,6 @@ if __name__ == '__main__':
     )
     canvas = ds_val.get_canvas(0)
 
-
-    confidence_threshold_ = 0.6
-
-
     classification_output_ = torch.load("/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/clf_output.pt")
     box_regression_output_ = torch.load("/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/boxreg_output.pt")
 
@@ -93,14 +99,27 @@ if __name__ == '__main__':
         box_regression_output_
     )
 
-    nms_filter = get_nms_filter(model_output_)
-    confidence_filter = get_confidence_filter(model_output_, confidence_threshold_)
-    idxs_predictions_ = logical_and_filter(nms_filter, confidence_filter)
-    print(len(idxs_predictions_))
-    predictions = get_predictions(model_output_, idxs_predictions_.tolist(), anchor_set.list_mnistboxes)
+    fig, axes = plt.subplots(3, 3)
 
-    fig, ax = plt.subplots()
-    canvas.plot_on_ax(ax, boxes=predictions)
+
+    # confidence_threshold_ = 0.6
+    # iou_threshold_ = 0.5
+    limit = 100
+
+    idx_ax = 0
+    for confidence_threshold_ in [0.5, 0.6, 0.7]:
+        for iou_threshold_ in [0.3, 0.5, 0.7]:
+
+            ax = axes.flatten()[idx_ax]
+            idx_ax += 1
+
+            predictions = get_predictions(model_output_, iou_threshold_, confidence_threshold_)
+            # TODO dodaj limit
+            if len(predictions) >= limit:
+                predictions = np.random.choice(predictions, limit, replace=False).tolist()
+
+            canvas.plot_on_ax(ax, boxes=predictions)
+            ax.set_xlabel(f"iou={iou_threshold_}, conf={confidence_threshold_}")
 
     plt.show()
 
