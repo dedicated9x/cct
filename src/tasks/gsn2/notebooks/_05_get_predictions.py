@@ -10,7 +10,7 @@ from src.tasks.gsn2.dataset import ImagesDataset
 from src.tasks.gsn2.target_decoder import TargetDecoder
 from src.tasks.gsn2.structures import DigitDetectionModelOutput
 
-def plot_predictions(model_output, canvas, limit):
+def plot_predictions(model_output, canvas_image, limit):
     fig, axes = plt.subplots(3, 3)
 
     idx_ax = 0
@@ -25,7 +25,10 @@ def plot_predictions(model_output, canvas, limit):
             if len(predictions) >= limit:
                 predictions = np.random.choice(predictions, limit, replace=False).tolist()
 
-            canvas.plot_on_ax(ax, boxes=predictions)
+            ax.imshow(canvas_image)
+            for box in predictions:
+                box.plot_on_ax(ax)
+
             ax.set_xlabel(f"iou={iou_threshold}, conf={confidence_threshold}")
 
     # Leave possibility to log the figure
@@ -55,7 +58,7 @@ if __name__ == '__main__':
         box_regression_output_
     )
 
-    plot_predictions(model_output_, canvas_, limit=100)
+    plot_predictions(model_output_, canvas_.image, limit=100)
 
     plt.show()
 

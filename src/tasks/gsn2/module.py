@@ -11,6 +11,7 @@ from src.tasks.gsn2.anchor_set import AnchorSet
 from src.tasks.gsn2.arch import MyNet32, DigitDetectionModelOutput
 from src.tasks.gsn2.dataset import ImagesDataset
 from src.tasks.gsn2.target_decoder import TargetDecoder
+from src.tasks.gsn2.notebooks._05_get_predictions import plot_predictions
 
 
 
@@ -133,6 +134,7 @@ class ObjectDetectionModule(BaseModule):
         return batch
 
     def test_epoch_end(self, outputs):
+        # TODO zcatowac poszczegolne batche
         n_batches = len(outputs)
         batch_size = outputs[0]['classification_target'].shape[0]
         for idx_batch in range(n_batches):
@@ -145,11 +147,30 @@ class ObjectDetectionModule(BaseModule):
                 canvas = outputs[idx_batch]['canvas'][idx_sample]
                 boxes = outputs[idx_batch]['boxes'][idx_sample]
 
-                predictions = TargetDecoder().get_predictions(model_output)
+                # predictions = TargetDecoder().get_predictions(model_output)
 
-        self.plot_predictions()
+        chosen_output = DigitDetectionModelOutput(
+            self.anchors,
+            outputs[0]['classification_output'][4].cpu(),
+            outputs[0]['box_regression_output'][4].cpu(),
+        )
+        fig = plot_predictions(
+            model_output=chosen_output,
+            canvas_image=outputs[0]['canvas'][4].squeeze().cpu().numpy(),
+            limit=100
+        )
+
+        # Log the plot to wandb
+        wandb.log({"Confusion Matrix": wandb.Image(fig)})
+
+        # Close the plot to avoid memory issues
+        plt.close(fig)
 
     def plot_predictions(self):
+
+        # plot_predictions(model_output_, canvas_, limit=100)
+
+
         # Generate data points
         x = np.linspace(0, 2 * np.pi, 100)  # 100 points between 0 and 2π
         y = np.sin(x)
