@@ -2,6 +2,7 @@ defaults:
   - /../../../common/conf/base@
   - model/base
   - dataset/base
+  - loss/base
   - _self_
 
 main:

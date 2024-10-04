@@ -71,6 +71,7 @@ class ObjectDetectionModule(BaseModule):
 
         self.anchors = anchor_set.list_mnistboxes
         self.collate_fn = custom_collate_fn
+        self.loss_params = config.loss
 
         self.save_hyperparameters(config)
 
@@ -88,14 +89,20 @@ class ObjectDetectionModule(BaseModule):
             clf_target = batch['classification_target'][idx_sample][matched_anchors]
             clf_output = output.classification_output[idx_sample][matched_anchors]
 
-            focal_loss= torchvision.ops.sigmoid_focal_loss(clf_output, clf_target, reduction="sum")
+            focal_loss= torchvision.ops.sigmoid_focal_loss(
+                clf_output,
+                clf_target,
+                alpha=self.loss_params.focal.alpha,
+                gamma=self.loss_params.focal.gamma,
+                reduction="sum"
+            )
 
             boxreg_target = batch['box_regression_target'][idx_sample][matched_anchors]
             boxreg_output = output.box_regression_output[idx_sample][matched_anchors]
 
             smooth_l1_loss = F.smooth_l1_loss(boxreg_output, boxreg_target, reduction="sum")
 
-            total_loss = focal_loss + smooth_l1_loss
+            total_loss = focal_loss + self.loss_params.w_L1 * smooth_l1_loss
 
             loss_batch += total_loss
             n_anchors_batch += len(matched_anchors)

@@ -1,9 +1,7 @@
-import os
 import hydra
 from  hydra.utils import instantiate
 import omegaconf
 import pytorch_lightning as pl
-from pathlib import Path
 
 from src.common.get_trainer import get_trainer
 
@@ -24,8 +22,8 @@ def main(config: omegaconf.DictConfig) -> None:
 def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
-    config.trainer.wandb = True
-    #
+    # config.trainer.wandb = True
+
     # config.trainer.ckpt_path = "/home/admin2/Documents/repos/cct/.EXCLUDED/checkpoints/39-0.40.ckpt"
     config.trainer.max_epochs = 40
     # config.trainer.batch_size = 6
