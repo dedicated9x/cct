@@ -26,10 +26,10 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
 
     config.trainer.wandb = True
     #
-    config.trainer.ckpt_path = "/home/admin2/Documents/repos/cct/.EXCLUDED/checkpoints/39-0.40.ckpt"
-    config.trainer.max_epochs = 45
+    # config.trainer.ckpt_path = "/home/admin2/Documents/repos/cct/.EXCLUDED/checkpoints/39-0.40.ckpt"
+    config.trainer.max_epochs = 40
     # config.trainer.batch_size = 6
-    config.trainer.limit_train_batches = 2
+    # config.trainer.limit_train_batches = 2
     # config.trainer.limit_val_batches = 2
     # config.trainer.limit_test_batches = 2
 

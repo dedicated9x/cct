@@ -34,10 +34,13 @@ def _get_metrics_sample(
     else:
         accuracy = 0
 
+    f1_score = 2 * precision * recall / (precision + recall + 1e-8)
+
     return {
         "precision": precision,
         "recall": recall,
-        "accuracy": accuracy
+        "accuracy": accuracy,
+        "f1_score": f1_score
     }
 
 def get_metrics_sample(
@@ -86,7 +89,7 @@ def get_metrics_batch(
         list_metrics.append(metrics)
         list_gt_box_counts.append(len(gt_boxes_sample))
 
-    metric_names = ["accuracy", "precision", "recall"]
+    metric_names = ["accuracy", "precision", "recall", "f1_score"]
     n_samples = len(list_metrics)
     metric_avgs = {}
     for name in metric_names:

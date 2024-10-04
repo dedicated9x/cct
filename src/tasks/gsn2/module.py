@@ -116,12 +116,9 @@ class ObjectDetectionModule(BaseModule):
         box_regression_output = torch.cat([batch['box_regression_output'] for batch in outputs]).cpu()
         gt_boxes = sum([batch['boxes'] for batch in outputs], [])
 
-        for threshold, metric_name in zip(
-            [0.5, 0.6, 0.7],
-            ["Val/AccC5", "Val/AccC6", "Val/AccC7"]
-        ):
+        for threshold in [0.5, 0.6, 0.7]:
 
-            acc = get_metrics_batch(
+            dict_metrics = get_metrics_batch(
                 anchors=self.anchors,
                 classification_output=classification_output,
                 box_regression_output=box_regression_output,
@@ -129,10 +126,18 @@ class ObjectDetectionModule(BaseModule):
                 iou_threshold=0.5,
                 confidence_threshold=threshold
             )
-            acc = acc['recall']
-            self.log(metric_name, acc)
-            if metric_name == "Val/AccC7":
-                print(f"\n {metric_name} = {acc:.2f}")
+            abbrev_map = {
+                "precision": "Prec",
+                "recall": "Rec",
+                "accuracy": "Acc",
+                "f1_score": "F1"
+            }
+
+            for metric_name, value in dict_metrics.items():
+                metric_name = f"Val/{abbrev_map[metric_name]}C{str(threshold)[-1]}"
+                self.log(metric_name, value)
+                if metric_name == 'Val/F1C7':
+                    print(f"\n {metric_name} = {value:.3f}")
 
     def test_step(self, batch, batch_idx):
         return self.validation_step(batch, batch_idx)
