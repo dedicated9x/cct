@@ -1,2 +1,4 @@
 train:
   size: 1024
+
+iou_threshold: 0.5

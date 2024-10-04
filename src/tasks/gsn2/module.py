@@ -59,13 +59,13 @@ class ObjectDetectionModule(BaseModule):
         self.ds_train = ImagesDataset(
             "train",
             config.dataset.train.size,
-            config.shared.iou_threshold,
+            config.dataset.iou_threshold,
             anchors=anchor_set.list_mnistboxes
         )
         self.ds_val = ImagesDataset(
             "val",
             None,
-            config.shared.iou_threshold,
+            config.dataset.iou_threshold,
             anchors=anchor_set.list_mnistboxes
         )
         self.ds_test = self.ds_val
@@ -117,17 +117,22 @@ class ObjectDetectionModule(BaseModule):
         box_regression_output = torch.cat([batch['box_regression_output'] for batch in outputs]).cpu()
         gt_boxes = sum([batch['boxes'] for batch in outputs], [])
 
-        acc_c7 = accuracy_batch(
-            anchors=self.anchors,
-            classification_output=classification_output,
-            box_regression_output=box_regression_output,
-            gt_boxes=gt_boxes,
-            iou_threshold=0.5,
-            confidence_threshold=0.7
-        )
+        for threshold, metric_name in zip(
+            [0.5, 0.6, 0.7],
+            ["Val/AccC5", "Val/AccC6", "Val/AccC7"]
+        ):
 
-        print(f"\n Val/AccC7 = {acc_c7:.2f}")
-        self.log(f"Val/AccC7", acc_c7)
+            acc = accuracy_batch(
+                anchors=self.anchors,
+                classification_output=classification_output,
+                box_regression_output=box_regression_output,
+                gt_boxes=gt_boxes,
+                iou_threshold=0.5,
+                confidence_threshold=threshold
+            )
+            self.log(metric_name, acc)
+            if metric_name == "Val/AccC7":
+                print(f"\n {metric_name} = {acc:.2f}")
 
     def test_step(self, batch, batch_idx):
         return self.validation_step(batch, batch_idx)
@@ -145,7 +150,7 @@ class ObjectDetectionModule(BaseModule):
         )
 
         # Log the plot to wandb
-        wandb.log({"Confusion Matrix": wandb.Image(fig)})
+        wandb.log({"Predictions": wandb.Image(fig)})
 
         # Close the plot to avoid memory issues
         plt.close(fig)

@@ -23,6 +23,3 @@ trainer:
   ckpt_path: null
   tag: null
 
-# TODO czy na pewno shared
-shared:
-  iou_threshold: 0.5
