@@ -100,7 +100,7 @@ def print_filtered_files(root_dir, excluded_words):
 if __name__ == "__main__":
     root_dir = "/home/admin2/Documents/repos/cct"
     excluded_dirs = ['.EXCLUDED', '_knowledge']
-    excluded_words = ['_knowledge', '.EXCLUDED', 'flowers', 'tests', 'print_repo']
+    excluded_words = ['_knowledge', '.EXCLUDED', 'flowers', 'tests', 'print_repo', "gsn2"]
 
     print_tree(root_dir, excluded_dirs=excluded_dirs)
     print_filtered_files(root_dir, excluded_words)

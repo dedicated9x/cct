@@ -25,9 +25,9 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
     config.trainer.wandb = True
-
-    config.trainer.ckpt_path = "/home/admin2/Documents/repos/cct/.EXCLUDED/checkpoints/39-0.40.ckpt"
-    config.trainer.max_epochs = 40
+    #
+    # config.trainer.ckpt_path = "/home/admin2/Documents/repos/cct/.EXCLUDED/checkpoints/39-0.40.ckpt"
+    # config.trainer.max_epochs = 40
     # config.trainer.batch_size = 6
     # config.trainer.limit_test_batches = 2
 
@@ -35,10 +35,10 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
 
     module = instantiate(config.module, config)
     trainer = get_trainer(config=config)
-    # trainer.fit(
-    #     model=module,
-    #     ckpt_path=config.trainer.ckpt_path
-    # )
+    trainer.fit(
+        model=module,
+        ckpt_path=config.trainer.ckpt_path
+    )
     if config.main.is_tested:
         trainer.test(
             model=module,
@@ -47,8 +47,4 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
 
 if __name__ == '__main__':
     main()
-
-"""
-    # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/lightning_logs/version_5/checkpoints/19-0.20.ckpt"
-"""
 
