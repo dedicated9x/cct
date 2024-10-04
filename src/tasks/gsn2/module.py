@@ -12,6 +12,8 @@ from src.tasks.gsn2.arch import MyNet32, DigitDetectionModelOutput
 from src.tasks.gsn2.dataset import ImagesDataset
 from src.tasks.gsn2.target_decoder import TargetDecoder
 from src.tasks.gsn2.notebooks._05_get_predictions import plot_predictions
+from src.tasks.gsn2.metrics import accuracy_single_canvas, accuracy_batch
+
 
 
 
@@ -134,23 +136,20 @@ class ObjectDetectionModule(BaseModule):
         return batch
 
     def test_epoch_end(self, outputs):
-        # TODO zcatowac poszczegolne batche
-        n_batches = len(outputs)
-        batch_size = outputs[0]['classification_target'].shape[0]
-        for idx_batch in range(n_batches):
-            for idx_sample in range(batch_size):
-                model_output = DigitDetectionModelOutput(
-                    self.anchors,
-                    outputs[idx_batch]['classification_output'][idx_sample],
-                    outputs[idx_batch]['box_regression_output'][idx_sample],
-                )
-                canvas = outputs[idx_batch]['canvas'][idx_sample]
-                boxes = outputs[idx_batch]['boxes'][idx_sample]
+        classification_output = torch.cat([batch['classification_output'] for batch in outputs]).cpu()
+        box_regression_output = torch.cat([batch['box_regression_output'] for batch in outputs]).cpu()
+        gt_boxes = sum([batch['boxes'] for batch in outputs], [])
 
-                # if idx_batch == 0 and idx_sample == 4:
-                #     torch.save(outputs[idx_batch]['classification_output'][idx_sample].cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/clf_output.pt")
-                #     torch.save(outputs[idx_batch]['box_regression_output'][idx_sample].cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/boxreg_output.pt")
+        acc_c7 = accuracy_batch(
+            anchors=self.anchors,
+            classification_output=classification_output,
+            box_regression_output=box_regression_output,
+            gt_boxes=gt_boxes,
+            iou_threshold=0.5,
+            confidence_threshold=0.7
+        )
 
+        # TODO to wymaga indeksów
         chosen_output = DigitDetectionModelOutput(
             self.anchors,
             outputs[0]['classification_output'][4].cpu(),
@@ -169,33 +168,6 @@ class ObjectDetectionModule(BaseModule):
         plt.close(fig)
 
     def plot_predictions(self):
-
-        # plot_predictions(model_output_, canvas_, limit=100)
-
-
-        # Generate data points
-        x = np.linspace(0, 2 * np.pi, 100)  # 100 points between 0 and 2π
-        y = np.sin(x)
-
-        # Create the plot with subplots
-        fig, ax = plt.subplots(figsize=(8, 6))
-
-        # Plot the data
-        ax.plot(x, y, label='sin(x)')
-
-        # Add labels and title
-        ax.set_xlabel('x')
-        ax.set_ylabel('sin(x)')
-        ax.set_title('Plot of sin(x)')
-
-        # Add grid and legend
-        ax.grid(True)
-        ax.legend()
-
-        # Log the plot to wandb
-        wandb.log({"Confusion Matrix": wandb.Image(fig)})
-
-        # Close the plot to avoid memory issues
-        plt.close(fig)
+        raise NotImplementedError
 
 

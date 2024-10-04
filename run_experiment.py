@@ -24,7 +24,7 @@ def main(config: omegaconf.DictConfig) -> None:
 def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
-    config.trainer.wandb = True
+    # config.trainer.wandb = True
 
     config.trainer.ckpt_path = "/home/admin2/Documents/repos/cct/.EXCLUDED/checkpoints/39-0.40.ckpt"
     # config.trainer.max_epochs = 40
