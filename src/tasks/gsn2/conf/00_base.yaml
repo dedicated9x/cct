@@ -5,7 +5,7 @@ defaults:
   - _self_
 
 main:
-  is_tested: false
+  is_tested: true
 
 module:
   _target_: src.tasks.gsn2.module.ObjectDetectionModule
@@ -18,7 +18,7 @@ trainer:
   batch_size: 16
   device: [0]
   monitored_metric:
-    name: "Val/Acc"
+    name: "Val/AccC7"
     mode: max
   ckpt_path: null
   tag: null

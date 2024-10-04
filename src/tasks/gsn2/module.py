@@ -68,16 +68,12 @@ class ObjectDetectionModule(BaseModule):
             config.shared.iou_threshold,
             anchors=anchor_set.list_mnistboxes
         )
-        # TODO remove this line
         self.ds_test = self.ds_val
 
         self.anchors = anchor_set.list_mnistboxes
         self.collate_fn = custom_collate_fn
 
         self.save_hyperparameters(config)
-
-        # TODO remove
-        self.counter = 0
 
     def training_step(self, batch, batch_idx):
         output = self.model(batch['canvas'])
@@ -111,31 +107,12 @@ class ObjectDetectionModule(BaseModule):
         return loss_batch
 
     def validation_step(self, batch, batch_idx):
-        return batch_idx
-        # x, targets = batch['x'], batch['y_shapes']
-        # logits = self.model(x)
-        # return {"logits": logits, "targets": targets}
-
-    def validation_epoch_end(self, outputs):
-        self.counter += 1
-        self.log(f"Val/Acc", self.counter / 100)
-        # logits = torch.cat([batch['logits'] for batch in outputs])
-        # targets = torch.cat([batch['targets'] for batch in outputs])
-        #
-        # preds = torch.sigmoid(logits)
-        # preds_binary = convert_topk_to_binary(preds, 2)
-        #
-        # acc = (preds_binary.int() == targets).all(dim=1).float().mean()
-        # print(f"\n Val/Acc = {acc:.2f}")
-        # self.log(f"Val/Acc", acc)
-
-    def test_step(self, batch, batch_idx):
         outputs = self.model(batch['canvas'])
         batch['classification_output'] = outputs.classification_output
         batch['box_regression_output'] = outputs.box_regression_output
         return batch
 
-    def test_epoch_end(self, outputs):
+    def validation_epoch_end(self, outputs):
         classification_output = torch.cat([batch['classification_output'] for batch in outputs]).cpu()
         box_regression_output = torch.cat([batch['box_regression_output'] for batch in outputs]).cpu()
         gt_boxes = sum([batch['boxes'] for batch in outputs], [])
@@ -149,7 +126,13 @@ class ObjectDetectionModule(BaseModule):
             confidence_threshold=0.7
         )
 
-        # TODO to wymaga indeksów
+        print(f"\n Val/AccC7 = {acc_c7:.2f}")
+        self.log(f"Val/AccC7", acc_c7)
+
+    def test_step(self, batch, batch_idx):
+        return self.validation_step(batch, batch_idx)
+
+    def test_epoch_end(self, outputs):
         chosen_output = DigitDetectionModelOutput(
             self.anchors,
             outputs[0]['classification_output'][4].cpu(),
@@ -166,8 +149,3 @@ class ObjectDetectionModule(BaseModule):
 
         # Close the plot to avoid memory issues
         plt.close(fig)
-
-    def plot_predictions(self):
-        raise NotImplementedError
-
-

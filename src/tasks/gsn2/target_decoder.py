@@ -57,9 +57,16 @@ def get_confidence_filter(model_output: DigitDetectionModelOutput, confidence_th
 
 def logical_and_filter(filter1, filter2):
     # TODO one niemusza byc tensorami
+    def tensor_to_set(tensor):
+        if tensor.dim() == 0:
+            return {tensor.item()}  # Zamień skalara na zbiór z jednym elementem
+        else:
+            return set(tensor.tolist())  # Zamień tensor wielowymiarowy na zbiór elementów
+
+
     # Convert tensors to sets and find intersection
-    filter1_set = set(filter1.tolist())
-    filter2_set = set(filter2.tolist())
+    filter1_set = tensor_to_set(filter1)
+    filter2_set = tensor_to_set(filter2)
 
     # Find the intersection
     intersection = filter1_set & filter2_set

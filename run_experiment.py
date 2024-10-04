@@ -24,14 +24,12 @@ def main(config: omegaconf.DictConfig) -> None:
 def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
-    # config.trainer.wandb = True
+    config.trainer.wandb = True
 
     config.trainer.ckpt_path = "/home/admin2/Documents/repos/cct/.EXCLUDED/checkpoints/39-0.40.ckpt"
-    # config.trainer.max_epochs = 40
-    config.trainer.batch_size = 6
-    config.trainer.limit_test_batches = 2
-    config.main.is_tested = True
-
+    config.trainer.max_epochs = 40
+    # config.trainer.batch_size = 6
+    # config.trainer.limit_test_batches = 2
 
     pl.seed_everything(1234)
 
@@ -44,8 +42,7 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
     if config.main.is_tested:
         trainer.test(
             model=module,
-            # ckpt_path="best"
-            ckpt_path=config.trainer.ckpt_path
+            ckpt_path=config.trainer.ckpt_path or "best"
         )
 
 if __name__ == '__main__':
