@@ -50,14 +50,14 @@ def get_metrics_sample(
     metrics = _get_metrics_sample(predictions, gt_boxes)
     return metrics
 
-def list_average(
-        _list: List[float],
-        weights: Optional[List[Union[float, int]]]
-):
-    sum_weights= sum(weights)
-    weights = [e / sum_weights for e in weights]
-    avg = sum([w * x for w, x in zip(weights, _list)])
-    return avg
+# def list_average(
+#         _list: List[float],
+#         weights: Optional[List[Union[float, int]]]
+# ):
+#     sum_weights= sum(weights)
+#     weights = [e / sum_weights for e in weights]
+#     avg = sum([w * x for w, x in zip(weights, _list)])
+#     return avg
 
 def get_metrics_batch(
     anchors: List[MnistBox],
@@ -66,8 +66,8 @@ def get_metrics_batch(
     gt_boxes: List[List[MnistBox]],
     iou_threshold: float,
     confidence_threshold: float
-):
-    list_recalls = []
+) -> Dict[str, float]:
+    list_metrics = []
     list_gt_box_counts = []
     for idx_sample, _ in enumerate(classification_output):
         model_output_sample = DigitDetectionModelOutput(
@@ -77,14 +77,19 @@ def get_metrics_batch(
         )
         gt_boxes_sample = gt_boxes[idx_sample]
 
-        recall = get_metrics_sample(
+        metrics = get_metrics_sample(
             model_output=model_output_sample,
             gt_boxes=gt_boxes_sample,
             iou_threshold=iou_threshold,
             confidence_threshold=confidence_threshold
-        )['recall']
-        list_recalls.append(recall)
+        )
+        list_metrics.append(metrics)
         list_gt_box_counts.append(len(gt_boxes_sample))
 
-    weighted_recall = list_average(list_recalls, list_gt_box_counts)
-    return weighted_recall
+    metric_names = ["accuracy", "precision", "recall"]
+    n_samples = len(list_metrics)
+    metric_avgs = {}
+    for name in metric_names:
+        metric_avg = sum([e[name] for e in list_metrics]) / n_samples
+        metric_avgs[name] = metric_avg
+    return metric_avgs

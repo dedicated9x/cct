@@ -8,7 +8,7 @@ from src.tasks.gsn2.anchor_set import AnchorSet
 from src.tasks.gsn2.dataset import ImagesDataset
 from src.tasks.gsn2.target_decoder import TargetDecoder
 from src.tasks.gsn2.structures import DigitDetectionModelOutput
-from src.tasks.gsn2.metrics import accuracy_single_canvas
+from src.tasks.gsn2.metrics import get_metrics_sample
 
 def plot_predictions(model_output, canvas_image, limit):
     fig, axes = plt.subplots(3, 3)
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     plot_predictions(model_output_, canvas_.image, limit=100)
     plt.show()
 
-    acc = accuracy_single_canvas(
+    acc = get_metrics_sample(
         model_output=model_output_,
         gt_boxes=canvas_.boxes,
         iou_threshold=0.5,

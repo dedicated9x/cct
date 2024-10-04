@@ -12,8 +12,7 @@ from src.tasks.gsn2.arch import MyNet32, DigitDetectionModelOutput
 from src.tasks.gsn2.dataset import ImagesDataset
 from src.tasks.gsn2.target_decoder import TargetDecoder
 from src.tasks.gsn2.notebooks._05_get_predictions import plot_predictions
-from src.tasks.gsn2.metrics import accuracy_single_canvas, accuracy_batch
-
+from src.tasks.gsn2.metrics import get_metrics_batch
 
 
 
@@ -122,7 +121,7 @@ class ObjectDetectionModule(BaseModule):
             ["Val/AccC5", "Val/AccC6", "Val/AccC7"]
         ):
 
-            acc = accuracy_batch(
+            acc = get_metrics_batch(
                 anchors=self.anchors,
                 classification_output=classification_output,
                 box_regression_output=box_regression_output,
@@ -130,6 +129,7 @@ class ObjectDetectionModule(BaseModule):
                 iou_threshold=0.5,
                 confidence_threshold=threshold
             )
+            acc = acc['recall']
             self.log(metric_name, acc)
             if metric_name == "Val/AccC7":
                 print(f"\n {metric_name} = {acc:.2f}")
