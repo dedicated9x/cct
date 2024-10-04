@@ -47,7 +47,7 @@ if __name__ == '__main__':
     ds_val_ = ImagesDataset(
         "val",None, 0.5, anchors=anchor_set_.list_mnistboxes
     )
-    canvas_ = ds_val_.get_canvas(0)
+    canvas_ = ds_val_.get_canvas(4)
 
     classification_output_ = torch.load("/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/clf_output.pt")
     box_regression_output_ = torch.load("/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/boxreg_output.pt")

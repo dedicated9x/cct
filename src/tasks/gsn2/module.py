@@ -147,7 +147,9 @@ class ObjectDetectionModule(BaseModule):
                 canvas = outputs[idx_batch]['canvas'][idx_sample]
                 boxes = outputs[idx_batch]['boxes'][idx_sample]
 
-                # predictions = TargetDecoder().get_predictions(model_output)
+                # if idx_batch == 0 and idx_sample == 4:
+                #     torch.save(outputs[idx_batch]['classification_output'][idx_sample].cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/clf_output.pt")
+                #     torch.save(outputs[idx_batch]['box_regression_output'][idx_sample].cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/boxreg_output.pt")
 
         chosen_output = DigitDetectionModelOutput(
             self.anchors,
