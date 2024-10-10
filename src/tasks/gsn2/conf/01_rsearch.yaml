@@ -1,0 +1,54 @@
+defaults:
+  - 00_base
+  - _self_
+
+random_search:
+  distributions:
+    dataset.iou_threshold:
+      - 0.3
+      - 0.5
+      - 0.7
+    loss.w_L1:
+      0.25: 0.15
+      0.5: 0.15
+      1.0: 0.4
+      2: 0.15
+      4: 0.15
+    loss.focal.alpha:
+      - 0.15
+      - 0.25
+      - 0.45
+    loss.focal.gamma:
+      - 1.5
+      - 2
+      - 3
+    model.n_layers_backbone:
+      - 1
+      - 2
+      - 3
+      - 4
+    model.n_layers_clf_head:
+      - 1
+      - 2
+      - 4
+    model.n_layers_reg_head:
+      - 1
+      - 2
+      - 4
+    trainer.batch_size:
+      - 8
+      - 16
+      - 64
+      - 128
+    optimizer.lr:
+      - 0.000003
+      - 0.00001
+      - 0.00003
+    trainer.tag:
+      - rsearch_no_1
+    trainer.max_epochs:
+      - 20
+      - 40
+      - 80
+
+  n_iters: 100

@@ -162,7 +162,11 @@ if __name__ == '__main__':
 
     for i in range(100):
         canvas = ds.get_canvas(i)
-        target = decoder.get_targets(canvas, anchor_set.list_mnistboxes)
+        target = decoder.get_targets(
+            canvas,
+            anchor_set.list_mnistboxes,
+            # iou_threshold=0.3
+        )
 
         matched_anchors = [
             elem for idx, elem in enumerate(anchor_set.list_mnistboxes)

@@ -23,11 +23,10 @@ def sample_configs(
         list_configs.append(next_config)
     return list_configs
 
-# @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="00_shapes_base")
-@hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="03_shapes_rsearch_v2")
+# @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="03_shapes_rsearch_v2")
+@hydra.main(version_base="1.2", config_path="src/tasks/gsn2/conf", config_name="01_rsearch")
 def main(config: omegaconf.DictConfig) -> None:
-    # TODO remove
-    config.trainer.max_epochs = 5
+
 
     config_random_search = config.random_search
     del config.random_search
@@ -39,11 +38,11 @@ def main(config: omegaconf.DictConfig) -> None:
         n_iters=config_random_search.n_iters
     )
 
-    for config in list_configs:
+    for config_ in list_configs:
         try:
             wandb.finish()
             # Your code that might raise an exception
-            run_experiment(config)
+            run_experiment(config_)
         except Exception as e:
             # Handle any exception
             print(f"An error occurred: {e}")
