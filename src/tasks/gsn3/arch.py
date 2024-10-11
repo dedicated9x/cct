@@ -19,6 +19,7 @@ class Attention(nn.Module):
         self.list_Wvs = nn.ModuleList([nn.Linear(hidden_dim, QKV_DIM) for i in range(num_heads)])
 
 
+
     def forward(self, x):
         # TODO: implement Attention; return both result of attention mechanism and
         # attention weights (for visualization).
