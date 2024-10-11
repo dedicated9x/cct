@@ -1,10 +1,7 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from time import time
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.nn.functional as F
 
 
@@ -49,15 +46,17 @@ class FeedForward(nn.Module):
     def __init__(self, hidden_dim, d_ff):
         super(FeedForward, self).__init__()
         # TODO: implement FeedForward layer
-        a = 2
+        self.layer_up = nn.Linear(hidden_dim, d_ff)
+        self.layer_down = nn.Linear(d_ff, hidden_dim)
         pass
 
     def forward(self, x):
-        # TODO: implement
         # x shape: (seqlen, batch, hiddendim)
-        result = x  # placeholder
-        pass
-        return result
+
+        x = self.layer_up(x)
+        x = F.relu(x)
+        x = self.layer_down(x)
+        return x
 
 
 class EncoderLayer(nn.Module):
@@ -66,15 +65,12 @@ class EncoderLayer(nn.Module):
         super(EncoderLayer, self).__init__()
         self.attention_layer = Attention(hidden_dim, num_heads)
         self.ff_layer = FeedForward(hidden_dim, d_ff)
-        # TODO: implement a single encoder layer, using Attention and FeedForward.
-        pass
 
     def forward(self, x):
         # x shape: (seqlen, batch, hiddendim)
-        # TODO: implement a single encoder layer, using Attention and FeedForward.
+
         x, att_weights = self.attention_layer(x)
         x = self.ff_layer(x)
-
         return x, att_weights
 
 # Code from https://www.tensorflow.org/tutorials/text/transformer

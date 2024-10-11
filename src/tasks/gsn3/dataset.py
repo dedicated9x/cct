@@ -16,6 +16,10 @@ SEQ_LEN = 64
 MAX_COUNT = 9
 OUTPUT_DIM = MAX_COUNT + 1
 
+SEED = 42
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+
 def get_single_example(n_tokens=None, seqlen=None):
   if n_tokens is None:
     n_tokens = N_TOKENS

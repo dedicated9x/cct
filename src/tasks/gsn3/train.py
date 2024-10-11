@@ -63,19 +63,8 @@ def train_model(model, lr, num_steps, batch_size):
     model.eval()
     return accs
 
-# TODO: change those placeholder parameters
-HIDDEN_DIM = 1  # change
-FF_DIM = 1  # change
-N_HEADS = 1  # change
-N_LAYERS = 1  # change
-
-BATCH_SIZE = 3  # change
-LR = 0.01  # change
-NUM_STEPS = 200  # change
-
 # Let's choose appropriate hyperparameters:
 HIDDEN_DIM = 128
-# QKV_DIM = 16
 FF_DIM = 256
 N_HEADS = 8
 N_LAYERS = 2
@@ -85,7 +74,27 @@ NUM_STEPS = 1000
 
 model = EncoderModel(N_TOKENS, HIDDEN_DIM, FF_DIM, OUTPUT_DIM, N_LAYERS, N_HEADS)
 accs = train_model(model, LR, NUM_STEPS, BATCH_SIZE)
-plt.plot([i * NUM_STEPS/(len(accs)-1) for i in range(len(accs))], accs)
+plt.plot([i * NUM_STEPS/(len(accs)-1) for i in range(len(accs))], [e.item() for e in accs])
 plt.xlabel('Steps')
 plt.ylabel('Test Acc')
 plt.show()
+
+# step 0 out of 1000
+# loss train 2.3270153999328613
+# accuracy test 0.004150390625
+#
+# step 10 out of 1000
+# loss train 1.804653525352478
+# accuracy test 0.2454833984375
+#
+# step 20 out of 1000
+# loss train 1.8742406368255615
+# accuracy test 0.227783203125
+#
+# step 30 out of 1000
+# loss train 1.8240848779678345
+# accuracy test 0.227783203125
+#
+# step 40 out of 1000
+# loss train 1.8283302783966064
+# accuracy test 0.2454833984375
