@@ -75,10 +75,11 @@ NUM_STEPS = 200  # change
 
 # Let's choose appropriate hyperparameters:
 HIDDEN_DIM = 128
+QKV_DIM = 16
 FF_DIM = 256
 N_HEADS = 8
 N_LAYERS = 2
-BATCH_SIZE = 64
+BATCH_SIZE = 7
 LR = 0.001
 NUM_STEPS = 1000
 
