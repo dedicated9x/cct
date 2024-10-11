@@ -16,10 +16,16 @@ for k in list_64_ks:
 list_dot_products = torch.Tensor(list_dot_products)
 print(list_dot_products)
 
-d = np.zeros((7, 64, 64))
+QKt_1 = np.zeros((7, 64, 64))
 for b in range(7):
     for i in range(64):
         for j in range(64):
-            d[b, i, j] = ((Q[i, b, :] * K[j, b, :])).sum()
+            for k in range(16):
+                QKt_1[b, i, j] += Q[i, b, k] * K[j, b, k]
 
-print(d[4, 17, :])
+QKt_2 = np.einsum('ibk,jbk->bij', Q, K)
+
+
+assert torch.isclose(list_dot_products, torch.Tensor(QKt_2[4, 17, :])).all().item()
+
+QKt = QKt_2
