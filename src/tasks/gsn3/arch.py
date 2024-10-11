@@ -12,41 +12,44 @@ class Attention(nn.Module):
     def __init__(self, hidden_dim, num_heads):
         super(Attention, self).__init__()
 
-        QKV_DIM = 16 # TODO przenies to gdzie indziej
+        dk = int(hidden_dim / num_heads)
 
-        self.list_Wqs = nn.ModuleList([nn.Linear(hidden_dim, QKV_DIM) for i in range(num_heads)])
-        self.list_Wks = nn.ModuleList([nn.Linear(hidden_dim, QKV_DIM) for i in range(num_heads)])
-        self.list_Wvs = nn.ModuleList([nn.Linear(hidden_dim, QKV_DIM) for i in range(num_heads)])
+        self.list_Wqs = nn.ModuleList([nn.Linear(hidden_dim, dk) for i in range(num_heads)])
+        self.list_Wks = nn.ModuleList([nn.Linear(hidden_dim, dk) for i in range(num_heads)])
+        self.list_Wvs = nn.ModuleList([nn.Linear(hidden_dim, dk) for i in range(num_heads)])
 
+        self.Wo = nn.Linear(hidden_dim, hidden_dim)
+
+        self.dk = dk
 
 
     def forward(self, x):
-        # TODO: implement Attention; return both result of attention mechanism and
-        # attention weights (for visualization).
         # x shape: (seqlen, batch, hiddendim)
 
+        list_attentions = []
+        att_weights = []
         for Wq, Wk, Wv in zip(self.list_Wqs, self.list_Wks, self.list_Wvs):
             Q = Wq(x)
             K = Wk(x)
             V = Wv(x)
 
-            torch.save(Q.cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/qkv/Q.pt")
-            torch.save(K.cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/qkv/K.pt")
-            torch.save(V.cpu(), "/home/admin2/Documents/repos/cct/.EXCLUDED/outputs/qkv/V.pt")
+            QKt = torch.einsum('ibk,jbk->bij', Q, K)
+            QKt_norm = F.softmax(QKt / np.sqrt(self.dk), dim=2)
+            attention_single_head = torch.einsum('bik,kbj->ibj', QKt_norm, V)
 
-        layer = nn.Linear(128, 16).cuda()
+            list_attentions.append(attention_single_head)
+            att_weights.append(QKt_norm)
 
-
-
-        result, att_weights = x, None  # placeholder
-        pass
-        return result, att_weights
+        attention = torch.cat(list_attentions, dim=2)
+        x = self.Wo(attention)
+        return x, att_weights
 
 
 class FeedForward(nn.Module):
     def __init__(self, hidden_dim, d_ff):
         super(FeedForward, self).__init__()
         # TODO: implement FeedForward layer
+        a = 2
         pass
 
     def forward(self, x):
@@ -61,18 +64,18 @@ class EncoderLayer(nn.Module):
     def __init__(self, hidden_dim, d_ff, num_heads, use_attention=True,
                  use_feedforward=True):
         super(EncoderLayer, self).__init__()
-        self.attention = Attention(hidden_dim, num_heads)
+        self.attention_layer = Attention(hidden_dim, num_heads)
+        self.ff_layer = FeedForward(hidden_dim, d_ff)
         # TODO: implement a single encoder layer, using Attention and FeedForward.
         pass
 
     def forward(self, x):
         # x shape: (seqlen, batch, hiddendim)
         # TODO: implement a single encoder layer, using Attention and FeedForward.
-        x = self.attention(x)
+        x, att_weights = self.attention_layer(x)
+        x = self.ff_layer(x)
 
-        result, att_weights = x, None  # placeholder
-        pass
-        return result, att_weights
+        return x, att_weights
 
 # Code from https://www.tensorflow.org/tutorials/text/transformer
 def get_angles(pos, i, d_model):
