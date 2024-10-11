@@ -1,6 +1,7 @@
 from time import time
 
 import torch
+import omegaconf
 import torch.nn as nn
 import torch.optim as optim
 
@@ -62,25 +63,32 @@ def _train_model(
             accs.append(test_acc)
     print('\nTRAINING TIME:', time() - start_time)
     model.eval()
-    return accs
-
-N_TOKENS = 16
-MAX_COUNT = 9
-
-# Let's choose appropriate hyperparameters:
-HIDDEN_DIM = 128
-FF_DIM = 256
-N_HEADS = 8
-N_LAYERS = 2
-BATCH_SIZE = 7
-LR = 0.001
-NUM_STEPS = 1000
-
-model = EncoderModel(N_TOKENS, HIDDEN_DIM, FF_DIM, N_LAYERS, N_HEADS, output_dim=(MAX_COUNT + 1))
-accs = _train_model(model, LR, NUM_STEPS, BATCH_SIZE, N_TOKENS, MAX_COUNT)
 
 
+def train(config: omegaconf.DictConfig):
+    n_tokens = 16
+    max_count = 9
 
+    model = EncoderModel(
+        n_tokens, config.hidden_dim, config.ff_dim,
+        config.n_layers, config.n_heads, output_dim=(max_count + 1)
+    )
+    _train_model(model, config.lr, config.num_steps, config.batch_size, n_tokens, max_count)
+
+config = {
+    "hidden_dim": 128,
+    "ff_dim": 256,
+    "n_heads": 8,
+    "n_layers": 2,
+    "batch_size": 7,
+    "lr": 0.001,
+    "num_steps": 1000
+}
+
+# Convert to DictConfig
+config = omegaconf.OmegaConf.create(config)
+
+train(config)
 
 # step 0 out of 1000
 # loss train 2.3270153999328613
