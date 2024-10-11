@@ -5,21 +5,24 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from src.tasks.gsn3.dataset import DEVICE, get_single_example, N_TOKENS
+from src.tasks.gsn3.dataset import get_single_example
 from src.tasks.gsn3.arch import EncoderModel
 
+N_TOKENS = 16
+SEQ_LEN = 64
 MAX_COUNT = 9
 OUTPUT_DIM = MAX_COUNT + 1
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 TEST_SIZE = 128
 
-test_examples = [get_single_example(max_count=MAX_COUNT) for i in range(TEST_SIZE)]
+test_examples = [get_single_example(N_TOKENS, SEQ_LEN, MAX_COUNT) for i in range(TEST_SIZE)]
 
 # Transpositions are used, because the convention in PyTorch is to represent
 # sequence tensors as <seq_len, batch_size> instead of <batch_size, seq_len>.
-test_X = torch.tensor([x[0] for x in test_examples],
-                      device=DEVICE).transpose(0, 1)
-test_Y = torch.tensor([x[1] for x in test_examples],
-                      device=DEVICE).transpose(0, 1)
+test_X = torch.tensor([x[0] for x in test_examples], device=DEVICE).transpose(0, 1)
+test_Y = torch.tensor([x[1] for x in test_examples], device=DEVICE).transpose(0, 1)
 
 
 def train_model(model, lr, num_steps, batch_size):
@@ -32,13 +35,10 @@ def train_model(model, lr, num_steps, batch_size):
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     for step in range(num_steps):
-        batch_examples = [get_single_example(max_count=MAX_COUNT) for i in range(batch_size)]
+        batch_examples = [get_single_example(N_TOKENS, SEQ_LEN, MAX_COUNT) for i in range(batch_size)]
 
-        batch_X = torch.tensor([x[0] for x in batch_examples],
-                               device=DEVICE
-                               ).transpose(0, 1)
-        batch_Y = torch.tensor([x[1] for x in batch_examples],
-                               device=DEVICE).transpose(0, 1)
+        batch_X = torch.tensor([x[0] for x in batch_examples], device=DEVICE).transpose(0, 1)
+        batch_Y = torch.tensor([x[1] for x in batch_examples], device=DEVICE).transpose(0, 1)
 
         model.train()
         model.zero_grad()
@@ -53,7 +53,8 @@ def train_model(model, lr, num_steps, batch_size):
             predicted_logits = model.forward(test_X).reshape(-1, OUTPUT_DIM)
             test_acc = (
                     torch.sum(torch.argmax(predicted_logits, dim=-1) == test_Y.reshape(-1))
-                    / test_Y.reshape(-1).shape[0])
+                    / test_Y.reshape(-1).shape[0]
+            )
             print('step', step, 'out of', num_steps)
             print('loss train', float(loss))
             print('accuracy test', float(test_acc))
