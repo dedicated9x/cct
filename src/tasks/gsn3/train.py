@@ -1,18 +1,18 @@
 import matplotlib.pyplot as plt
-import numpy as np
 from time import time
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 
-from src.tasks.gsn3.dataset import DEVICE, get_single_example, OUTPUT_DIM, N_TOKENS
+from src.tasks.gsn3.dataset import DEVICE, get_single_example, N_TOKENS
 from src.tasks.gsn3.arch import EncoderModel
 
+MAX_COUNT = 9
+OUTPUT_DIM = MAX_COUNT + 1
 TEST_SIZE = 128
 
-test_examples = [get_single_example() for i in range(TEST_SIZE)]
+test_examples = [get_single_example(max_count=MAX_COUNT) for i in range(TEST_SIZE)]
 
 # Transpositions are used, because the convention in PyTorch is to represent
 # sequence tensors as <seq_len, batch_size> instead of <batch_size, seq_len>.
@@ -32,7 +32,7 @@ def train_model(model, lr, num_steps, batch_size):
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     for step in range(num_steps):
-        batch_examples = [get_single_example() for i in range(batch_size)]
+        batch_examples = [get_single_example(max_count=MAX_COUNT) for i in range(batch_size)]
 
         batch_X = torch.tensor([x[0] for x in batch_examples],
                                device=DEVICE
