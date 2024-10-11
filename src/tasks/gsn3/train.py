@@ -4,6 +4,7 @@ import torch
 import omegaconf
 import torch.nn as nn
 import torch.optim as optim
+import wandb
 
 from src.tasks.gsn3.dataset import get_single_example
 from src.tasks.gsn3.arch import EncoderModel
@@ -35,6 +36,9 @@ def _train_model(
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
+    # Initialize wandb
+    wandb.init(project="gsn3-training", reinit=True)
+
     for step in range(num_steps):
         batch_examples = [get_single_example(n_tokens, seq_len, max_count) for i in range(batch_size)]
 
@@ -60,8 +64,19 @@ def _train_model(
             print('loss train', float(loss))
             print('accuracy test', float(test_acc))
             print()
+
+            # Log metrics to wandb
+            wandb.log({"train_loss": loss.item(), "test_accuracy": test_acc.item(), "step": step})
+
             accs.append(test_acc)
-    print('\nTRAINING TIME:', time() - start_time)
+
+
+    # Log the total training time
+    wandb.log({"training_time": time() - start_time})
+
+    # Finish the wandb run
+    wandb.finish()
+
     model.eval()
 
 
