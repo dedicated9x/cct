@@ -96,9 +96,18 @@ def get_positional_encoding(n_positions, n_dimensions):
 
 
 class EncoderModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, d_ff, output_dim, n_layers,
-                 num_heads, use_attention=True, use_feedforward=True,
-                 use_positional=True):
+    def __init__(
+            self,
+            input_dim,
+            hidden_dim,
+            d_ff,
+            n_layers,
+            num_heads,
+            output_dim,
+            use_attention=True,
+            use_feedforward=True,
+            use_positional=True
+    ):
         super(EncoderModel, self).__init__()
 
         self._use_positional = use_positional
