@@ -5,6 +5,8 @@ import omegaconf
 import torch.nn as nn
 import torch.optim as optim
 import wandb
+import datetime
+from pathlib import Path
 
 from src.tasks.gsn3.dataset import get_single_example
 from src.tasks.gsn3.arch import EncoderModel
@@ -79,6 +81,12 @@ def _train_model(
     # Log the total training time
     wandb.log({"training_time": time() - start_time})
 
+    # Save ckpt
+    filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".ckpt"
+    path_ckpt = str(Path("/tmp") / filename)
+    torch.save(model.state_dict(), path_ckpt)
+    print(f"Weights saved to \"{path_ckpt}\".")
+
     # Finish the wandb run
     wandb.finish()
 
@@ -93,6 +101,11 @@ def train(config: omegaconf.DictConfig):
         n_tokens, config.hidden_dim, config.ff_dim,
         config.n_layers, config.n_heads, output_dim=(max_count + 1)
     )
+
+    # Load the saved state_dict
+    if config.ckpt_path is not None:
+        model.load_state_dict(torch.load(config.ckpt_path))
+
     _train_model(
         model, config.lr, config.num_steps,
         config.batch_size, n_tokens, max_count, config
@@ -100,36 +113,19 @@ def train(config: omegaconf.DictConfig):
 
 if __name__ == '__main__':
     config = {
-        "hidden_dim": 128,
-        "ff_dim": 256,
+        "hidden_dim": 512,
+        "ff_dim": 512,
         "n_heads": 8,
-        "n_layers": 2,
-        "batch_size": 7,
-        "lr": 0.001,
-        "num_steps": 1000
+        "n_layers": 1,
+        "batch_size": 64,
+        "lr": 0.0001,
+        "num_steps": 2000,
+        # "num_steps": 200,
+        "ckpt_path": "/tmp/20241014_151225.ckpt"
+        # "ckpt_path": None
     }
 
     # Convert to DictConfig
     config = omegaconf.OmegaConf.create(config)
 
     train(config)
-
-# step 0 out of 1000
-# loss train 2.3270153999328613
-# accuracy test 0.004150390625
-#
-# step 10 out of 1000
-# loss train 1.804653525352478
-# accuracy test 0.2454833984375
-#
-# step 20 out of 1000
-# loss train 1.8742406368255615
-# accuracy test 0.227783203125
-#
-# step 30 out of 1000
-# loss train 1.8240848779678345
-# accuracy test 0.227783203125
-#
-# step 40 out of 1000
-# loss train 1.8283302783966064
-# accuracy test 0.2454833984375
