@@ -7,9 +7,29 @@ import torch.optim as optim
 import wandb
 import datetime
 from pathlib import Path
+import pandas as pd
 
 from src.tasks.gsn3.dataset import get_single_example
 from src.tasks.gsn3.arch import EncoderModel
+
+def _analyze(test_X, test_Y, model):
+    predicted_logits = model.forward(test_X)
+    predicted_logits_ = predicted_logits.argmax(dim=-1)
+
+    idx_sample = 13
+
+    # Convert tensors to lists
+    test_X_list = test_X[:, idx_sample].cpu().detach().numpy().tolist()
+    test_Y_list = test_Y[:, idx_sample].cpu().detach().numpy().tolist()
+    predicted_logits_list = predicted_logits_[:, idx_sample].cpu().detach().numpy().tolist()
+
+    # Create a DataFrame
+    df = pd.DataFrame({
+        'test_X': test_X_list,
+        'test_Y': test_Y_list,
+        'predicted_logits': predicted_logits_list
+    })
+
 
 
 def _train_model(
@@ -32,6 +52,8 @@ def _train_model(
     test_Y = torch.tensor([x[1] for x in test_examples], device=device).transpose(0, 1)
 
     model.to(device)
+
+    # _analyze(test_X, test_Y, model)
 
     start_time = time()
     accs = []
@@ -62,9 +84,9 @@ def _train_model(
         if step % (num_steps // 100) == 0 or step == num_steps - 1:
             # Printing a summary of the current state of training every 1% of steps.
             model.eval()
-            predicted_logits = model.forward(test_X).reshape(-1, output_dim)
+            predicted_logits = model.forward(test_X)
             test_acc = (
-                    torch.sum(torch.argmax(predicted_logits, dim=-1) == test_Y.reshape(-1))
+                    torch.sum(torch.argmax(predicted_logits.reshape(-1, output_dim), dim=-1) == test_Y.reshape(-1))
                     / test_Y.reshape(-1).shape[0]
             )
             print('step', step, 'out of', num_steps)
