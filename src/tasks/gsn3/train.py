@@ -16,7 +16,8 @@ def _train_model(
         num_steps,
         batch_size,
         n_tokens,
-        max_count
+        max_count,
+        config
 ) -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     seq_len = 64
@@ -36,8 +37,12 @@ def _train_model(
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    # Initialize wandb
-    wandb.init(project="gsn3-training", reinit=True)
+    # Initialize wandb and log config (hyperparameters)
+    wandb.init(
+        project="gsn3-training",
+        reinit=True,
+        config=omegaconf.OmegaConf.to_container(config, resolve=True)
+    )
 
     for step in range(num_steps):
         batch_examples = [get_single_example(n_tokens, seq_len, max_count) for i in range(batch_size)]
@@ -88,22 +93,26 @@ def train(config: omegaconf.DictConfig):
         n_tokens, config.hidden_dim, config.ff_dim,
         config.n_layers, config.n_heads, output_dim=(max_count + 1)
     )
-    _train_model(model, config.lr, config.num_steps, config.batch_size, n_tokens, max_count)
+    _train_model(
+        model, config.lr, config.num_steps,
+        config.batch_size, n_tokens, max_count, config
+    )
 
-config = {
-    "hidden_dim": 128,
-    "ff_dim": 256,
-    "n_heads": 8,
-    "n_layers": 2,
-    "batch_size": 7,
-    "lr": 0.001,
-    "num_steps": 1000
-}
+if __name__ == '__main__':
+    config = {
+        "hidden_dim": 128,
+        "ff_dim": 256,
+        "n_heads": 8,
+        "n_layers": 2,
+        "batch_size": 7,
+        "lr": 0.001,
+        "num_steps": 1000
+    }
 
-# Convert to DictConfig
-config = omegaconf.OmegaConf.create(config)
+    # Convert to DictConfig
+    config = omegaconf.OmegaConf.create(config)
 
-train(config)
+    train(config)
 
 # step 0 out of 1000
 # loss train 2.3270153999328613
