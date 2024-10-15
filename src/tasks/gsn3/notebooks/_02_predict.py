@@ -11,7 +11,7 @@ def print_predictions(test_X, test_Y, model):
     predicted_logits = model.forward(test_X)
     predicted_logits_ = predicted_logits.argmax(dim=-1)
 
-    idx_sample = 13
+    idx_sample = 14
 
     # Convert tensors to lists
     test_X_list = test_X[:, idx_sample].cpu().detach().numpy().tolist()
@@ -38,7 +38,10 @@ def train(config: omegaconf.DictConfig):
 
     model = EncoderModel(
         n_tokens, config.hidden_dim, config.ff_dim,
-        config.n_layers, config.n_heads, output_dim=(max_count + 1)
+        config.n_layers, config.n_heads, output_dim=(max_count + 1),
+        use_attention=config.use_attention,
+        use_feedforward=config.use_feedforward,
+        use_positional=config.use_positional
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -61,8 +64,11 @@ if __name__ == '__main__':
         "batch_size": 64,
         "lr": 0.0001,
         "num_steps": 2000,
-        "ckpt_path": "/tmp/20241015_083926.ckpt"
+        "ckpt_path": "/tmp/20241015_083926.ckpt",
         # "ckpt_path": None
+        "use_attention": True,
+        "use_feedforward": True,
+        "use_positional": True
     }
 
     # Convert to DictConfig

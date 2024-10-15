@@ -66,11 +66,19 @@ class EncoderLayer(nn.Module):
         self.attention_layer = Attention(hidden_dim, num_heads)
         self.ff_layer = FeedForward(hidden_dim, d_ff)
 
+        self.use_attention = use_attention
+        self.use_feedforward = use_feedforward
+
     def forward(self, x):
         # x shape: (seqlen, batch, hiddendim)
+        if self.use_attention:
+            x, att_weights = self.attention_layer(x)
+        else:
+            att_weights = None
 
-        x, att_weights = self.attention_layer(x)
-        x = self.ff_layer(x)
+        if self.use_feedforward:
+            x = self.ff_layer(x)
+
         return x, att_weights
 
 # Code from https://www.tensorflow.org/tutorials/text/transformer

@@ -111,7 +111,10 @@ def train(config: omegaconf.DictConfig):
 
     model = EncoderModel(
         n_tokens, config.hidden_dim, config.ff_dim,
-        config.n_layers, config.n_heads, output_dim=(max_count + 1)
+        config.n_layers, config.n_heads, output_dim=(max_count + 1),
+        use_attention=config.use_attention,
+        use_feedforward=config.use_feedforward,
+        use_positional=config.use_positional
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -139,10 +142,20 @@ if __name__ == '__main__':
         "num_steps": 2000,
         # "num_steps": 200,
         # "ckpt_path": "/tmp/20241015_083926.ckpt"
-        "ckpt_path": None
+        "ckpt_path": None,
+        "use_attention": True,
+        "use_feedforward": True,
+        "use_positional": True
     }
 
     # Convert to DictConfig
     config = omegaconf.OmegaConf.create(config)
 
     train(config)
+
+"""
+base = "/tmp/20241015_083926.ckpt"
+use_attention = "/tmp/20241015_101103.ckpt"
+use_feedfordward = "/tmp/20241015_100843.ckpt"
+use_positional = "/tmp/20241015_100511.ckpt"
+"""
