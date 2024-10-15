@@ -1,11 +1,4 @@
 from time import time
-
-
-import torch
-import matplotlib.pyplot as plt
-import matplotlib; matplotlib.use('TkAgg')
-
-from matplotlib.collections import LineCollection
 import torch
 import omegaconf
 import torch.nn as nn
@@ -14,31 +7,9 @@ import wandb
 import datetime
 from pathlib import Path
 import pandas as pd
-import numpy as np
-
-
 
 from src.tasks.gsn3.dataset import get_single_example
 from src.tasks.gsn3.arch import EncoderModel
-
-
-def _analyze(test_X, test_Y, model):
-    predicted_logits = model.forward(test_X)
-    predicted_logits_ = predicted_logits.argmax(dim=-1)
-
-    idx_sample = 13
-
-    # Convert tensors to lists
-    test_X_list = test_X[:, idx_sample].cpu().detach().numpy().tolist()
-    test_Y_list = test_Y[:, idx_sample].cpu().detach().numpy().tolist()
-    predicted_logits_list = predicted_logits_[:, idx_sample].cpu().detach().numpy().tolist()
-
-    # Create a DataFrame
-    df = pd.DataFrame({
-        'test_X': test_X_list,
-        'test_Y': test_Y_list,
-        'predicted_logits': predicted_logits_list
-    })
 
 
 def get_test_dataset(
@@ -55,6 +26,7 @@ def get_test_dataset(
     test_Y = torch.tensor([x[1] for x in test_examples], device=device).transpose(0, 1)
 
     return test_X, test_Y
+
 
 def _train_model(
         model,
