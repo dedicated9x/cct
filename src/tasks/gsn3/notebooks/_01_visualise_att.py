@@ -1,98 +1,45 @@
-from time import time
-
-
-import torch
 import matplotlib.pyplot as plt
 import matplotlib; matplotlib.use('TkAgg')
-
-from matplotlib.collections import LineCollection
 import torch
 import omegaconf
-import torch.nn as nn
-import torch.optim as optim
-import wandb
-import datetime
-from pathlib import Path
-import pandas as pd
-import numpy as np
+import seaborn as sns
 
-from src.tasks.gsn3.dataset import get_single_example
 from src.tasks.gsn3.arch import EncoderModel
-from src.tasks.gsn3.train import _train_model, get_test_dataset
+from src.tasks.gsn3.train import get_test_dataset
 
 
-def plot_attention(att_weights, test_X, token_idx, head_idx):
-    # Zakładam, że masz już zdefiniowane att_weights i test_X
-    # Jeśli nie, proszę je zdefiniować zgodnie z Twoimi danymi
 
-    # Wybierz indeks tokena, który chcesz zwizualizować (0 <= idx < 64)
-    idx = token_idx  # Możesz zmienić na dowolny indeks
-    head = head_idx  # Wybierz głowę attention (0 <= head < 8)
+def _plot_attention(att_weights, test_X, token_idx):
+    att_single_token_all_heads = [att_weights[head_idx_][token_idx, :] for head_idx_ in range(len(att_weights))]
+    att_single_token_all_heads = torch.stack(att_single_token_all_heads)
 
-    # Pobierz wagi attention dla wybranego tokena i głowy
-    weights = att_weights[head][idx].detach().cpu().numpy()  # Rozmiar [64]
+    assert abs(att_single_token_all_heads[0, :].sum().item() - 1) < 1e-5
 
-    # Normalizacja wag dla celów wizualizacji (opcjonalne)
-    weights = weights / weights.max()
+    # Zakładam, że att_single_token_all_heads i test_X są już zdefiniowane
 
-    # Przygotuj dane do wizualizacji
-    tokens = test_X.cpu().numpy()  # Konwertuj tensory na numpy
-    token_labels = [str(t) for t in tokens]
+    # Konwertuj tensor atencji na numpy i transponuj go, aby uzyskać 64 wiersze i 8 kolumn
+    attention_data = att_single_token_all_heads.cpu().detach().numpy().T  # Kształt [64, 8]
 
-    # Ustawienia pozycji dla lewej i prawej kolumny
-    y_pos = np.arange(len(tokens))
-    x_left = np.full(len(tokens), 0)
-    x_right = np.full(len(tokens), 1)
+    # Konwertuj test_X na numpy
+    test_X_labels = test_X.cpu().numpy()  # Kształt [64]
 
-    # Tworzenie figur i osi
-    fig, ax = plt.subplots(figsize=(10, 20))
+    # Tworzenie heatmapy
+    plt.figure(figsize=(10, 12))
+    ax = sns.heatmap(attention_data, annot=False, cmap='viridis', yticklabels=test_X_labels)
 
-    # TODO usun te linie
-    # Create an array of values from 0 to 2*pi
-    # x = np.linspace(0, 2 * np.pi, 100)
-    # y = np.sin(x)
-    # ax.plot(x, y)
-    #
-    # plt.show()
-    # return
+    # Ustawienia osi
+    plt.xlabel('Głowy atencji')
+    plt.ylabel('Tokeny (test_X)')
+    plt.title('Heatmapa wizualizująca atencję')
 
-    # Rysowanie tokenów po lewej i prawej stronie
-    for i, token in enumerate(token_labels):
-        ax.text(x_left[i] - 0.05, y_pos[i], token, ha='right', va='center')
-        ax.text(x_right[i] + 0.05, y_pos[i], token, ha='left', va='center')
+    # Upewnij się, że etykiety osi Y są w poprawnej kolejności
+    plt.yticks(rotation=0)  # Opcjonalnie, aby etykiety były poziome
 
-    # Przygotowanie linii reprezentujących wagi attention
-    lines = []
-    colors = []
-    for j in range(len(tokens)):
-        # Linia od tokena idx po lewej do tokena j po prawej
-        lines.append([(x_left[idx], y_pos[idx]), (x_right[j], y_pos[j])])
-        # Kolor zależny od wagi
-        colors.append(plt.cm.viridis(weights[j]))
-
-    # Tworzenie kolekcji linii
-    lc = LineCollection(lines, colors=colors, linewidths=2)
-
-    # Dodanie linii do wykresu
-    ax.add_collection(lc)
-
-    # Ukrycie osi
-    ax.set_xlim(-0.5, 1.5)
-    ax.set_ylim(-1, len(tokens))
-    ax.axis('off')
-
-    # Dodanie kolorbarwy do interpretacji wag
-    sm = plt.cm.ScalarMappable(cmap='viridis', norm=plt.Normalize(vmin=weights.min(), vmax=weights.max()))
-    sm.set_array([])
-    cbar = plt.colorbar(sm, ax=ax, orientation='horizontal', fraction=0.046, pad=0.04)
-    cbar.set_label('Waga attention')
-
-    plt.title(f'Attention dla tokena na pozycji {idx} w głowie {head}')
-    plt.tight_layout()
+    # Wyświetl wykres
     plt.show()
 
 
-def _analyze2(test_X, test_Y, model):
+def plot_attention(test_X, test_Y, model):
     _, att_weights = model.forward(test_X, return_att_weights=True)
 
     sample_idx = 13
@@ -103,16 +50,8 @@ def _analyze2(test_X, test_Y, model):
     att_weights = att_weights[0]
     att_weights = [att_weights[head_idx][sample_idx] for head_idx in range(len(att_weights))]
 
+    _plot_attention(att_weights, test_X, token_idx=55)
 
-    plot_attention(att_weights, test_X, token_idx=1, head_idx=0)
-    plot_attention(att_weights, test_X, token_idx=1, head_idx=1)
-    plot_attention(att_weights, test_X, token_idx=1, head_idx=2)
-    plot_attention(att_weights, test_X, token_idx=1, head_idx=3)
-    plot_attention(att_weights, test_X, token_idx=1, head_idx=4)
-    plot_attention(att_weights, test_X, token_idx=1, head_idx=5)
-    plot_attention(att_weights, test_X, token_idx=1, head_idx=6)
-    plot_attention(att_weights, test_X, token_idx=1, head_idx=7)
-    return
 
 def train(config: omegaconf.DictConfig):
     n_tokens = 16
@@ -133,7 +72,7 @@ def train(config: omegaconf.DictConfig):
     if config.ckpt_path is not None:
         model.load_state_dict(torch.load(config.ckpt_path))
 
-    _analyze2(test_X, test_Y, model)
+    plot_attention(test_X, test_Y, model)
 
 
 if __name__ == '__main__':
