@@ -5,7 +5,7 @@ import pandas as pd
 import omegaconf
 import torch.utils.data
 from torchvision import transforms
-
+from torchvision.transforms import RandAugment
 
 class ImagesDataset(torch.utils.data.Dataset):
     def __init__(self, config: omegaconf.DictConfig, split: str):
@@ -39,10 +39,28 @@ class ImagesDataset(torch.utils.data.Dataset):
         # Indices should start from0, not from 1
         list_idxs = [idx - 1 for idx in list_idxs]
 
-        # df_all["filename"] = df_all['path'].apply(lambda x: Path(x).name)
-
         self.df = df_all.iloc[list_idxs]
+
+        self.base_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+
+        train_transform = transforms.Compose([
+            RandAugment(num_ops=2, magnitude=9),
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+
+        if split == "train":
+            self.transform = train_transform
+        else:
+            self.transform = self.base_transform
+
         self.visualization_mode = config.dataset.visualization_mode
+
 
     def __len__(self):
         return len(self.df)
@@ -51,23 +69,19 @@ class ImagesDataset(torch.utils.data.Dataset):
         row = self.df.iloc[idx]
         image = PIL.Image.open(row['path']).convert('RGB')
 
-        # Transformacje: Resize do 224x224 i normalizacja jak w ViT
-        preprocess = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
+        sample = {}
+        if self.visualization_mode:
+            image_original = self.base_transform(image)
+            sample['image_original'] = image_original
 
-        image = preprocess(image)
+        image = self.transform(image)
 
         sample = {
+            **sample,
             "image": image,
             "label": row['label'],
             "filename": Path(row['path']).name
         }
-
-        if self.visualization_mode:
-            pass
 
         return sample
 
@@ -79,22 +93,36 @@ if __name__ == '__main__':
     from src.common.utils.printing import pprint_sample
 
 
-    def plot_image(image, label):
+    def plot_image(image, image_original, label):
         # Convert the tensor to a numpy array and transpose to (H, W, C)
         image = image.permute(1, 2, 0).numpy()
+        image_original = image_original.permute(1, 2, 0).numpy()
 
         # Unnormalize the image (reverse the normalization)
         mean = [0.485, 0.456, 0.406]
         std = [0.229, 0.224, 0.225]
         image = image * std + mean
+        image_original = image_original * std + mean
 
         # Clip any values outside [0, 1] range
         image = image.clip(0, 1)
+        image_original = image_original.clip(0, 1)
 
-        # Plot the image
-        plt.imshow(image)
-        plt.title(f"Label: {label}")
-        plt.axis('off')  # Hide the axes
+        # Create a figure and axis
+        fig, ax = plt.subplots(1, 2)
+
+        # Plot the image on the axis
+        ax[0].imshow(image)
+        ax[0].set_title("augmented")
+        ax[0].axis('off')  # Hide the axes
+
+        ax[1].imshow(image_original)
+        ax[1].set_title("original")
+        ax[1].axis('off')  # Hide the axes
+
+        fig.suptitle(f"Label: {label}")
+
+        # Display the plot
         plt.show()
 
     # Updated _display_dataset function call to pass both y and y_orig
@@ -104,14 +132,14 @@ if __name__ == '__main__':
         config.dataset.visualization_mode = True
         ds = ImagesDataset(
             config=config,
-            split="val"
+            split="train"
         )
 
         for idx in range(len(ds)):
             sample = ds[idx]
             pprint_sample(sample)
 
-            plot_image(sample['image'], sample['label'])
+            plot_image(sample['image'], sample['image_original'], sample['label'])
             plt.waitforbuttonpress()  # Wait until a key or mouse click is pressed
             plt.close()  # Close the current figure after keypress/mouse click
 
