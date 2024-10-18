@@ -7,9 +7,9 @@ import torch.utils.data
 from torchvision import transforms
 from torchvision.transforms import RandAugment
 
-class ImagesDataset(torch.utils.data.Dataset):
+class AppsilonDataset(torch.utils.data.Dataset):
     def __init__(self, config: omegaconf.DictConfig, split: str):
-        super(ImagesDataset, self).__init__()
+        super(AppsilonDataset, self).__init__()
         assert split in ["train", "test", "val"]
 
         path_images_dir = Path(config.paths.data) / "appsilon/17flowers/jpg"
@@ -126,11 +126,11 @@ if __name__ == '__main__':
         plt.show()
 
     # Updated _display_dataset function call to pass both y and y_orig
-    @hydra.main(version_base="1.2", config_path="conf", config_name="base")
+    @hydra.main(version_base="1.2", config_path="conf", config_name="00_base")
     def _display_dataset(config: omegaconf.DictConfig) -> None:
         config.paths.root = str(Path(__file__).parents[3])
         config.dataset.visualization_mode = True
-        ds = ImagesDataset(
+        ds = AppsilonDataset(
             config=config,
             split="train"
         )

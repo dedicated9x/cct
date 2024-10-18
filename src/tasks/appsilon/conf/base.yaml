@@ -1,4 +1,0 @@
-defaults:
-  - /../../../common/conf/base@
-  - dataset/base
-  - _self_
