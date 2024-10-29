@@ -1,0 +1,17 @@
+{
+  "description": "Graph representation of molecules with discrete node and edge features",
+  "features": [
+    "atom",
+    "bond"
+  ],
+  "features_dim": [
+    49,
+    18
+  ],
+  "features_type": [
+    "atom",
+    "bond"
+  ],
+  "max_n_nodes": 256,
+  "format": "sparse"
+}
