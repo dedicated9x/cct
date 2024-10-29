@@ -282,5 +282,10 @@ if __name__ == "__main__":
     data_x = featurizer.load(dataset.feat_dir)
     batch_dict = {col: data_x[col][0: 0 + 100] for col in data_x.keys()}
     X = featurizer.unpack(batch_dict)
+
+    # X2_all = featurizer.unpack(data_x)
+    # X2 = {col: X2_all[col][0: 0 + 100, ...] for col in X2_all.keys()}
+
+    a = 2
     print(f"There are {X['atom'].shape[0]} examples in the batch")
     print(f"The maximum number of atoms is {X['atom'].shape[1]} and each atom has {X['atom'].shape[2]} features.")

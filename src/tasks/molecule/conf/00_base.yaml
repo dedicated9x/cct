@@ -1,6 +1,5 @@
 defaults:
   - /../../../common/conf/base@
-  - dataset/base
   - _self_
 
 main:
@@ -10,11 +9,11 @@ module:
   _target_: src.tasks.appsilon.module.AppsilonModule
 
 optimizer:
-  lr: 0.001
+  lr: 0.00001
 
 trainer:
   max_epochs: 20
-  batch_size: 128
+  batch_size: 16
   device: [0]
   monitored_metric:
     name: "Val/Acc"
