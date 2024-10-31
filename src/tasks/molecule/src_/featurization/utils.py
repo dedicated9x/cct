@@ -71,7 +71,7 @@ def to_torch_tensor(arr, long: bool = False) -> torch.Tensor:
     if torch.cuda.is_available():
         pass
         # TODO wrocic z tym do normalnosci
-        return ten.cuda()
+        # return ten.cuda()
     return ten
 
 

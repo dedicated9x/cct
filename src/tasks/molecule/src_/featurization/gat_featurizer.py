@@ -157,7 +157,7 @@ class GatGraphFeaturizer(ReactionFeaturizer):
             chunk_results = [gat_featurize_parallel(parallel_args[0])]
         else:
             pool = Pool(self.n_jobs)
-            chunk_results = pool.map(gat_featurize_parallel, parallel_args)
+            chunk_reswults = pool.map(gat_featurize_parallel, parallel_args)
 
         # vector of number of nodes for each reaction
         # we need it to determine zero-padding for each reaction

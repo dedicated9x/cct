@@ -120,8 +120,8 @@ if __name__ == "__main__":
     from src_.featurization.gat_featurizer import GatGraphFeaturizer
 
     # TODO wrocic z tym do normalnosci
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    # device = 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
 
     dataset = ConditionsPredictionToyTask()
     featurizer = GatGraphFeaturizer(n_jobs=1)

@@ -1,12 +1,13 @@
 defaults:
   - /../../../common/conf/base@
+  - dataset/base
   - _self_
 
 main:
-  is_tested: true
+  is_tested: false
 
 module:
-  _target_: src.tasks.appsilon.module.AppsilonModule
+  _target_: src.tasks.molecule.module.MoleculeModule
 
 optimizer:
   lr: 0.00001

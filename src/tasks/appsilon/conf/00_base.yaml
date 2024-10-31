@@ -15,7 +15,7 @@ optimizer:
 trainer:
   max_epochs: 20
   batch_size: 128
-  device: [0]
+  device: cpu
   monitored_metric:
     name: "Val/Acc"
     mode: max

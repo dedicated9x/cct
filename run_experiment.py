@@ -16,18 +16,18 @@ gsn1/conf/01_counts_base -> 0.26, 0.41, 0.52
 # @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="01_counts_base")
 # @hydra.main(version_base="1.2", config_path="src/tasks/gsn1/conf", config_name="02_counts_encoded_base")
 # @hydra.main(version_base="1.2", config_path="src/tasks/gsn2/conf", config_name="00_base")
-@hydra.main(version_base="1.2", config_path="src/tasks/appsilon/conf", config_name="00_base")
+@hydra.main(version_base="1.2", config_path="src/tasks/molecule/conf", config_name="00_base")
 def main(config: omegaconf.DictConfig) -> None:
     run_experiment(config)
 
 def run_experiment(config: omegaconf.DictConfig) -> None:
     print(omegaconf.OmegaConf.to_yaml(config))
 
-    config.trainer.wandb = True
+    # config.trainer.wandb = True
 
-    # config.trainer.ckpt_path = "/home/admin2/Documents/repos/cct/.EXCLUDED/checkpoints/39-0.40.ckpt"
+    # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/default/version_3/checkpoints/14-0.97.ckpt"
     # config.trainer.max_epochs = 40
-    # config.trainer.max_epochs = 2
+    # config.trainer.max_epochs = 20
     # config.trainer.batch_size = 6
 
 
