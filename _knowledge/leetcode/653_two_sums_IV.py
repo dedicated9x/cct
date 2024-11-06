@@ -34,25 +34,28 @@ def create_bst_from_flattened_list(values):
     return root
 
 class Solution:
-    visited_nodes = {}
     def findTarget(self, root: Optional[TreeNode], k: int) -> bool:
+        visited_nodes = {}
+        return self.findTarget_(root, k, visited_nodes)
+
+    def findTarget_(self, root: Optional[TreeNode], k: int, visited_nodes) -> bool:
         if root is None:
             return False
         else:
             diff = k - root.val
-            if diff in self.visited_nodes:
+            if diff in visited_nodes:
                 retval = True
             else:
-                self.visited_nodes[root.val] = None
-                retval = self.findTarget(root.left, k) or self.findTarget(root.right, k)
-            print(root.val, retval)
+                visited_nodes[root.val] = None
+                retval = self.findTarget_(root.left, k, visited_nodes) or self.findTarget_(root.right, k, visited_nodes)
+            # print(root.val, retval)
             return retval
 
 
 
 root = create_bst_from_flattened_list([5,3,6,2,4,None,7])
-# print(Solution().findTarget(root, k=9))
-# print(Solution().findTarget(root, k=28))
+print(Solution().findTarget(root, k=9))
+print(Solution().findTarget(root, k=28))
 
 root = create_bst_from_flattened_list([1])
 print(Solution().findTarget(root, k=2))
