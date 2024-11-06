@@ -25,7 +25,7 @@ class Solution:
         if len(nums) < 3:
             return list_results
 
-        nums_as_dict = {k: None for k in nums}
+        nums_as_dict = {k: idx for idx, k in enumerate(nums)}
         left_idx = 0
         right_idx = 1
         while left_idx < len(nums) - 1:
@@ -33,7 +33,7 @@ class Solution:
             right_val = nums[right_idx]
             diff = 0 - left_val - right_val
 
-            if (diff in nums_as_dict) and (diff not in [left_val, right_val]):
+            if (diff in nums_as_dict) and (diff not in [left_val, right_val]) and nums_as_dict[diff] > right_idx:
                 list_results.append([diff, left_val, right_val])
 
             right_idx += 1
