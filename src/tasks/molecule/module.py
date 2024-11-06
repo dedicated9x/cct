@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, precision_score, recall_score
 
 from src.common.module import BaseModule
 from src_.models.gat import GAT
@@ -55,15 +55,24 @@ class MoleculeModule(BaseModule):
         predictions = (logits > 0.5).float()
         accuracy = (predictions == targets).float().mean().item()
 
-        # Obliczenie AUROC
         # Konwersja tensorów na CPU, aby użyć funkcji sklearn
         targets_cpu = targets.cpu().numpy()
         logits_cpu = logits.cpu().numpy()
+        predictions_cpu = predictions.cpu().numpy()
+
+        # Obliczenie pozostałych metryk
         auroc = roc_auc_score(targets_cpu, logits_cpu)
+        precision = precision_score(targets_cpu, predictions_cpu)
+        recall = recall_score(targets_cpu, predictions_cpu)
 
-        print(f"Accuracy: {accuracy:.4f}")
+        # print(f"Accuracy: {accuracy:.4f}")
         print(f"AUROC: {auroc:.4f}")
+        # print(f"Precision: {precision:.4f}")
+        # print(f"Recall: {recall:.4f}")
 
-        self.log(f"Val/Acc", accuracy)
+        self.log("Val/Acc", accuracy)
+        self.log("Val/AUROC", auroc)
+        self.log("Val/Precision", precision)
+        self.log("Val/Recall", recall)
 
 

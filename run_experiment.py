@@ -27,7 +27,7 @@ def run_experiment(config: omegaconf.DictConfig) -> None:
 
     # config.trainer.ckpt_path = "/tmp/wandb_pl_logs/cct/default/version_3/checkpoints/14-0.97.ckpt"
     # config.trainer.max_epochs = 40
-    # config.trainer.max_epochs = 20
+    config.trainer.max_epochs = 10
     # config.trainer.batch_size = 6
 
 
