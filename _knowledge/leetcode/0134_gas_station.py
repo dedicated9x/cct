@@ -6,21 +6,21 @@ class Solution:
         total_cost = [g - c for g, c in zip(gas, cost)]
         _sum = sum(total_cost)
 
-        arr = np.full((len(total_cost), len(total_cost)), None)
-
-        first_row = np.array(total_cost).cumsum()
-        arr[0, :] = first_row
-
-        for idx in range(1, len(total_cost)):
-            previous_row = arr[idx-1, :]
-            previous_cost = total_cost[idx -1]
-            next_row = (previous_row - previous_cost)[1:].tolist() + [_sum]
-            arr[idx, :] = next_row
+        if _sum < 0:
+            return - 1
 
         good_indices = []
-        for idx, row in enumerate(arr):
-            if (row >= 0).all():
-                good_indices.append(idx)
+
+        previous_row = np.array(total_cost).cumsum()
+        for idx in range(1, len(total_cost) + 1):
+            print(previous_row)
+            if (previous_row >= 0).all() == True:
+                good_indices.append(idx - 1)
+            # print(idx - 1, previous_row)
+            if idx <= len(total_cost):
+                previous_cost = total_cost[idx -1]
+                next_row = np.array((previous_row - previous_cost)[1:].tolist() + [_sum])
+                previous_row = next_row
 
         if len(good_indices) == 0:
             return -1
