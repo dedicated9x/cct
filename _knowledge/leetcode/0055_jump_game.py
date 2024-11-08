@@ -2,24 +2,26 @@ from typing import List
 
 class Solution:
     def canJump(self, nums: List[int]) -> bool:
-        if nums[0] == 0:
-            if len(nums) == 1:
-                return True
-            else:
-                return False
+        if len(nums) == 1:
+            return True
 
-        right_idx = 0
+        if nums[0] == 0:
+            return False
+
+        nums[-1] = 1
+
 
         # last    - len(nums) - 1
         # last-1  - len(nums) - 2
         # last-2  - len(nums) - 3
-
+        right_idx = 0
         while right_idx <= len(nums) - 3:
             right_idx += 1
 
             # print("right", nums[right_idx])
 
-            if (nums[right_idx + 1] != 0 and nums[right_idx] == 0) or (right_idx == len(nums) - 2):
+            # if (nums[right_idx + 1] != 0 and nums[right_idx] == 0) or (right_idx + 1 == len(nums) - 1):
+            if (nums[right_idx + 1] != 0 and nums[right_idx] == 0):
                 left_idx = right_idx
                 while left_idx >= 0:
                     left_idx -= 1
@@ -57,3 +59,4 @@ print(Solution().canJump(nums = [
 
 print(Solution().canJump(nums = [2,1,0,0]))
 print(Solution().canJump(nums =   [1,2,3]))
+# print(Solution().canJump(nums = [2,1,0,2]))
