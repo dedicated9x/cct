@@ -1,3 +1,5 @@
+# Cool one
+
 from typing import List
 
 class Solution:
