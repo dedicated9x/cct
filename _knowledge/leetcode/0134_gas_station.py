@@ -9,24 +9,17 @@ class Solution:
         if _sum < 0:
             return - 1
 
-        good_indices = []
+        cumsum = np.cumsum(total_cost)
 
-        previous_row = np.array(total_cost).cumsum()
-        for idx in range(1, len(total_cost) + 1):
-            print(previous_row)
-            if (previous_row >= 0).all() == True:
-                good_indices.append(idx - 1)
-            # print(idx - 1, previous_row)
-            if idx <= len(total_cost):
-                previous_cost = total_cost[idx -1]
-                next_row = np.array((previous_row - previous_cost)[1:].tolist() + [_sum])
-                previous_row = next_row
+        min_index = cumsum.argmin() + 1
 
-        if len(good_indices) == 0:
-            return -1
-        else:
-            return good_indices[0]
+        if min_index == len(cumsum):
+            min_index = 0
+
+        return int(min_index)
 
 
 
 print(Solution().canCompleteCircuit(gas = [1, 2, 3, 4, 5], cost = [3, 4, 5, 1, 2]))
+print(Solution().canCompleteCircuit(gas = [5, 1, 2, 3, 4], cost = [2, 3, 4, 5, 1]))
+print(Solution().canCompleteCircuit(gas = [4, 5, 1, 2, 3], cost = [1, 2, 3, 4, 5]))
