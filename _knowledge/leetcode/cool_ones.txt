@@ -1,1 +1,4 @@
 0055_jump_game.py
+
+0200_number_of_islands.py
+    Pokazuje fajny sposob, jak mozna wyznaczas podgrafy w grafie.
