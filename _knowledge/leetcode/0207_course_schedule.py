@@ -65,9 +65,19 @@ class Solution:
                     node.edges_out = []
                     node.calculate_flags()
                 elif node.type == "all_in":
+                    for edge in node.edges_in:
+                        node_out, node_in = edge
+                        list_nodes[node_out].edges_out.remove(edge)
+                        list_nodes[node_out].calculate_flags()
+                    node.edges_in = []
+                    node.calculate_flags()
+                else:
                     pass
-            a = 2
-        # str(list_nodes[0])
+
+        if "bidirectional" in [e.type for e in list_nodes]:
+            return False
+        else:
+            return True
 
 
 print(Solution().canFinish(numCourses = 11, prerequisites = [
@@ -84,6 +94,6 @@ print(Solution().canFinish(numCourses = 11, prerequisites = [
     [8, 9],
     [10, 9],
 ]))
-# print(Solution().canFinish(numCourses = 2, prerequisites = [[1,0]]))
-# print(Solution().canFinish(numCourses = 2, prerequisites = [[1,0],[0,1]]))
-# print(Solution().canFinish(numCourses = 6, prerequisites = [[0,1], [1,2], [2, 0], [4, 3], [5,3]]))
+print(Solution().canFinish(numCourses = 2, prerequisites = [[1,0]]))
+print(Solution().canFinish(numCourses = 2, prerequisites = [[1,0],[0,1]]))
+print(Solution().canFinish(numCourses = 6, prerequisites = [[0,1], [1,2], [2, 0], [4, 3], [5,3]]))
