@@ -9,7 +9,10 @@ class Node:
         self.is_removable = None
 
     def __str__(self):
-        return f"{self.val} in:{self.edges_in} out:{self.edges_out} type:{self.type}"
+        return f"{self.val} edges_in:{self.edges_in} edges_out:{self.edges_out} type:{self.type}"
+
+    def __repr__(self):
+        return self.__str__()
 
     def calculate_flags(self):
         self._calculate_type()
@@ -55,7 +58,15 @@ class Solution:
         while any([e.is_removable for e in list_nodes]):
             for node in list_nodes:
                 if node.type == "all_out":
-                    a = 2
+                    for edge in node.edges_out:
+                        node_out, node_in = edge
+                        list_nodes[node_in].edges_in.remove(edge)
+                        list_nodes[node_in].calculate_flags()
+                    node.edges_out = []
+                    node.calculate_flags()
+                elif node.type == "all_in":
+                    pass
+            a = 2
         # str(list_nodes[0])
 
 
