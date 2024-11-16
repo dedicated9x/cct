@@ -40,13 +40,29 @@ from typing import Optional, List
 from collections import deque
 
 class Solution:
-    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+    def recoverTree(self, root: Optional[TreeNode]) -> None:
         tree_as_list = self.flatten(root)
 
-        for idx in range(len(tree_as_list) - 1):
-            if tree_as_list[idx].val >= tree_as_list[idx + 1].val:
-                return False
-        return True
+        down_idxs = []
+        for idx in range(1, len(tree_as_list)):
+            if tree_as_list[idx - 1].val > tree_as_list[idx].val:
+                down_idxs.append(idx)
+
+        if len(down_idxs) == 2:
+            idx_left = down_idxs[0] - 1
+            idx_right = down_idxs[1]
+        elif len(down_idxs) == 1:
+            idx_left = down_idxs[0] - 1
+            idx_right = down_idxs[0]
+        else:
+            pass
+
+        buff = tree_as_list[idx_right].val
+        tree_as_list[idx_right].val = tree_as_list[idx_left].val
+        tree_as_list[idx_left].val = buff
+
+        # tree_as_list2 = self.flatten(root)
+        # print(tree_as_list2)
 
     def flatten(self, root: Optional[TreeNode]) -> List[TreeNode]:
         tree_as_list = [root]
@@ -66,14 +82,15 @@ class Solution:
                 d.append(next_node.right)
         return tree_as_list
 
-root = create_bst_from_flattened_list([5,1,4,None,None,3,6])
-print(Solution().isValidBST(root))
-root = create_bst_from_flattened_list([5,4,6,None,None,3,7])
-print(Solution().isValidBST(root))
-root = create_bst_from_flattened_list([5,4,7,None,None,6,8])
-print(Solution().isValidBST(root))
-root = create_bst_from_flattened_list([5])
-print(Solution().isValidBST(root))
+
+root = create_bst_from_flattened_list([1,2,None])
+print(Solution().recoverTree(root))
+root = create_bst_from_flattened_list([1,3,None,None,2])
+print(Solution().recoverTree(root))
+root = create_bst_from_flattened_list([3,1,4,None,None,2])
+print(Solution().recoverTree(root))
+root = create_bst_from_flattened_list([2,4,1,None,None,3])
+print(Solution().recoverTree(root))
 """
 False
 False

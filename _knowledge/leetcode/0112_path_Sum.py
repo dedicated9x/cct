@@ -4,6 +4,7 @@ class TreeNode:
         self.val = val
         self.left = left
         self.right = right
+        # self.sum = None
 
     def __repr__(self):
         return f"{self.val}"
@@ -40,45 +41,38 @@ from typing import Optional, List
 from collections import deque
 
 class Solution:
-    def isValidBST(self, root: Optional[TreeNode]) -> bool:
-        tree_as_list = self.flatten(root)
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        root.__class__.sum = None
 
-        for idx in range(len(tree_as_list) - 1):
-            if tree_as_list[idx].val >= tree_as_list[idx + 1].val:
-                return False
-        return True
+        root.sum = root.val
+        # setattr(root, 'sum', root.val)
 
-    def flatten(self, root: Optional[TreeNode]) -> List[TreeNode]:
-        tree_as_list = [root]
         d = deque()
         d.append(root)
         while d:
             next_node = d.popleft()
 
             if next_node.left is not None:
-                idx = tree_as_list.index(next_node)
-                tree_as_list = tree_as_list[:idx] + [next_node.left] + tree_as_list[idx:]
+                next_node.left.sum = next_node.left.val + next_node.sum
+                # setattr(next_node.left, 'sum', next_node.left.val + next_node.sum)
                 d.append(next_node.left)
 
             if next_node.right is not None:
-                idx = tree_as_list.index(next_node)
-                tree_as_list = tree_as_list[:(idx + 1)] + [next_node.right] + tree_as_list[(idx + 1):]
+                next_node.right.sum = next_node.right.val + next_node.sum
+                # setattr(next_node.right, 'sum', next_node.right.val + next_node.sum)
                 d.append(next_node.right)
-        return tree_as_list
 
-root = create_bst_from_flattened_list([5,1,4,None,None,3,6])
-print(Solution().isValidBST(root))
-root = create_bst_from_flattened_list([5,4,6,None,None,3,7])
-print(Solution().isValidBST(root))
-root = create_bst_from_flattened_list([5,4,7,None,None,6,8])
-print(Solution().isValidBST(root))
-root = create_bst_from_flattened_list([5])
-print(Solution().isValidBST(root))
-"""
-False
-False
-True
-True
-"""
+            if (next_node.left is None and next_node.right is None) and next_node.sum == targetSum:
+                return True
+        return False
 
+
+
+
+
+root = create_bst_from_flattened_list([5,4,8,11,None,13,4,7,2,None,None, None,1])
+print(Solution().hasPathSum(root, targetSum=22))
+
+root = create_bst_from_flattened_list([1,2,3])
+print(Solution().hasPathSum(root, targetSum=5))
 

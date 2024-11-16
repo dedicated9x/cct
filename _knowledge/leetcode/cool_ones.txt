@@ -1,4 +1,21 @@
 0055_jump_game.py
 
+0098_validate_bst
+    Pokazuje, jak flattenowac bst
+
 0200_number_of_islands.py
     Pokazuje fajny sposob, jak mozna wyznaczas podgrafy w grafie.
+
+
+# Mental highlight reel:
+## EASY
+0204_count_primes.py
+    Wystarczylo zrobić standardowe "wykreślanie"
+
+## MEDIUM
+0201_bitwise_AND_of_numbers_range.py
+    Okazało się, że macierz w numpy byłaby zbyt wielka. Przyglądająć się rendżom w numpaju zauważyłem zależność.
+
+## HARD
+0279_perfect_squares.py
+    O dziwo ta metoda z rozgałęziającym się drzewem była skuteczna.
