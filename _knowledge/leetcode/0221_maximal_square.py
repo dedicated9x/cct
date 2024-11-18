@@ -1,6 +1,5 @@
 from typing import List
 import numpy as np
-from collections import deque
 
 class Square:
     def __init__(self, topleft, size):
@@ -29,6 +28,14 @@ class Square:
         else:
             return False
 
+    def __hash__(self):
+        # Use a tuple of the unique attributes for hashing
+        return hash((self.topleft, self.size))
+
+    def __eq__(self, other):
+        # Compare attributes for equality
+        return isinstance(other, Square) and self.topleft == other.topleft and self.size == other.size
+
     def __repr__(self):
         return f"{self.topleft}, size: {self.size}"
 
@@ -36,27 +43,33 @@ class Solution:
     def maximalSquare(self, matrix: List[List[str]]) -> int:
         arr = np.array(matrix).astype(int)
         m, n = arr.shape
+        max_size = min(m, n)
 
-        queue = deque()
+        size_to_candidates = [[] for e in range(max_size + 1)]
 
         for i in range(m):
             for j in range(n):
                 square = Square(topleft=(i, j), size=1)
-                queue.append(square)
+                size_to_candidates[1].append(square)
 
         list_sizes = []
-        while queue:
-            square = queue.popleft()
-            if square.consist_ones_only(arr):
-                list_sizes.append(square.size)
-                list_children = square.get_children()
-                list_children = [e for e in list_children if e.is_valid(m, n)]
-                for child in list_children:
-                    queue.append(child)
-
-            if 4 in list_sizes:
-                a = 2
-            print(max(list_sizes))
+        for size, list_candidates in enumerate(size_to_candidates):
+            if size == 0:
+                continue
+            if len(list_candidates) == 0:
+                continue
+            for square in list_candidates:
+                if square.consist_ones_only(arr):
+                    list_sizes.append(square.size)
+                    if size == max_size:
+                        continue
+                    list_children = square.get_children()
+                    list_children = [e for e in list_children if e.is_valid(m, n)]
+                    for child in list_children:
+                        size_to_candidates[size+1].append(child)
+            if size == max_size:
+                continue
+            size_to_candidates[size+1] = list(set(size_to_candidates[size+1]))
 
         if len(list_sizes) == 0:
             return 0
@@ -65,15 +78,15 @@ class Solution:
 
 from _knowledge.leetcode.data._0221_data import MATRIX
 
-# print(Solution().maximalSquare(matrix = [
-#     ["1","0","1","0","0"],
-#     ["1","0","1","1","1"],
-#     ["1","1","1","1","1"],
-#     ["1","0","0","1","0"]
-# ]))
-#
-# print(Solution().maximalSquare(matrix = [["0","1"],["1","0"]]))
-# print(Solution().maximalSquare(matrix = [["0"]]))
-# print(Solution().maximalSquare(matrix = [["1"]]))
-# print(Solution().maximalSquare(matrix = [["1","1"],["1","1"]]))
+print(Solution().maximalSquare(matrix = [
+    ["1","0","1","0","0"],
+    ["1","0","1","1","1"],
+    ["1","1","1","1","1"],
+    ["1","0","0","1","0"]
+]))
+
+print(Solution().maximalSquare(matrix = [["0","1"],["1","0"]]))
+print(Solution().maximalSquare(matrix = [["0"]]))
+print(Solution().maximalSquare(matrix = [["1"]]))
+print(Solution().maximalSquare(matrix = [["1","1"],["1","1"]]))
 print(Solution().maximalSquare(matrix = MATRIX))
