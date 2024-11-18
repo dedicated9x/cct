@@ -2,26 +2,42 @@ from typing import List
 
 class Solution:
     def minSubArrayLen(self, target: int, nums: List[int]) -> int:
-        list_sums = [0]
+        self.list_sums = [0]
         running_sum = 0
         for elem in nums:
             running_sum += elem
-            list_sums.append(running_sum)
+            self.list_sums.append(running_sum)
 
-        list_lenghts = []
-        for i in range(len(list_sums)):
-            for j in range(len(list_sums)):
-                if i <= j:
-                    _sum = list_sums[j] - list_sums[i]
-                    if _sum >= target:
-                        lenght = j - i
-                        list_lenghts.append(lenght)
+        # for i in range(len(nums)):
+        #     for j in range(len(nums)):
+        #         if i <= j:
+        #             sum2 = self.get_sum(i, j)
+        #             print(i, j, nums[i:(j+1)], sum2)
 
-        if len(list_lenghts) >= 1:
-            min_len = min(list_lenghts)
-            return min_len
-        else:
+        if sum(nums) < target:
             return 0
+
+        idx_left = 0
+        idx_right = 0
+        min_lenght = len(nums)
+        while idx_left < len(nums) -1:
+            current_sum = self.get_sum(idx_left, idx_right)
+            current_lenght = idx_right - idx_left + 1
+
+            if current_sum >= target and current_lenght < min_lenght:
+                min_lenght = current_lenght
+
+            if idx_right == len(nums) - 1:
+                idx_left += 1
+            else:
+                if current_sum < target:
+                    idx_right += 1
+                else:
+                    idx_left += 1
+        return min_lenght
+
+    def get_sum(self, i, j):
+        return self.list_sums[j + 1] - self.list_sums[i]
 
 
 

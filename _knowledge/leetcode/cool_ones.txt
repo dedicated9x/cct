@@ -6,15 +6,24 @@
 0200_number_of_islands.py
     Pokazuje fajny sposob, jak mozna wyznaczas podgrafy w grafie.
 
+0209_minimum_size_subarray_sum.py
+    Pokazuje, ze `sliding_window` ma O(n), jeśli obydwa indeksy idą ZAWSZE w prawo. Nie trzeba też przez to za bardzo skracać tych obliczeń.
 
 # Mental highlight reel:
 ## EASY
 0204_count_primes.py
     Wystarczylo zrobić standardowe "wykreślanie"
+0207_course_schedule.py
+    Okazało się, że warto na to spojrzeć, jak na usuwanie krawędzi z grafu.
+0213_house_robber_II.py
+    Zadanie redukowało się do house robber (ale ciężko zaklepać house robber od zera).
+
 
 ## MEDIUM
 0201_bitwise_AND_of_numbers_range.py
     Okazało się, że macierz w numpy byłaby zbyt wielka. Przyglądająć się rendżom w numpaju zauważyłem zależność.
+0198_house_robber.py
+    Wpadłeś na rekurencję (z dwóch ostatnich).
 
 ## HARD
 0279_perfect_squares.py
