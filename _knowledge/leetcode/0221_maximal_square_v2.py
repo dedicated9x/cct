@@ -1,26 +1,18 @@
 from typing import List, Tuple
 import numpy as np
 
-def get_border_idx(arr: np.ndarray) -> List[Tuple[int, int]]:
-    m, n = arr.shape
-    list_idxs = []
-    for i in range(m):
-        for j in range(n):
-            if i in [0, m-1] or j in [0, n-1]:
-                list_idxs.append((i, j))
-    return list_idxs
-
-def get_neighbours(i, j, arr: np.ndarray) -> List[int]:
+def get_neighbours_v2(i, j, m, n) -> List[Tuple[int, int]]:
     list_neighbours = [
-        arr[i-1, j-1],
-        arr[i-1, j],
-        arr[i-1, j+1],
-        arr[i, j-1],
-        arr[i, j+1],
-        arr[i+1, j-1],
-        arr[i+1, j],
-        arr[i+1, j+1],
+        (i-1, j-1),
+        (i-1, j),
+        (i-1, j+1),
+        (i, j-1),
+        (i, j+1),
+        (i+1, j-1),
+        (i+1, j),
+        (i+1, j+1),
     ]
+    list_neighbours = [(i, j) for i, j in list_neighbours if 0 <= i <= m-1 and 0 <= j <= n-1]
     return list_neighbours
 
 class Solution:
@@ -35,26 +27,38 @@ class Solution:
             else:
                 return 0
 
+        # Grid calculation
         arr[arr == 1] = -1
-        list_border_idxs = get_border_idx(arr)
-        for location in list_border_idxs:
-            i, j = location
-            if arr[i, j] == -1:
-                arr[i, j] = 1
 
-        last_max_value = 0
+        arr_outer = np.zeros((m + 2, n + 2))
+        arr_outer[1:m + 1, 1:n + 1] = arr
+
+        arr_orig = arr
+        arr = arr_outer
+
+        list_to_trawerse = []
+        for i in range(m+2):
+            for j in range(n+2):
+                if arr[i, j] == 0:
+                    list_to_trawerse.append((i, j))
+
         while (arr == -1).any():
-            for i in range(1, m-1):
-                for j in range(1, n-1):
-                    if arr[i, j] == -1:
-                        list_neighbours = get_neighbours(i, j, arr)
-                        if last_max_value in list_neighbours:
-                            arr[i, j] = last_max_value + 1
-            last_max_value += 1
+            next_list_to_trawerse = []
+            for center in list_to_trawerse:
+                i, j = center
+                center_value = arr[i, j]
+                list_neighbours = get_neighbours_v2(i, j, m+2, n+2)
+                for neighbour in list_neighbours:
+                    i1, j1 = neighbour
+                    if arr[i1, j1] == -1:
+                        arr[i1, j1] = center_value + 1
+                        next_list_to_trawerse.append((i1, j1))
+            list_to_trawerse = next_list_to_trawerse
 
+        # Calculate max_are
         list_2x2_mins = []
-        for i in range(0, m - 1):
-            for j in range(0, n - 1):
+        for i in range(1, m):
+            for j in range(1, n):
                 square_2x2 = [
                     arr[i, j],
                     arr[i+1, j],
@@ -85,7 +89,7 @@ print(Solution().maximalSquare(matrix = [
     ["1","1","1","1","1"],
     ["1","0","0","1","0"]
 ]))
-
+#
 print(Solution().maximalSquare(matrix = [["0","1"],["1","0"]]))
 print(Solution().maximalSquare(matrix = [["0"]]))
 print(Solution().maximalSquare(matrix = [["1"]]))

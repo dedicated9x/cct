@@ -17,7 +17,8 @@
     Okazało się, że warto na to spojrzeć, jak na usuwanie krawędzi z grafu.
 0213_house_robber_II.py
     Zadanie redukowało się do house robber (ale ciężko zaklepać house robber od zera).
-
+0223_rectangle_area.py
+    Zadanie 2D redukowało się do dwóch zadań 1D (odcinki zamiast prostokąty).
 
 ## MEDIUM
 0201_bitwise_AND_of_numbers_range.py
@@ -28,3 +29,5 @@
 ## HARD
 0279_perfect_squares.py
     O dziwo ta metoda z rozgałęziającym się drzewem była skuteczna.
+0221_maximal_square_v2.py
+    W nhuj trudno było wpaść na tę "mapkę otoczek-poziomic", ale się udało :).
