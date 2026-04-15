@@ -10,9 +10,9 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sns
 
 from src.common.module import BaseModule
-from src.tasks.gsn1.arch import ShapeClassificationNet
-from src.tasks.gsn1.dataset import ImagesDataset
-from src.tasks.gsn1.metrics import bcewithlogits_multilabel, convert_topk_to_binary, chunkwise_softmax_2d_and_reshape, loss_counting
+from src.arch import ShapeClassificationNet
+from src.dataset import ImagesDataset
+from src.metrics import bcewithlogits_multilabel, convert_topk_to_binary, chunkwise_softmax_2d_and_reshape, loss_counting
 
 class ShapesModule(BaseModule):
     def __init__(self, config=None):

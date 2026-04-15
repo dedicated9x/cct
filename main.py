@@ -4,7 +4,7 @@ import omegaconf
 import pytorch_lightning as pl
 
 from src.common.get_trainer import get_trainer
-from src.tasks.gsn1.module import ShapesModule
+from src.module import ShapesModule
 
 
 def build_shapes_config() -> omegaconf.DictConfig:
