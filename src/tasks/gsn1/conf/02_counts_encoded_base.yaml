@@ -1,6 +1,0 @@
-defaults:
-  - 00_shapes_base
-  - _self_
-
-module:
-  _target_: src.tasks.gsn1.module.CountsEncodedModule
