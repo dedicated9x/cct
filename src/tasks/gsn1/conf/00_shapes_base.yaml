@@ -5,7 +5,7 @@ defaults:
   - _self_
 
 main:
-  is_tested: true
+  is_tested: false
 
 module:
   _target_: src.tasks.gsn1.module.ShapesModule
