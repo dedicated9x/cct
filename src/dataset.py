@@ -18,7 +18,8 @@ class Augmentation:
 
         new2old = {k: v for k, v in zip(self.transform_y_scheme, base_scheme)}
 
-        dict_counts_orig = {k: v for k, v in zip(base_scheme, y)}
+        # `y` can come from tensors -> normalize to Python ints early.
+        dict_counts_orig = {k: int(v) for k, v in zip(base_scheme, y)}
         dict_counts = {k: dict_counts_orig[new2old[k]] for k in base_scheme}
 
         y = list(dict_counts.values())
@@ -105,16 +106,35 @@ class ImagesDataset(torch.utils.data.Dataset):
 
         self.visualization_mode = config.dataset.visualization_mode
 
+        # Preload the whole dataset into RAM to avoid re-opening image files in `__getitem__`.
+        # We keep only a single channel (index 0) to reduce memory usage.
+        xs = []
+        y_counts_orig = []
+        filenames = []
+        y_cols = ['squares', 'circles', 'up', 'right', 'down', 'left']
+
+        for i in range(len(self.df)):
+            row = self.df.iloc[i]
+            image = PIL.Image.open(self.path_images / row["name"])
+            x_orig = transforms.ToTensor()(image)  # shape: (C,H,W) where C can vary (e.g. 1 or 4)
+            x = x_orig[0].unsqueeze(0)  # (1,H,W)
+            xs.append(x)
+
+            y_counts_orig.append([int(row[col_name]) for col_name in y_cols])
+            filenames.append(row["name"])
+
+        self._xs = torch.stack(xs)  # (N,1,28,28)
+        self._y_counts_orig = torch.tensor(y_counts_orig, dtype=torch.int32)  # (N,6)
+        self._filenames = filenames
+
     def __len__(self):
         return self.df.shape[0]
 
     def __getitem__(self, idx):
-        row = self.df.iloc[idx]
-        image = PIL.Image.open(self.path_images / row["name"])
-        x_orig = transforms.ToTensor()(image)
-        y_counts_orig = [row[col_name] for col_name in ['squares', 'circles', 'up', 'right', 'down', 'left']]
+        x_orig = self._xs[idx]  # (1,28,28)
+        y_counts_orig_list = self._y_counts_orig[idx].tolist()  # Python ints for scheme mapping
 
-        x, y_counts = x_orig, y_counts_orig
+        x, y_counts = x_orig.clone(), y_counts_orig_list.copy()
 
         # Augmentations
         if torch.rand(1).item() < self.aug.prob_rotation:
@@ -128,9 +148,7 @@ class ImagesDataset(torch.utils.data.Dataset):
         else:
             pass
 
-        # Channels 0,1,2 are equal, channel 3 has no information.
-        x = x[0].unsqueeze(0)
-        y_counts = torch.tensor(y_counts).to(torch.int32)
+        y_counts = torch.tensor(y_counts, dtype=torch.int32)
 
         y_counts_encoded = encode_counts(y_counts)
 
@@ -141,16 +159,12 @@ class ImagesDataset(torch.utils.data.Dataset):
             "y_shapes": y_shapes,
             "y_counts": y_counts,
             "y_counts_encoded": torch.tensor(y_counts_encoded),
-            "filename": row['name']
+            "filename": self._filenames[idx],
         }
 
         if self.visualization_mode:
-            # See
-            x_orig = x_orig[0].unsqueeze(0)
-            y_counts_orig = torch.tensor(y_counts_orig).to(torch.int32)
-
             sample["x_orig"] = x_orig
-            sample["y_counts_orig"] = y_counts_orig
+            sample["y_counts_orig"] = self._y_counts_orig[idx]
 
         return sample
 
