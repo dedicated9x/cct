@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import os
 import omegaconf
 import pytorch_lightning as pl
 
@@ -10,6 +11,10 @@ from src.module import ShapesModule
 def build_shapes_config() -> omegaconf.DictConfig:
     root = Path(__file__).resolve().parent
 
+    max_epochs = int(os.getenv("CCT_MAX_EPOCHS", "20"))
+    enable_profiler = os.getenv("CCT_ENABLE_PROFILER", "0") == "1"
+    profiler_type = os.getenv("CCT_PROFILER_TYPE", "advanced")
+
     config_dict = {
         "num_workers": 4,
         "main": {
@@ -19,7 +24,10 @@ def build_shapes_config() -> omegaconf.DictConfig:
         },
         "trainer": {
             "device": [0],
-            "max_epochs": 20,
+            "max_epochs": max_epochs,
+            # Enable Lightning profiler (no extra deps).
+            "enable_profiler": enable_profiler,
+            "profiler_type": profiler_type,
             "monitored_metric": {
                 "name": "Val/Acc",
                 "mode": "max",

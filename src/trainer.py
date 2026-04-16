@@ -48,12 +48,24 @@ def get_trainer(config):
         accelerator = "cpu"
         devices = 1
 
+    profiler = None
+    enable_profiler = bool(getattr(config.trainer, "enable_profiler", False))
+    profiler_type = str(getattr(config.trainer, "profiler_type", "advanced")).lower()
+
+    if enable_profiler:
+        # No extra deps: use Lightning's built-in profilers.
+        if profiler_type in ["simple", "simple_profiler"]:
+            profiler = pl.profilers.SimpleProfiler()
+        else:
+            profiler = pl.profilers.AdvancedProfiler()
+
     trainer = pl.Trainer(
         accelerator=accelerator,
         devices=devices,
         max_epochs=config.trainer.max_epochs,
         callbacks=callbacks,
         logger=logger,
+        profiler=profiler,
         num_sanity_val_steps=0,
         limit_train_batches=config.trainer.limit_train_batches,
         limit_val_batches=config.trainer.limit_val_batches,
