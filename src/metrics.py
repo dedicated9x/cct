@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 def bcewithlogits_multilabel(batch_logits, batch_targets):
@@ -40,21 +39,6 @@ def convert_topk_to_binary(tensor, k):
     binary_tensor.scatter_(1, topk_indices, 1)
 
     return binary_tensor
-
-def chunkwise_softmax_2d_and_reshape(x, chunk_size: int):
-    assert abs(x.shape[1] % chunk_size) < 1e-6
-    assert x.dim() == 2
-    batch_size = x.shape[0]
-    logits = x.reshape(batch_size, int(x.shape[1] / chunk_size), chunk_size)
-    preds = F.softmax(logits, dim=2)
-    return preds
-
-# TODO zapytac preview skad pomysl na taki glupi loss
-def loss_counting(counts, preds, device: str = "cpu"):
-    repeated_counts = counts.unsqueeze(2).repeat(1, 1, 10)
-    j_indices = torch.arange(10).unsqueeze(0).repeat(6, 1).to(device)
-    loss = (preds * ((j_indices - repeated_counts) ** 2)).sum()
-    return loss
 
 if __name__ == '__main__':
     pass
