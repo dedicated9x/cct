@@ -40,14 +40,17 @@ def get_trainer(config):
             save_dir=get_logging_dir()
         )
 
-    # GPUs
+    # Devices (PyTorch Lightning 2.x API)
     if torch.cuda.is_available():
-        gpus = config.trainer.device
+        accelerator = "gpu"
+        devices = config.trainer.device
     else:
-        gpus = None
+        accelerator = "cpu"
+        devices = 1
 
     trainer = pl.Trainer(
-        gpus=gpus,
+        accelerator=accelerator,
+        devices=devices,
         max_epochs=config.trainer.max_epochs,
         callbacks=callbacks,
         logger=logger,

@@ -21,6 +21,8 @@ class ShapesModule(pl.LightningModule):
         self.ds_test = ImagesDataset(config, "test")
 
         self.save_hyperparameters(config)
+        self._val_step_outputs = []
+        self._test_step_outputs = []
 
     def forward(self, x):
         return self.model(x)
@@ -62,29 +64,39 @@ class ShapesModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, targets = batch['x'], batch['y_shapes']
         logits = self.model(x)
-        return {"logits": logits, "targets": targets}
+        self._val_step_outputs.append({"logits": logits.detach(), "targets": targets.detach()})
 
-    def validation_epoch_end(self, outputs):
-        logits = torch.cat([batch['logits'] for batch in outputs])
-        targets = torch.cat([batch['targets'] for batch in outputs])
+    def on_validation_epoch_end(self):
+        if not self._val_step_outputs:
+            return
+
+        logits = torch.cat([batch['logits'] for batch in self._val_step_outputs])
+        targets = torch.cat([batch['targets'] for batch in self._val_step_outputs])
 
         preds = torch.sigmoid(logits)
         preds_binary = convert_topk_to_binary(preds, 2)
 
         acc = (preds_binary.int() == targets).all(dim=1).float().mean()
         print(f"\n Val/Acc = {acc:.2f}")
-        self.log(f"Val/Acc", acc)
+        self.log("Val/Acc", acc, prog_bar=True)
+        self._val_step_outputs.clear()
 
     def test_step(self, batch, batch_idx):
-        return self.validation_step(batch, batch_idx)
+        x, targets = batch['x'], batch['y_shapes']
+        logits = self.model(x)
+        self._test_step_outputs.append({"logits": logits.detach(), "targets": targets.detach()})
 
-    def test_epoch_end(self, outputs):
-        logits = torch.cat([batch['logits'] for batch in outputs])
-        targets = torch.cat([batch['targets'] for batch in outputs])
+    def on_test_epoch_end(self):
+        if not self._test_step_outputs:
+            return
+
+        logits = torch.cat([batch['logits'] for batch in self._test_step_outputs])
+        targets = torch.cat([batch['targets'] for batch in self._test_step_outputs])
 
         preds = torch.sigmoid(logits)
         preds_binary = convert_topk_to_binary(preds, 2)
 
         acc = (preds_binary.int() == targets).all(dim=1).float().mean()
         print(f"\n Test/Acc = {acc:.2f}")
-        self.log(f"Test/Acc", acc)
+        self.log("Test/Acc", acc, prog_bar=True)
+        self._test_step_outputs.clear()
