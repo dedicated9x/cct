@@ -1,18 +1,12 @@
-import pytorch_lightning as pl
-import math
 import torch
 import torch.utils.data
+import pytorch_lightning as pl
 
 
 class BaseModule(pl.LightningModule):
-    """
-    Base training configuration.
-    Suitable for most cases.
-    """
     def __init__(self, config=None):
         super(BaseModule, self).__init__()
         self.config = config
-        self.collate_fn = None
 
     def forward(self, x):
         return self.model(x)
@@ -23,7 +17,6 @@ class BaseModule(pl.LightningModule):
             batch_size=self.config.trainer.batch_size,
             shuffle=True,
             num_workers=4,
-            collate_fn=self.collate_fn
         )
 
     def val_dataloader(self):
@@ -31,7 +24,6 @@ class BaseModule(pl.LightningModule):
             self.ds_val,
             batch_size=self.config.trainer.batch_size,
             num_workers=4,
-            collate_fn=self.collate_fn
         )
 
     def test_dataloader(self):
@@ -40,30 +32,9 @@ class BaseModule(pl.LightningModule):
                 self.ds_test,
                 batch_size=self.config.trainer.batch_size,
                 num_workers=4,
-                collate_fn=self.collate_fn
             )
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.config.optimizer.lr)
-        if self.config.optimizer.use_scheduler == True:
-            scheduler = torch.optim.lr_scheduler.OneCycleLR(
-                optimizer=optimizer,
-                max_lr=self.config.optimizer.lr,
-                epochs=self.config.trainer.max_epochs + 1,
-                steps_per_epoch=math.ceil(self.ds_train.__len__() / self.config.trainer.batch_size),
-            )
-            return [optimizer], [scheduler]
-        else:
-            return optimizer
+        return optimizer
 
-    def _scheduler_step(self):
-        self.lr_schedulers().step()
-
-    def _scheduler_log(self):
-        sch = self.lr_schedulers()
-
-        lr = sch.get_last_lr()[0]
-        progress = sch._step_count / sch.total_steps
-
-        self.log("trainer/lr", lr)
-        self.log("trainer/progress", progress)

@@ -3,7 +3,7 @@ from pathlib import Path
 import omegaconf
 import pytorch_lightning as pl
 
-from src.common.get_trainer import get_trainer
+from src.trainer import get_trainer
 from src.module import ShapesModule
 
 
@@ -32,7 +32,6 @@ def build_shapes_config() -> omegaconf.DictConfig:
             "tag": None,
         },
         "optimizer": {
-            "use_scheduler": False,
             "lr": 0.00001,
         },
         "paths": {

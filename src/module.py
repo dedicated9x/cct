@@ -1,11 +1,6 @@
 from pathlib import Path
 import torch
 import numpy as np
-import wandb
-import matplotlib.pyplot as plt
-from itertools import combinations
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
 
 from src.common.module import BaseModule
 from src.arch import ShapeClassificationNet
@@ -63,56 +58,3 @@ class ShapesModule(BaseModule):
         acc = (preds_binary.int() == targets).all(dim=1).float().mean()
         print(f"\n Test/Acc = {acc:.2f}")
         self.log(f"Test/Acc", acc)
-        self._plot_confusion_matrix(preds_binary, targets)
-
-    def _plot_confusion_matrix(self, preds, targets):
-        # Ensure preds and targets are NumPy arrays
-        preds = preds.cpu().numpy() if hasattr(preds, 'cpu') else preds
-        targets = targets.cpu().numpy() if hasattr(targets, 'cpu') else targets
-
-        # Generate all combinations of two indices from six classes
-        class_indices = list(range(6))
-        index_pairs = list(combinations(class_indices, 2))  # List of 15 tuples
-
-        # Create a mapping from index pairs to class labels (integers 0 to 14)
-        pair_to_label = {pair: idx for idx, pair in enumerate(index_pairs)}
-        # Mapping from label to index pairs (for label names)
-        label_to_pair = {idx: pair for idx, pair in enumerate(index_pairs)}
-
-        # Symbolic representation of each class
-        symbols = ['□', '●', '▲', '▶', '▼', '◀']
-        # Create label names using the symbolic representations
-        label_names = []
-        for pair in index_pairs:
-            label_names.append(f"{symbols[pair[0]]} {symbols[pair[1]]}")
-
-        # Function to map a binary vector to a class label
-        def binary_vector_to_label(row):
-            indices = np.where(row == 1)[0]
-            indices = tuple(sorted(indices))
-            return pair_to_label[indices]
-
-        # Map preds and targets to class labels
-        preds_labels = np.apply_along_axis(binary_vector_to_label, 1, preds)
-        targets_labels = np.apply_along_axis(binary_vector_to_label, 1, targets)
-
-        # Compute the confusion matrix
-        cm = confusion_matrix(targets_labels, preds_labels, labels=range(len(label_names)))
-
-        # Plotting the confusion matrix using seaborn
-        plt.figure(figsize=(12, 10))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                    xticklabels=label_names, yticklabels=label_names)
-        plt.xlabel('Predicted Class')
-        plt.ylabel('True Class')
-        plt.title('Confusion Matrix')
-        plt.xticks(rotation=45, ha='right')
-        plt.yticks(rotation=0)
-        plt.tight_layout()
-
-        # Instead of displaying, log the confusion matrix plot to WandB
-        # Log the figure to WandB as an image
-        wandb.log({"Confusion Matrix": wandb.Image(plt)})
-
-        # Optionally, close the figure to free memory
-        plt.close()
