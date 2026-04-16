@@ -11,6 +11,7 @@ def build_shapes_config() -> omegaconf.DictConfig:
     root = Path(__file__).resolve().parent
 
     config_dict = {
+        "num_workers": 4,
         "main": {
             # Keep disabled by default because current torch/checkpoint behavior
             # may fail on loading "best" checkpoint in test stage.

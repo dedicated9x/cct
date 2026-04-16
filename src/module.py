@@ -32,14 +32,14 @@ class ShapesModule(pl.LightningModule):
             self.ds_train,
             batch_size=self.config.trainer.batch_size,
             shuffle=True,
-            num_workers=4,
+            num_workers=self.config.num_workers,
         )
 
     def val_dataloader(self):
         return torch.utils.data.DataLoader(
             self.ds_val,
             batch_size=self.config.trainer.batch_size,
-            num_workers=4,
+            num_workers=self.config.num_workers,
         )
 
     def test_dataloader(self):
@@ -47,7 +47,7 @@ class ShapesModule(pl.LightningModule):
             return torch.utils.data.DataLoader(
                 self.ds_test,
                 batch_size=self.config.trainer.batch_size,
-                num_workers=4,
+                num_workers=self.config.num_workers,
             )
 
     def configure_optimizers(self):
