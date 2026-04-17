@@ -13,6 +13,12 @@ def get_logging_dir():
     return logdir
 
 
+def get_outputs_dir(config):
+    outputs_dir = Path(config.paths.data) / "outputs"
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+    return outputs_dir
+
+
 def _setup_mlflow_env() -> None:
     # /tmp/.env is expected in the target runtime (same pattern as clothes-classificator).
     load_dotenv("/tmp/.env", override=False)
@@ -40,18 +46,8 @@ def _setup_mlflow_env() -> None:
         )
 
 def get_trainer(config):
-
-    # Checkpoints
-    if config.trainer.monitored_metric is not None:
-        metric_name = config.trainer.monitored_metric.name
-        callbacks = [pl.callbacks.ModelCheckpoint(
-            monitor=metric_name,
-            filename='{epoch}-' + f'{{{metric_name}:.2f}}',
-            mode=config.trainer.monitored_metric.mode,
-            auto_insert_metric_name=("/" not in metric_name)
-        )]
-    else:
-        callbacks = None
+    outputs_dir = get_outputs_dir(config)
+    checkpoint_base_dir = outputs_dir
 
     # Configure loggers
     logger_name = str(getattr(config.trainer, "logger", "tensorboard")).lower()
@@ -63,6 +59,7 @@ def get_trainer(config):
             tracking_uri=os.environ["MLFLOW_TRACKING_URI"],
             tags={"tag": str(config.trainer.tag)},
         )
+        checkpoint_base_dir = outputs_dir / str(logger.run_id)
     elif logger_name == "wandb":
         logger = WandbLogger(
             project=str(config.trainer.experiment_name),
@@ -71,6 +68,19 @@ def get_trainer(config):
         )
     else:
         logger = TensorBoardLogger(save_dir=get_logging_dir())
+
+    # Checkpoints
+    if config.trainer.monitored_metric is not None:
+        metric_name = config.trainer.monitored_metric.name
+        callbacks = [pl.callbacks.ModelCheckpoint(
+            monitor=metric_name,
+            dirpath=str(checkpoint_base_dir / "checkpoints"),
+            filename='{epoch}-' + f'{{{metric_name}:.2f}}',
+            mode=config.trainer.monitored_metric.mode,
+            auto_insert_metric_name=("/" not in metric_name)
+        )]
+    else:
+        callbacks = None
 
     # Devices (PyTorch Lightning 2.x API)
     if torch.cuda.is_available():
@@ -81,6 +91,7 @@ def get_trainer(config):
         devices = 1
 
     trainer = pl.Trainer(
+        default_root_dir=str(outputs_dir),
         accelerator=accelerator,
         devices=devices,
         max_epochs=config.trainer.max_epochs,
