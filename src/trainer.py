@@ -1,14 +1,43 @@
-import torch
-import pytorch_lightning as pl
-import pytorch_lightning.loggers
-from pathlib import Path
 import os
+from pathlib import Path
+
+import pytorch_lightning as pl
+import torch
+from dotenv import load_dotenv
+from pytorch_lightning.loggers import MLFlowLogger, TensorBoardLogger, WandbLogger
 
 def get_logging_dir():
     repo_name = Path(__file__).parents[2].name
-    logdir = f'/tmp/wandb_pl_logs/{repo_name}'
+    logdir = f"/tmp/pl_logs/{repo_name}"
     os.makedirs(logdir, exist_ok=True)
     return logdir
+
+
+def _setup_mlflow_env() -> None:
+    # /tmp/.env is expected in the target runtime (same pattern as clothes-classificator).
+    load_dotenv("/tmp/.env", override=False)
+
+    # TODO przeniesc do zmiennych lokalnych
+    os.environ.setdefault("SSO_CLIENT_ID", "mlflow-caise-platform")
+    os.environ.setdefault("SSO_URL","https://sso.task.gda.pl/auth/realms/citask/protocol/openid-connect/token")
+    os.environ.setdefault("MLFLOW_TRACKING_URI", "https://mlflow.caise.apl.task.gda.pl/pl0158-01/")
+    os.environ.setdefault("MLFLOW_TRACKING_AUTH", "mlflow_oauth2_client.MlFlowAuthProvider")
+
+    required_vars = (
+        "SSO_CLIENT_ID",
+        "SSO_URL",
+        "MLFLOW_TRACKING_URI",
+        "MLFLOW_TRACKING_AUTH",
+        "MLFLOW_SSO_USER",
+        "MLFLOW_SSO_PASSWORD",
+    )
+    missing = [name for name in required_vars if not os.getenv(name)]
+    if missing:
+        missing_list = ", ".join(missing)
+        raise RuntimeError(
+            f"Missing MLflow SSO environment variables: {missing_list}. "
+            "Set them in the shell and/or /tmp/.env."
+        )
 
 def get_trainer(config):
 
@@ -25,20 +54,23 @@ def get_trainer(config):
         callbacks = None
 
     # Configure loggers
-    if config.trainer.wandb:
-        module_name = config.module._target_.split(".")[-1]
-        logger = pytorch_lightning.loggers.WandbLogger(
-            project=module_name,
-            name=module_name.lower(),
+    logger_name = str(getattr(config.trainer, "logger", "tensorboard")).lower()
+    if logger_name == "mlflow":
+        _setup_mlflow_env()
+        logger = MLFlowLogger(
+            experiment_name=str(config.trainer.experiment_name),
+            run_name=str(config.trainer.run_name),
+            tracking_uri=os.environ["MLFLOW_TRACKING_URI"],
+            tags={"tag": str(config.trainer.tag)},
+        )
+    elif logger_name == "wandb":
+        logger = WandbLogger(
+            project=str(config.trainer.experiment_name),
+            name=str(config.trainer.run_name),
             save_dir=get_logging_dir(),
         )
-
-        if config.trainer.tag is not None:
-            logger.experiment.tags = logger.experiment.tags + (config.trainer.tag,)
     else:
-        logger = pytorch_lightning.loggers.TensorBoardLogger(
-            save_dir=get_logging_dir()
-        )
+        logger = TensorBoardLogger(save_dir=get_logging_dir())
 
     # Devices (PyTorch Lightning 2.x API)
     if torch.cuda.is_available():

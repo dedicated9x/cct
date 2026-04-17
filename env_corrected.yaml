@@ -16,3 +16,4 @@ dependencies:
       - omegaconf==2.3.0
       - scikit-learn==1.8.0
       - mlflow==3.6.0
+      - python-dotenv==1.2.1
